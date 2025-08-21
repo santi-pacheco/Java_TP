@@ -39,4 +39,48 @@ public class PersonController {
 			throw new RuntimeException("Error getting persons", e);
 		}
 	}
+	
+	public Person getPersonById(int id) {
+		try {
+			Person personById = personService.getPerson(id);
+			return personById;
+		} catch (Exception e) {
+			throw new RuntimeException("Error getting person by ID", e);
+		}	
+	}
+	
+	public boolean addPerson(Person per) {
+		try {
+			Person createdPerson = personService.createPerson(per);
+			if (createdPerson != null) {
+	            return true;
+	        } else {
+	            return false;
+	        }
+		} catch (Exception e) {
+			throw new RuntimeException("Error adding person", e);
+		}
+	}
+	
+	public boolean modifyPerson(Person per) {
+		try {
+			Person createdPerson = personService.updatePerson(per);
+			if (createdPerson != null) {
+	            return true;
+	        } else {
+	            return false;
+	        }
+		} catch (Exception e) {
+			throw new RuntimeException("Error modifying person", e);
+		}
+	}
+	
+	public Person removePerson(Person per) {
+		try {
+			Person deleted = personService.deletePerson(per);
+			return deleted;
+		} catch (Exception e) {
+			throw new RuntimeException("Error removing person", e);
+		}
+	}
 }

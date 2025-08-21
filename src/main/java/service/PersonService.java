@@ -2,7 +2,7 @@ package service;
 
 import entity.Person;
 import repository.PersonRepository;
-import repository.PersonRepository;
+import info.movito.themoviedbapi.tools.TmdbException;
 import java.util.List;
 
 public class PersonService {
@@ -42,4 +42,23 @@ public class PersonService {
 		return localPersons;
 	}
 	
+	public Person getPerson(int id) {
+		Person person = personRepository.findOne(id);
+		return person;
+	}
+	
+	public Person createPerson(Person per) {
+		Person person = personRepository.add(per);
+		return person;
+	}
+	
+	public Person updatePerson(Person per) {
+		Person person = personRepository.update(per);
+		return person;
+	}
+	
+	public Person deletePerson(Person per) {
+		Person perToDelete = personRepository.delete(per));
+		return perToDelete;
+	}
 }

@@ -5,7 +5,7 @@ public class Person {
 	private int id;
 	private String name;
 	private String apellido;
-	private String fechaNacimiento;
+	private Date fechaNacimiento;
 
 	public int getId() {
 		return id;
