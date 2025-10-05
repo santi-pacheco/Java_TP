@@ -28,7 +28,7 @@ public class PersonService {
 		if (localPersons.isEmpty()) {
 			// If local list is empty, fetch from external API
 			try {
-				List<info.movito.themoviedbapi.model.people.Person> tmdbPersons = 
+				List<info.movito.themoviedbapi.model.core.popularperson.PopularPerson> tmdbPersons = 
 					externalApiService.getMoviePersons();
 				localPersons = externalApiService.convertToLocalPersons(tmdbPersons);
 				
@@ -58,7 +58,7 @@ public class PersonService {
 	}
 	
 	public Person deletePerson(Person per) {
-		Person perToDelete = personRepository.delete(per));
+		Person perToDelete = personRepository.delete(per);
 		return perToDelete;
 	}
 }

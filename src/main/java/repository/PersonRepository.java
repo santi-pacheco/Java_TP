@@ -9,6 +9,8 @@ import java.sql.Statement;
 import util.DatabaseConnection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Date;
+import java.time.LocalDate;
 
 	public class PersonRepository {
 		
@@ -34,7 +36,7 @@ import java.sql.SQLException;
 				person.setId(rs.getInt("id"));
 				person.setName(rs.getString("name"));
 				person.setApellido(rs.getString("apellido"));
-				person.setFechaNacimiento(rs.getString("fechaNacimiento"));
+				person.setFechaNacimiento(convertToLocalDate(rs.getDate("fechaNacimiento")));
 				persons.add(person);
 			}
 		} catch (SQLException e) {
@@ -64,7 +66,7 @@ import java.sql.SQLException;
 				per.setId(rs.getInt("id"));
 				per.setName(rs.getString("name"));
 				per.setApellido(rs.getString("apellido"));
-				per.setFechaNacimiento(rs.getString("fechaNacimiento"));
+				per.setFechaNacimiento(convertToLocalDate(rs.getDate("fechaNacimiento")));
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("Error fetching person by ID from database", e);
@@ -86,7 +88,7 @@ import java.sql.SQLException;
 			stmt = connection.prepareStatement("INSERT INTO persons (name, apellido, fechaNacimiento) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, per.getName());
 			stmt.setString(2, per.getApellido());
-			stmt.setString(3, per.getFechaNacimiento());//<-------------------------- setDate? o setString?
+			stmt.setDate(3, convertToDate(per.getFechaNacimiento()));
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows > 0) {
 				try (ResultSet keyResultSet = stmt.getGeneratedKeys()) {
@@ -114,7 +116,7 @@ import java.sql.SQLException;
 			stmt = connection.prepareStatement("UPDATE persons SET name = ?, apellido = ?, fechaNacimiento = ? WHERE id = ?");
 			stmt.setString(1, per.getName());
 			stmt.setString(2, per.getApellido());
-			stmt.setString(3, per.getFechaNacimiento());
+			stmt.setDate(3, convertToDate(per.getFechaNacimiento()));
 			stmt.setInt(4, per.getId());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
@@ -148,4 +150,28 @@ import java.sql.SQLException;
 		}
 		return per;
 	}
+	
+	public List<Person> saveAll(List<Person> persons) {
+		for (Person per : persons) {
+			add(per);
+		}
+		return persons;
+	}
+	
+	public Date convertToDate(LocalDate dateLocal) {
+		if (dateLocal != null) {
+			return Date.valueOf(dateLocal);
+		} else {
+			return null;
+		}
+	}
+	
+	public LocalDate convertToLocalDate(Date dateSql) {
+		if (dateSql != null) {
+			return dateSql.toLocalDate();
+		} else {
+			return null;
+		}
+	}
+	
 }

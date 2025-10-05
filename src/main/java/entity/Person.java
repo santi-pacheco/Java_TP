@@ -1,11 +1,13 @@
 package entity;
 
+import java.time.LocalDate;
+
 public class Person {
 	
 	private int id;
 	private String name;
 	private String apellido;
-	private Date fechaNacimiento;
+	private LocalDate fechaNacimiento;
 
 	public int getId() {
 		return id;
@@ -31,11 +33,11 @@ public class Person {
 		this.apellido = apellido;
 	}
 
-	public String getFechaNacimiento() {
+	public LocalDate getFechaNacimiento() {
 		return fechaNacimiento;
 	}
 
-	public void setFechaNacimiento(String fechaNacimiento) {
+	public void setFechaNacimiento(LocalDate fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
 	}
 }

@@ -36,4 +36,20 @@ public class ExternalApiService {
                 .map(this::convertToLocalGenre)
                 .collect(Collectors.toList());
     }
+     
+    public List<info.movito.themoviedbapi.model.core.popularperson.PopularPerson> getMoviePersons() throws TmdbException {
+		return tmdbApi.getPeopleLists().getPopular(null, 1).getResults();
+	}
+    
+    public List<entity.Person> convertToLocalPersons(List<info.movito.themoviedbapi.model.core.popularperson.PopularPerson> tmdbPersons) {
+		return tmdbPersons.stream()
+				.map(tmdbPerson -> {
+					entity.Person localPerson = new entity.Person();
+					localPerson.setId(tmdbPerson.getId());
+					localPerson.setName(tmdbPerson.getName());
+					// Additional fields can be mapped here
+					return localPerson;
+				})
+				.collect(Collectors.toList());
+	}
 }
