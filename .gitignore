@@ -1,0 +1,27 @@
+# Directorios de compilación de Maven y Eclipse
+target/
+.apt_generated/
+.settings/
+.classpath
+.project
+
+# Archivos y directorios de Eclipse
+.metadata
+*.log
+*.tmp
+*.bak
+*.scc
+*.mp
+*.sublime-project
+*.sublime-workspace
+.idea/
+.vscode/
+
+# Ignorar archivos del servidor local (Tomcat)
+apache-tomcat-*
+
+# Ignorar otros archivos generados por el IDE
+*.class
+bin/
+gen/
+build/
