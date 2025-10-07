@@ -3,7 +3,7 @@ package util;
 import info.movito.themoviedbapi.TmdbApi;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-
+import java.util.Comparator;
 public class DiscoverReflectionMain {
 
     public static void main(String[] args) throws Exception {
@@ -15,7 +15,11 @@ public class DiscoverReflectionMain {
 
         // 2) Crear instancia del wrapper (la clase proviene de themoviedbapi)
         TmdbApi tmdbApi = new TmdbApi(apiKey);
-
+        
+        Arrays.stream(tmdbApi.getDiscover().getClass().getMethods())
+        .sorted(Comparator.comparing(Method::getName))
+        .forEach(System.out::println);
+        /*
         // 3) Obtener el objeto discover y listar métodos relevantes
         Object discoverObj = tmdbApi.getDiscover();
         System.out.println("Discover CLASS: " + discoverObj.getClass().getName());
@@ -29,7 +33,7 @@ public class DiscoverReflectionMain {
                 System.out.println("---");
             }
         }
-
+*/
         // También imprimimos todos los métodos (opcional, comentar si hay demasiado)
         // for (Method m : methods) System.out.println(m.toGenericString());
     }
