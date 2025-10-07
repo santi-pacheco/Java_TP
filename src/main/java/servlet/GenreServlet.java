@@ -1,14 +1,13 @@
 package servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
@@ -35,26 +34,28 @@ public class GenreServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String action = request.getParameter("action");
+        // Determinar si es una solicitud AJAX o una solicitud normal
+        String acceptHeader = request.getHeader("Accept");
+        String xRequestedWith = request.getHeader("X-Requested-With");
+        boolean isAjaxRequest = (xRequestedWith != null && xRequestedWith.equals("XMLHttpRequest")) || 
+                            (acceptHeader != null && acceptHeader.contains("application/json"));
         
-        if (action == null || action.equals("list")) {
-            handleListGenres(request, response);
-        } else if (action.equals("json")) {
-            handleJsonGenres(request, response);
-        } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
-        }
-    }
-    
-    private void handleListGenres(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+        // Obtener la lista de géneros
+        List<Genre> genres = genreController.getGenres();
         
-        try {
-            List<Genre> genres = genreController.getGenres();
+        // Si es una solicitud AJAX, devuelve JSON
+        if (isAjaxRequest) {
+            response.setContentType("application/json;charset=UTF-8");
+            String json = gson.toJson(genres);
+            response.getWriter().write(json);
+        } 
+        // Si es una solicitud normal, redirige a JSP
+        else {
+            // Establecer atributos para la vista JSP
+            request.setAttribute("genres", genres);
             
             // Establecer el tipo de contenido para HTML
             response.setContentType("text/html;charset=UTF-8");
-            PrintWriter out = response.getWriter();
             
             // Reenviar al JSP desde el context root
             request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
