@@ -121,7 +121,7 @@ import java.sql.SQLException;
 	}
 	
 	public void saveAll(List<Person> persons) {
-        String sql = "INSERT INTO personas (id_persona, name, apellido, birthdate) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?";
+        String sql = "INSERT INTO personas (id_persona, name, apellido, birthdate) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), apellido = VALUES(apellido), birthdate = VALUES(birthdate)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -130,6 +130,7 @@ import java.sql.SQLException;
                 stmt.setString(2, person.getName());
                 stmt.setString(3, person.getApellido());
                 stmt.setDate(4, person.getBirthDate());
+                stmt.addBatch();
             }
             stmt.executeBatch();
         } catch (SQLException e) {

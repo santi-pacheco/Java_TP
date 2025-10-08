@@ -117,7 +117,7 @@ public class GenreRepository {
 	}
     
     public void saveAll(List<Genre> genres) {
-        String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
+        String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -125,6 +125,7 @@ public class GenreRepository {
                 stmt.setInt(1, genre.getId());
                 stmt.setString(2, genre.getName());
                 stmt.setInt(3, genre.getId_api());
+                stmt.addBatch();
             }
             stmt.executeBatch();
         } catch (SQLException e) {
