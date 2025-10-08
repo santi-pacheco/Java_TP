@@ -1,14 +1,13 @@
 package servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
@@ -35,112 +34,31 @@ public class GenreServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String action = request.getParameter("action");
+        // Determinar si es una solicitud AJAX o una solicitud normal
+        String acceptHeader = request.getHeader("Accept");
+        String xRequestedWith = request.getHeader("X-Requested-With");
+        boolean isAjaxRequest = (xRequestedWith != null && xRequestedWith.equals("XMLHttpRequest")) || 
+                            (acceptHeader != null && acceptHeader.contains("application/json"));
         
-        if (action == null || action.equals("list")) {
-            handleListGenres(request, response);
-        } else if (action.equals("json")) {
-            handleJsonGenres(request, response);
-        } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
-        }
-    }
-    
-    private void handleListGenres(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+        // Obtener la lista de géneros
+        List<Genre> genres = genreController.getGenres();
         
-        try {
-            List<Genre> genres = genreController.getGenres();
-            
-            // Configurar respuesta HTML
-            response.setContentType("text/html;charset=UTF-8");
-            PrintWriter out = response.getWriter();
-            
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Géneros de Películas</title>");
-            out.println("<style>");
-            out.println("body { font-family: Arial, sans-serif; margin: 40px; }");
-            out.println("h1 { color: #333; }");
-            out.println("table { border-collapse: collapse; width: 100%; margin-top: 20px; }");
-            out.println("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
-            out.println("th { background-color: #f2f2f2; }");
-            out.println("tr:nth-child(even) { background-color: #f9f9f9; }");
-            out.println(".btn { background-color: #4CAF50; color: white; padding: 10px 20px; ");
-            out.println("text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }");
-            out.println("</style>");
-            out.println("</head>");
-            out.println("<body>");
-            
-            out.println("<h1>Géneros de Películas</h1>");
-            out.println("<p>Total de géneros: " + genres.size() + "</p>");
-            
-            // Botones de acción
-            out.println("<a href='genres?action=json' class='btn'>Ver como JSON</a>");
-            out.println("<a href='genreCrud.html' class='btn'>Volver al CRUD</a>");
-            
-            // Tabla de géneros
-            out.println("<table>");
-            out.println("<tr><th>ID</th><th>Nombre</th></tr>");
-            
-            for (Genre genre : genres) {
-                out.println("<tr>");
-                out.println("<td>" + genre.getId() + "</td>");
-                out.println("<td>" + genre.getName() + "</td>");
-                out.println("</tr>");
-            }
-            
-            out.println("</table>");
-            out.println("</body>");
-            out.println("</html>");
-            
-        } catch (Exception e) {
-            response.setContentType("text/html;charset=UTF-8");
-            PrintWriter out = response.getWriter();
-            out.println("<html><body>");
-            out.println("<h1>Error</h1>");
-            out.println("<p>Error al obtener los géneros: " + e.getMessage() + "</p>");
-            out.println("<a href='genreCrud.html'>Volver</a>");
-            out.println("</body></html>");
-            e.printStackTrace();
-        }
-    }
-    
-    private void handleJsonGenres(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        try {
-            List<Genre> genres = genreController.getGenres();
-            
-            // Configurar respuesta JSON
+        // Si es una solicitud AJAX, devuelve JSON
+        if (isAjaxRequest) {
             response.setContentType("application/json;charset=UTF-8");
-            PrintWriter out = response.getWriter();
+            String json = gson.toJson(genres);
+            response.getWriter().write(json);
+        } 
+        // Si es una solicitud normal, redirige a JSP
+        else {
+            // Establecer atributos para la vista JSP
+            request.setAttribute("genres", genres);
             
-            String jsonResponse = gson.toJson(genres);
-            out.print(jsonResponse);
+            // Establecer el tipo de contenido para HTML
+            response.setContentType("text/html;charset=UTF-8");
             
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json;charset=UTF-8");
-            PrintWriter out = response.getWriter();
-            
-            String errorJson = gson.toJson(new ErrorResponse("Error al obtener los géneros: " + e.getMessage()));
-            out.print(errorJson);
-            e.printStackTrace();
-        }
-    }
-    
-    // Clase auxiliar para respuestas de error en JSON
-    private static class ErrorResponse {
-        private String error;
-        
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
-        
-        public String getError() {
-            return error;
+            // Reenviar al JSP desde el context root
+            request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
         }
     }
 }

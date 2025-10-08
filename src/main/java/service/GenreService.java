@@ -8,11 +8,9 @@ import java.util.Optional;
 
 public class GenreService {
     
-    private ExternalApiService externalApiService;
     private GenreRepository genreRepository;
     
-    public GenreService(ExternalApiService externalApiService, GenreRepository genreRepository) {
-        this.externalApiService = externalApiService;
+    public GenreService(GenreRepository genreRepository) {
         this.genreRepository = genreRepository;
     }
     
