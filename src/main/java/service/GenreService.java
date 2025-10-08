@@ -2,9 +2,7 @@ package service;
 
 import entity.Genre;
 import repository.GenreRepository;
-import info.movito.themoviedbapi.tools.TmdbException;
 import java.util.List;
-import java.util.Optional;
 
 public class GenreService {
     
@@ -15,26 +13,19 @@ public class GenreService {
     }
     
     public List<Genre> getAllGenres() {
-        // First try to get from local database
-        List<Genre> localGenres = genreRepository.findAll();
-        
-        if (localGenres.isEmpty()) {
-            // If empty, fetch from external API and save locally
-            try {
-                List<info.movito.themoviedbapi.model.core.Genre> tmdbGenres = 
-                    externalApiService.getMovieGenres();
-                localGenres = externalApiService.convertToLocalGenres(tmdbGenres);
-                
-                // Save to database for future use
-                genreRepository.saveAll(localGenres);
-                
-            } catch (TmdbException e) {
-                throw new RuntimeException("Error fetching genres from external API", e);
-            }
-        }
-        
-        return localGenres;
+    	return genreRepository.findAll();
     }
+
+    public Genre getGenreById(int id) {
+		return genreRepository.findOne(id);
+	}
     
+    public Genre CreateGenre(Genre genre) {
+		if (genre != null && genre.getName() != null && !genre.getName().isEmpty()) {
+			return genreRepository.add(genre);
+		} else {
+			throw new IllegalArgumentException("Invalid user data");
+		}
+	}
     
 }

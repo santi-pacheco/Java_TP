@@ -2,19 +2,15 @@ package controller;
 
 import entity.Genre;
 import repository.GenreRepository;
-import service.ExternalApiService;
 import service.GenreService;
-import util.DatabaseConnection;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 public class GenreController {
     
     private GenreService genreService;
     
-    public GenreController(String tmdbApiKey) {
+    public GenreController() {
     	//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
         GenreRepository genreRepository = new GenreRepository();
     	this.genreService = new GenreService(genreRepository);
@@ -30,7 +26,7 @@ public class GenreController {
             throw new RuntimeException("Error getting genres", e);
         }
     }
-    
+    /*
     public static void main(String[] args) {
         String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
         
@@ -48,4 +44,5 @@ public class GenreController {
             DatabaseConnection.closeConnection();
         }
     }
+    */
 }

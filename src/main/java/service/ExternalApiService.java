@@ -1,10 +1,7 @@
 package service;
 
-import entity.Genre; // 
 import info.movito.themoviedbapi.TmdbApi;
-import info.movito.themoviedbapi.model.movielists.*;
 import info.movito.themoviedbapi.tools.TmdbException;
-import info.movito.themoviedbapi.TmdbMovies;
 import info.movito.themoviedbapi.tools.builders.discover.*;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
