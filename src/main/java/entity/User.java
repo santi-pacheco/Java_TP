@@ -3,12 +3,12 @@ package entity;
 import java.sql.Date;
 
 public class User {
-	int id;
-	String username;	
-	String password;
-	String role; // e.g., "admin", "user"
-	String email;
-	Date BirthDate;
+	private int id;
+	private String username;	
+	private String password;
+	private String role; // e.g., "admin", "user"
+	private String email;
+	private Date BirthDate;
 	public int getId() {
 		return id;
 	}

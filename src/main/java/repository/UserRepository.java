@@ -7,20 +7,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import entity.User;
-import util.DatabaseConnection;
+import util.DataSourceProvider;
 
 public class UserRepository {
 
 	
-private Connection connection;
+//private Connection connection;
     
 public UserRepository() {
-    try {
-        // Obtener una nueva conexión cada vez que se crea el repositorio
-        this.connection = DatabaseConnection.getConnection();
-    } catch (SQLException e) {
-        throw new RuntimeException("Error al conectar con la base de datos", e);
-    }
+    //Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
 }
 
 
@@ -28,7 +23,7 @@ public List<User> findAll() {
     List<User> Users = new ArrayList<>();
     String sql = "SELECT id,password,username,role,email,birthdate FROM users ORDER BY id";
     
-    try (Connection conn = DatabaseConnection.getConnection();
+    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql);
          ResultSet rs = stmt.executeQuery()) {
         
@@ -53,7 +48,7 @@ public User getbyID(int id) {
 	User user = null;
 	String sql = "SELECT id, password, username, role, email, birthdate FROM users WHERE id = ?";
 	
-	try (Connection conn = DatabaseConnection.getConnection();
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	     PreparedStatement stmt = conn.prepareStatement(sql)) {
 		
 		stmt.setInt(1, id);
@@ -78,7 +73,7 @@ public User getbyID(int id) {
 public User add(User u) {
 	String sql = "INSERT INTO users (password, username, role, email, birthdate) VALUES (?, ?, ?, ?, ?)";
 	
-	try (Connection conn = DatabaseConnection.getConnection();
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 		
 		stmt.setString(1, u.getPassword());

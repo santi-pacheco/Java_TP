@@ -2,9 +2,9 @@ package entity;
 
 public class Genre {
 	
-	int id;
-	String name;
-	int id_api;
+	private int id;
+	private String name;
+	private int id_api;
 	
 	public int getId() {
 		return id;

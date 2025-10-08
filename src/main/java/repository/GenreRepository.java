@@ -8,22 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entity.Genre;
+import util.DataSourceProvider;
 
 public class GenreRepository {
 
-    private Connection connection;
+    //private Connection connection;
     
     public GenreRepository(Connection connection) {
-        this.connection = connection;
+    	//Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
     }
 
     public List<Genre> findAll() {
         List<Genre> genres = new ArrayList<>();
         String sql = "SELECT id, name FROM genres ORDER BY name";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+        		PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {          
+        	
             while (rs.next()) {
                 Genre genre = new Genre();
                 genre.setId(rs.getInt("id"));

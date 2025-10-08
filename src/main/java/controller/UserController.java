@@ -10,15 +10,9 @@ public class UserController {
 	private UserService userService;
 	
 	public UserController() {
-		try {
-		// Crear UserRepository sin pasar una conexión, ya que ahora maneja sus propias conexiones
+		//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
 		UserRepository userRepository = new UserRepository();
 		this.userService = new UserService(userRepository);
-		}
-		catch (Exception e) {
-			System.err.println("Error al inicializar UserController: " + e.getMessage());
-			throw new RuntimeException("Error initializing UserController", e);
-		}
 	}
 	public List<User> getUsers(){
 		try {

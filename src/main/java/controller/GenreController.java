@@ -15,23 +15,9 @@ public class GenreController {
     private GenreService genreService;
     
     public GenreController(String tmdbApiKey) {
-        try {
-            
-         
-            Connection connection = DatabaseConnection.getConnection();
-            GenreRepository genreRepository = new GenreRepository(connection);
-            ExternalApiService externalApiService = new ExternalApiService(tmdbApiKey);
-            this.genreService = new GenreService(externalApiService, genreRepository);
-            
-            System.out.println("GenreController inicializado correctamente");
-            
-        } catch (SQLException e) {
-            System.err.println("Error de SQL al inicializar GenreController: " + e.getMessage());
-            throw new RuntimeException("Error initializing database connection", e);
-        } catch (Exception e) {
-            System.err.println("Error general al inicializar GenreController: " + e.getMessage());
-            throw new RuntimeException("Error initializing GenreController", e);
-        }
+    	//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
+        GenreRepository genreRepository = new GenreRepository();
+    	this.genreService = new GenreService(genreRepository);
     }
     
     public List<Genre> getGenres() {
