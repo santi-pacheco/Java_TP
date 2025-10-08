@@ -6,29 +6,42 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 
 public class DataSourceProvider {
-	private static HikariDataSource ds;
+    private static volatile HikariDataSource ds;
 
-    static {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3307/fatmovies");
-        config.setUsername("java_user");
-        config.setPassword("java_pass");
-        config.setMaximumPoolSize(10);    // ajustar según la app/servidor
-        config.setMinimumIdle(2);
-        config.setPoolName("FatMoviesPool");
-        config.setConnectionTimeout(30000); // ms
-        config.setIdleTimeout(600000);      // ms
-        config.setMaxLifetime(1800000);     // ms
-
-        // optimizaciones opcionales
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-
-        ds = new HikariDataSource(config);
-    }
+    private DataSourceProvider() { /* no instancias */ }
 
     public static DataSource getDataSource() {
+        if (ds == null) {
+            synchronized (DataSourceProvider.class) {
+                if (ds == null) {
+                    try {
+                        // fuerza la carga del driver en el classloader correcto
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+
+                        HikariConfig config = new HikariConfig();
+                        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+                        config.setJdbcUrl("jdbc:mysql://localhost:3307/fatmovies");
+                        config.setUsername("java_user");
+                        config.setPassword("java_pass");
+
+                        config.setMaximumPoolSize(10);
+                        config.setMinimumIdle(2);
+                        config.setPoolName("FatMoviesPool");
+                        config.setConnectionTimeout(30000);
+                        config.setIdleTimeout(600000);
+                        config.setMaxLifetime(1800000);
+
+                        config.addDataSourceProperty("cachePrepStmts", "true");
+                        config.addDataSourceProperty("prepStmtCacheSize", "250");
+                        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+                        ds = new HikariDataSource(config);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error inicializando DataSource", e);
+                    }
+                }
+            }
+        }
         return ds;
     }
 

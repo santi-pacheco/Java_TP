@@ -15,7 +15,8 @@ public class DatabaseConnection {
 	
 	static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3307/fatmovies");
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/fatmovies");
         config.setUsername("java_user");
         config.setPassword("java_pass");
         config.setMaximumPoolSize(10);    // ajustar según la app/servidor
