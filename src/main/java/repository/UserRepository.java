@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import entity.User;
 import util.DataSourceProvider;
 
@@ -21,7 +22,7 @@ public UserRepository() {
 
 public List<User> findAll() {
     List<User> Users = new ArrayList<>();
-    String sql = "SELECT id,password,username,role,email,birthdate FROM users ORDER BY id";
+    String sql = "SELECT id_user ,password, username, role, email, birthdate FROM usuarios ORDER BY id_user";
     
     try (Connection conn = DataSourceProvider.getDataSource().getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql);
@@ -29,7 +30,7 @@ public List<User> findAll() {
         
         while (rs.next()) {
             User user = new User();
-            user.setId(rs.getInt("id"));
+            user.setId(rs.getInt("id_user"));
             user.setPassword(rs.getString("password"));
             user.setUsername(rs.getString("username"));
             user.setRole(rs.getString("role"));
@@ -44,9 +45,9 @@ public List<User> findAll() {
     return Users;
 }
 
-public User getbyID(int id) {
+public User findOne(int id) {
 	User user = null;
-	String sql = "SELECT id, password, username, role, email, birthdate FROM users WHERE id = ?";
+	String sql = "SELECT id_user, password, username, role, email, birthdate FROM usuarios WHERE id_user = ?";
 	
 	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -55,7 +56,7 @@ public User getbyID(int id) {
 		try (ResultSet rs = stmt.executeQuery()) {
 			if (rs.next()) {
 				user = new User();
-				user.setId(rs.getInt("id"));
+				user.setId(rs.getInt("id_user"));
 				user.setPassword(rs.getString("password"));
 				user.setUsername(rs.getString("username"));
 				user.setRole(rs.getString("role"));
@@ -71,7 +72,7 @@ public User getbyID(int id) {
 }
 
 public User add(User u) {
-	String sql = "INSERT INTO users (password, username, role, email, birthdate) VALUES (?, ?, ?, ?, ?)";
+	String sql = "INSERT INTO usuarios (password, username, role, email, birthdate) VALUES (?, ?, ?, ?, ?)";
 	
 	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -94,6 +95,41 @@ public User add(User u) {
 		throw new RuntimeException("Error adding user to database", e);
 	}
 	
+	return u;
+}
+
+public User update(User u) {
+	String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ? WHERE id_user = ?";
+	
+	try (Connection connection = DataSourceProvider.getDataSource().getConnection();
+		PreparedStatement stmt = connection.prepareStatement(sql)) {
+		
+		stmt.setString(1, u.getUsername());
+		stmt.setString(2, u.getPassword());
+		stmt.setString(3, u.getRole());
+		stmt.setString(4, u.getEmail());
+		stmt.setDate(5, u.getBirthDate());
+		
+		stmt.executeUpdate();
+		
+	} catch (SQLException e) {
+		throw new RuntimeException("Error preparing update statement for person", e);
+	}
+	return u;
+}
+
+public User delete(User u) {
+	String sql = "DELETE FROM usuarios WHERE id_user = ?";
+	
+	try ( Connection connection = DataSourceProvider.getDataSource().getConnection();
+		PreparedStatement stmt = connection.prepareStatement(sql)) {
+		
+		stmt.setInt(1, u.getId());
+		stmt.executeUpdate();
+		
+	} catch (SQLException e) {
+		throw new RuntimeException("Error deleting person from database", e);
+	}
 	return u;
 }
 

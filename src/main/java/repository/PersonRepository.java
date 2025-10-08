@@ -1,94 +1,78 @@
 package repository;
 
 import java.sql.Connection;
+
 import entity.Person;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import util.DatabaseConnection;
+import util.DataSourceProvider;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Date;
-import java.time.LocalDate;
 
 	public class PersonRepository {
 		
-	private Connection connection;
+	//private Connection connection;
 	
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
-	
-	public PersonRepository(Connection connection) {
-		setConnection(connection);
+	public PersonRepository() {
+		//Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
 	}
 
 	public List<Person> findAll() {
 		List<Person> persons = new ArrayList<>();
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = connection.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM persons ORDER BY name");
+		String sql = "SELECT id_persona, name, apellido, birthdate FROM personas ORDER BY name";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = stmt.executeQuery()) {
+			
 			while (rs.next()) {
 				Person person = new Person();
-				person.setId(rs.getInt("id"));
+				person.setId(rs.getInt("id_persona"));
 				person.setName(rs.getString("name"));
 				person.setApellido(rs.getString("apellido"));
-				person.setFechaNacimiento(convertToLocalDate(rs.getDate("fechaNacimiento")));
+				person.setBirthDate(rs.getDate("birthdate"));
 				persons.add(person);
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("Error fetching persons from database", e);
-		} finally {
-			try {
-				if (stmt != null) {stmt.close();}
-				if (rs != null) {rs.close();}
-				DatabaseConnection.closeConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException("Error closing resources after deleting person", e);
-			}
 		}
 		return persons;
 	}
 	
 	public Person findOne(int id) {
 		Person per = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = connection.prepareStatement("SELECT * FROM persons WHERE id = ?");
+		String sql = "SELECT id_persona, name, apellido, birthdate FROM personas WHERE id_persona = ?";
+		
+		try ( Connection conn = DataSourceProvider.getDataSource().getConnection();
+			PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
 			stmt.setInt(1, id);
-			rs = stmt.executeQuery();
-			if (rs.next()) {
-				per = new Person();
-				per.setId(rs.getInt("id"));
-				per.setName(rs.getString("name"));
-				per.setApellido(rs.getString("apellido"));
-				per.setFechaNacimiento(convertToLocalDate(rs.getDate("fechaNacimiento")));
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					per = new Person();
+					per.setId(rs.getInt("id_persona"));
+					per.setName(rs.getString("name"));
+					per.setApellido(rs.getString("apellido"));
+					per.setBirthDate(rs.getDate("birthdate"));
+				}
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("Error fetching person by ID from database", e);
-		} finally {
-			try {
-				if (stmt != null) {stmt.close();}
-				if (rs != null) {rs.close();}
-				DatabaseConnection.closeConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException("Error closing resources after deleting person", e);
-			}
 		}
 		return per;
 	}
 	
 	public Person add(Person per) {
-		PreparedStatement stmt = null;
-		try {
-			stmt = connection.prepareStatement("INSERT INTO persons (name, apellido, fechaNacimiento) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+		String sql = "INSERT INTO personas (name, apellido, birthdate) VALUES (?, ?, ?)";
+
+		try (Connection connection = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+			
 			stmt.setString(1, per.getName());
 			stmt.setString(2, per.getApellido());
-			stmt.setDate(3, convertToDate(per.getFechaNacimiento()));
+			stmt.setDate(3, per.getBirthDate());
+			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows > 0) {
 				try (ResultSet keyResultSet = stmt.getGeneratedKeys()) {
@@ -99,79 +83,58 @@ import java.time.LocalDate;
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("Error adding person to database", e);
-		} finally {
-			try {
-				if (stmt != null) {stmt.close();}
-				DatabaseConnection.closeConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException("Error closing resources after deleting person", e);
-			}
 		}
 		return per;
 	}
 	
 	public Person update(Person per) {
-		PreparedStatement stmt = null;
-		try {
-			stmt = connection.prepareStatement("UPDATE persons SET name = ?, apellido = ?, fechaNacimiento = ? WHERE id = ?");
+		String sql = "UPDATE personas SET name = ?, apellido = ?, birthdate = ? WHERE id_persona = ?";
+		
+		try (Connection connection = DataSourceProvider.getDataSource().getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)) {
+			
 			stmt.setString(1, per.getName());
 			stmt.setString(2, per.getApellido());
-			stmt.setDate(3, convertToDate(per.getFechaNacimiento()));
+			stmt.setDate(3, per.getBirthDate());
 			stmt.setInt(4, per.getId());
 			stmt.executeUpdate();
+			
 		} catch (SQLException e) {
 			throw new RuntimeException("Error preparing update statement for person", e);
-		} finally {
-			try {
-				if (stmt != null) {stmt.close();}
-				DatabaseConnection.closeConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException("Error closing resources after preparing update statement", e);
-			}
 		}
 		return per;
 	}
 	
 	public Person delete(Person per) {
-		PreparedStatement stmt = null;
-		try {
-			stmt = connection.prepareStatement("DELETE FROM persons WHERE id = ?");
+		String sql = "DELETE FROM personas WHERE id_persona = ?";
+		
+		try ( Connection connection = DataSourceProvider.getDataSource().getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)) {
+			
 			stmt.setInt(1, per.getId());
 			stmt.executeUpdate();
+			
 		} catch (SQLException e) {
 			throw new RuntimeException("Error deleting person from database", e);
-		} finally {
-			try {
-				if (stmt != null) {stmt.close();}
-				DatabaseConnection.closeConnection();
-			} catch (SQLException e) {
-				throw new RuntimeException("Error closing resources after deleting person", e);
-			}
 		}
 		return per;
 	}
 	
-	public List<Person> saveAll(List<Person> persons) {
-		for (Person per : persons) {
-			add(per);
-		}
-		return persons;
-	}
-	
-	public Date convertToDate(LocalDate dateLocal) {
-		if (dateLocal != null) {
-			return Date.valueOf(dateLocal);
-		} else {
-			return null;
-		}
-	}
-	
-	public LocalDate convertToLocalDate(Date dateSql) {
-		if (dateSql != null) {
-			return dateSql.toLocalDate();
-		} else {
-			return null;
-		}
-	}
-	
+	public void saveAll(List<Person> persons) {
+        String sql = "INSERT INTO personas (id_persona, name, apellido, birthdate) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+       	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            for (Person person : persons) {
+                stmt.setInt(1, person.getId());
+                stmt.setString(2, person.getName());
+                stmt.setString(3, person.getApellido());
+                stmt.setDate(4, person.getBirthDate());
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving genres to database", e);
+        }
+    }
+		
 }

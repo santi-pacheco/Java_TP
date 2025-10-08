@@ -1,12 +1,7 @@
 package controller;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import repository.PersonRepository;
-import service.ExternalApiService;
 import service.PersonService;
-import util.DatabaseConnection;
 import entity.Person;
 import java.util.List;
 
@@ -18,17 +13,9 @@ public class PersonController {
 			this.personService = personService;
 		}
 
-	public PersonController(String tmdbApiKey) {
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PersonRepository personRepository = new PersonRepository(connection);
-            ExternalApiService externalApiService = new ExternalApiService(tmdbApiKey);
-            setPersonService(new PersonService(externalApiService, personRepository));
-        } catch (SQLException e) {	
-            throw new RuntimeException("Error initializing database connection", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Error initializing PersonController", e);
-        }
+	public PersonController() {
+            PersonRepository personRepository = new PersonRepository();
+            this.personService = new PersonService(personRepository);
     }
 	
 	public List<Person> getPersons() {

@@ -25,9 +25,8 @@ public class GenreServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         // Inicializar el controlador con la API key
-        String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
-        this.genreController = new GenreController(apiKey);
-        this.gson = new Gson();
+        //String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
+        this.genreController = new GenreController();
     }
     
     @Override
@@ -61,4 +60,9 @@ public class GenreServlet extends HttpServlet {
             request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
         }
     }
+    
+    
+    
+    
+    
 }
