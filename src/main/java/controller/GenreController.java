@@ -14,7 +14,7 @@ public class GenreController {
     
     private GenreService genreService;
     
-    public GenreController(String tmdbApiKey) {
+    public GenreController() {
     	//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
         GenreRepository genreRepository = new GenreRepository();
     	this.genreService = new GenreService(genreRepository);
