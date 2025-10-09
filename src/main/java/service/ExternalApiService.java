@@ -8,10 +8,18 @@ import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
-
+import java.time.LocalDate;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.time.format.DateTimeParseException;
+
+import controller.MovieController;
+import controller.EstrenoController;
+
+import entity.Movie;
+import entity.Genre;
+import entity.Estreno;
+
 public class ExternalApiService {
     
     private TmdbApi tmdbApi;
@@ -41,15 +49,15 @@ public class ExternalApiService {
     }
     
  
-    public entity.Genre convertToLocalGenre(info.movito.themoviedbapi.model.core.Genre tmdbGenre) {
-        entity.Genre localGenre = new entity.Genre();
+    public Genre convertToLocalGenre(info.movito.themoviedbapi.model.core.Genre tmdbGenre) {
+        Genre localGenre = new Genre();
         localGenre.setId_api(tmdbGenre.getId());//Cambié setId por setId_api
         localGenre.setName(tmdbGenre.getName());
         return localGenre;
     }
     
 
-    public List<entity.Genre> convertToLocalGenres(List<info.movito.themoviedbapi.model.core.Genre> tmdbGenres) {
+    public List<Genre> convertToLocalGenres(List<info.movito.themoviedbapi.model.core.Genre> tmdbGenres) {
         return tmdbGenres.stream()
                 .map(this::convertToLocalGenre)
                 .collect(Collectors.toList());
@@ -97,7 +105,7 @@ public class ExternalApiService {
 		*/
     
  // Reemplaza el método existente por este:
-    public List<info.movito.themoviedbapi.model.core.Movie> getMoviesByGenre(List<entity.Genre> genre) throws TmdbException {
+    public List<info.movito.themoviedbapi.model.core.Movie> getMoviesByGenre(List<Genre> genre) throws TmdbException {
         // --- CONFIGURABLE ---
         final int targetResults = 5000;                      // cuántas películas queremos como máximo
         final int perPageEstimate = 20;                      // TMDB suele devolver 20 por página
@@ -179,4 +187,43 @@ public class ExternalApiService {
             return all;
         }
     }
+    
+    public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie, EstrenoController estrenoController, MovieController MovieController) {
+    	
+    	Movie m = new Movie();
+    	m.setId_api(tmdbMovie.getId());
+
+        // Titulos
+        m.setTitulo(tmdbMovie.getTitle());
+        m.setTituloOriginal(tmdbMovie.getOriginalTitle());
+        // Texto
+        m.setSinopsis(tmdbMovie.getOverview());
+        // Puntuaciones / votos / popularidad (pueden venir nulos)
+        m.setPuntuacionApi(tmdbMovie.getVoteAverage() != null ? tmdbMovie.getVoteAverage() : null);
+        m.setVotosApi(tmdbMovie.getVoteCount() != null ? tmdbMovie.getVoteCount() : null);
+        m.setPopularidad(tmdbMovie.getPopularity() != null ? tmdbMovie.getPopularity() : null);
+        // Adulto
+        m.setAdulto(tmdbMovie.getAdult());
+        // Poster path
+        m.setPosterPath(tmdbMovie.getPosterPath()); // guarda la ruta tal cual "/abc.jpg"
+        // Idioma original
+        m.setIdiomaOriginal(tmdbMovie.getOriginalLanguage());
+        // Fecha de estreno -> Estreno (objeto tuyo)
+        if (tmdbMovie.getReleaseDate() != null && !tmdbMovie.getReleaseDate().isBlank()) {
+            try {
+            	LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
+                int year = release.getYear();
+
+                // Buscar o crear Estreno según año
+                Estreno estreno = estrenoController.getEstrenoByYear(year);
+                m.setEstreno(estreno);
+
+            } catch (DateTimeParseException ex) {
+                // loguear y seguir
+            }
+        }
+        // guarda o actualiza
+        MovieController.addMovie(m);
+        return m;
+    }  
 }
