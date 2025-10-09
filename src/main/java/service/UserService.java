@@ -15,7 +15,7 @@ public class UserService {
 	}
 	
 	public User getUserById(int id) {
-		return userRepository.getbyID(id);
+		return userRepository.findOne(id);
 	}
 	public User CreateUser(User user) {
 		if (user != null && user.getUsername() != null && !user.getUsername().isEmpty()) {
