@@ -78,3 +78,24 @@ CREATE TABLE usuarios (
     email VARCHAR(100) NOT NULL UNIQUE,    -- Correo electrónico, cadena no nula y único.
     birthDate DATE                         -- Fecha de nacimiento (solo fecha, no hora).
 );
+
+------------------------------------------------------------------------------------------------------------------------------
+-- Creación de la tabla 'paises'
+-- Para almacenar los países asociados a las películas.
+
+CREATE TABLE paises (
+	id_country INT PRIMARY KEY AUTO_INCREMENT,
+	iso_country VARCHAR(2) NOT NULL UNIQUE,
+	name VARCHAR(100) NOT NULL 	
+);
+
+CREATE TABLE peliculas_paises (
+    id_pelicula INT NOT NULL,
+    id_country INT NOT NULL,
+    
+    PRIMARY KEY (id_pelicula, id_country),
+    
+    FOREIGN KEY (id_pelicula) REFERENCES peliculas(id_pelicula) ON DELETE CASCADE,
+    FOREIGN KEY (id_country) REFERENCES paises(id_country) ON DELETE CASCADE
+);
+
