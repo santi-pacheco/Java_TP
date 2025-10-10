@@ -35,6 +35,7 @@ public class DatabaseConnection {
     }
 	
 	public static DataSource getDataSource() {
+		
         return ds;
     }
 
@@ -43,6 +44,10 @@ public class DatabaseConnection {
             ds.close();
         }
     }
+    
+    
+    
+    
 	/*
     //private static final String URL = "jdbc:mysql://localhost:3306/fatmovies"; 
     private static final String URL = "jdbc:mysql://localhost:3307/fatmovies";
