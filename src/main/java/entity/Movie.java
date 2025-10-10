@@ -13,7 +13,7 @@ public class Movie {
     //@Column(columnDefinition = "TEXT")
     private String sinopsis;
     //@Column(name = "puntuacion_api")
-    private Double puntuacionApi;
+    private float puntuacionApi;
     //@Column(name = "idioma_original")
     private String idiomaOriginal;
     //@Column(name = "poster_path")
@@ -60,11 +60,11 @@ public class Movie {
 		this.sinopsis = sinopsis;
 	}
 
-	public Double getPuntuacionApi() {
+	public float getPuntuacionApi() {
 		return puntuacionApi;
 	}
 
-	public void setPuntuacionApi(Double puntuacionApi) {
+	public void setPuntuacionApi(float puntuacionApi) {
 		this.puntuacionApi = puntuacionApi;
 	}
 
