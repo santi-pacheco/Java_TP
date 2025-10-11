@@ -9,6 +9,7 @@ import java.util.List;
 
 import entity.Genre;
 import util.DataSourceProvider;
+import exception.ErrorFactory;
 
 public class GenreRepository {
 
@@ -34,7 +35,7 @@ public class GenreRepository {
                 genres.add(genre);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching genres from database", e);
+            throw ErrorFactory.internal("Error fetching genres from database");
         }
         
         return genres;
@@ -57,9 +58,8 @@ public class GenreRepository {
     			}
     		}
     	} catch (SQLException e) {
-    		throw new RuntimeException("Error fetching user by ID", e);
+    		throw ErrorFactory.internal("Error fetching user by ID");
     	}
-    	
     	return genre;
     }
     
@@ -81,7 +81,10 @@ public class GenreRepository {
     			}
     		}
     	} catch (SQLException e) {
-    		throw new RuntimeException("Error adding user to database", e);
+    		if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+				throw ErrorFactory.duplicate("Genre with the same API ID already exists");
+			}
+			throw ErrorFactory.internal("Error adding genre to database");
     	}
     	
     	return g;
@@ -98,7 +101,7 @@ public class GenreRepository {
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw new RuntimeException("Error preparing update statement for genre", e);
+			throw ErrorFactory.internal("Error preparing update statement for genre");
 		} 
 		return g;
 	}
@@ -111,13 +114,13 @@ public class GenreRepository {
 			stmt.setInt(1, g.getId());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
-			throw new RuntimeException("Error deleting person from database", e);
+			throw ErrorFactory.internal("Error deleting person from database");
 		}
 		return g;
 	}
     
     public void saveAll(List<Genre> genres) {
-        String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
+        String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -129,7 +132,7 @@ public class GenreRepository {
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving genres to database", e);
+            throw ErrorFactory.internal("Error saving genres to database");
         }
     }
 }

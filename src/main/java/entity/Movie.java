@@ -1,26 +1,29 @@
 package entity;
 
+import jakarta.validation.constraints.*;
+import java.sql.Time;
+
 public class Movie {
 
     private int id;
-    private int id_api;
-    private Estreno estreno;
-    private Integer duracion;
-    private Boolean adulto;
-    private String titulo;
-    private Double popularidad;
+    private int id_api; //
+    private int estrenoYear; //
+    private Time duracion;
+    private Boolean adulto; //
+    private String titulo; //
+    private Double popularidad; //
     //@Column(name = "votos_api")
-    private Integer votosApi;
+    private int votosApi; //
     //@Column(name = "titulo_original")
-    private String tituloOriginal;
+    private String tituloOriginal; //
     //@Column(columnDefinition = "TEXT")
-    private String sinopsis;
+    private String sinopsis; //
     //@Column(name = "puntuacion_api")
-    private Double puntuacionApi;
+    private Double puntuacionApi; //
     //@Column(name = "idioma_original")
-    private String idiomaOriginal;
+    private String idiomaOriginal; //
     //@Column(name = "poster_path")
-    private String posterPath;
+    private String posterPath; //
     
 	public int getId() {
 		return id;
@@ -33,17 +36,17 @@ public class Movie {
 	}
 	public void setId_api(int id_api) {
 		this.id_api = id_api;
+	} 
+	public int getEstrenoYear() {
+		return estrenoYear;
 	}
-	public Estreno getEstreno() {
-		return estreno;
+	public void setEstrenoYear(int estrenoYear) {
+		this.estrenoYear = estrenoYear;
 	}
-	public void setEstreno(Estreno estreno) {
-		this.estreno = estreno;
-	}
-	public Integer getDuracion() {
+	public Time getDuracion() {
 		return duracion;
 	}
-	public void setDuracion(Integer duracion) {
+	public void setDuracion(Time duracion) {
 		this.duracion = duracion;
 	}
 	public Boolean getAdulto() {
@@ -58,10 +61,10 @@ public class Movie {
 	public void setPopularidad(Double popularidad) {
 		this.popularidad = popularidad;
 	}
-	public Integer getVotosApi() {
+	public int getVotosApi() {
 		return votosApi;
 	}
-	public void setVotosApi(Integer votosApi) {
+	public void setVotosApi(int votosApi) {
 		this.votosApi = votosApi;
 	}
 	public String getTituloOriginal() {
@@ -99,5 +102,13 @@ public class Movie {
 	}
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
+	}
+	
+	@Override
+	public String toString() {
+		return "Movie [id=" + id + ", id_api=" + id_api + ", estrenoYear=" + estrenoYear + ", duracion=" + duracion
+				+ ", adulto=" + adulto + ", titulo=" + titulo + ", popularidad=" + popularidad + ", votosApi="
+				+ votosApi + ", tituloOriginal=" + tituloOriginal + ", sinopsis=" + sinopsis + ", puntuacionApi="
+				+ puntuacionApi + ", idiomaOriginal=" + idiomaOriginal + ", posterPath=" + posterPath + "]";
 	}
 }

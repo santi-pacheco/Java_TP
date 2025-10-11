@@ -14,11 +14,9 @@ import java.util.Arrays;
 import java.time.format.DateTimeParseException;
 
 import controller.MovieController;
-import controller.EstrenoController;
 
 import entity.Movie;
 import entity.Genre;
-import entity.Estreno;
 
 public class ExternalApiService {
     
@@ -125,8 +123,8 @@ public class ExternalApiService {
                 .language("es")
                 .sortBy(info.movito.themoviedbapi.tools.sortby.DiscoverMovieSortBy.POPULARITY_DESC)
                 .voteCountGte(50)
-                .voteAverageGte(5.0)
-                .primaryReleaseYear(2000);
+                .voteAverageGte(5.0);
+                //.primaryReleaseYear(2000);
 
         List<info.movito.themoviedbapi.model.core.Movie> all = new ArrayList<>();
 
@@ -188,11 +186,11 @@ public class ExternalApiService {
         }
     }
     
-    public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie, EstrenoController estrenoController, MovieController MovieController) {
+    public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
     	
     	Movie m = new Movie();
     	m.setId_api(tmdbMovie.getId());
-
+    	
         // Titulos
         m.setTitulo(tmdbMovie.getTitle());
         m.setTituloOriginal(tmdbMovie.getOriginalTitle());
@@ -213,17 +211,13 @@ public class ExternalApiService {
             try {
             	LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
                 int year = release.getYear();
-
-                // Buscar o crear Estreno según año
-                Estreno estreno = estrenoController.getEstrenoByYear(year);
-                m.setEstreno(estreno);
-
+                m.setEstrenoYear(year);
             } catch (DateTimeParseException ex) {
                 // loguear y seguir
             }
         }
+        m.setDuracion(null); // no viene en discover, se podría buscar aparte si se quiere
         // guarda o actualiza
-        MovieController.addMovie(m);
         return m;
     }  
 }
