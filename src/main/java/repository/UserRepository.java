@@ -9,6 +9,7 @@ import java.util.List;
 
 import entity.User;
 import util.DataSourceProvider;
+import exception.ErrorFactory;
 
 public class UserRepository {
 
@@ -39,7 +40,7 @@ public List<User> findAll() {
             Users.add(user);
         }
     } catch (SQLException e) {
-        throw new RuntimeException("Error fetching users from database", e);
+    	throw ErrorFactory.internal("Error fetching users from database");
     }
     
     return Users;
@@ -65,9 +66,8 @@ public User findOne(int id) {
 			}
 		}
 	} catch (SQLException e) {
-		throw new RuntimeException("Error fetching user by ID", e);
+		throw ErrorFactory.internal("Error fetching user by ID");
 	}
-	
 	return user;
 }
 
@@ -92,7 +92,11 @@ public User add(User u) {
 			}
 		}
 	} catch (SQLException e) {
-		throw new RuntimeException("Error adding user to database", e);
+		if (e.getSQLState().equals("23505")) { // Código SQLState para violación de restricción única en PostgreSQL
+			throw ErrorFactory.duplicate("Username or email already exists");
+		} else {
+			throw ErrorFactory.internal("Error adding user to database");
+		}
 	}
 	
 	return u;
@@ -109,11 +113,12 @@ public User update(User u) {
 		stmt.setString(3, u.getRole());
 		stmt.setString(4, u.getEmail());
 		stmt.setDate(5, u.getBirthDate());
+		stmt.setInt(6, u.getId());
 		
 		stmt.executeUpdate();
 		
 	} catch (SQLException e) {
-		throw new RuntimeException("Error preparing update statement for person", e);
+		throw ErrorFactory.internal("Error preparing update statement for user");
 	}
 	return u;
 }
@@ -128,7 +133,7 @@ public User delete(User u) {
 		stmt.executeUpdate();
 		
 	} catch (SQLException e) {
-		throw new RuntimeException("Error deleting person from database", e);
+		throw ErrorFactory.internal("Error deleting user from database");
 	}
 	return u;
 }
