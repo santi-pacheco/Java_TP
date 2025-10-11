@@ -1,3 +1,4 @@
+/*
 package entity;
 
 public class Estreno {
@@ -18,3 +19,4 @@ public class Estreno {
 		this.anio = anio;
 	}
 }
+*/

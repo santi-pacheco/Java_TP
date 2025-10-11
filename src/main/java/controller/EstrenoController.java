@@ -1,9 +1,11 @@
+/*
 package controller;
 
 import service.EstrenoService;
+import java.util.List;
 import entity.Estreno;
 
-public class EstrenoController {
+public class EstrenoController {	
 	
 	private EstrenoService estrenoService;
 	
@@ -11,25 +13,31 @@ public class EstrenoController {
 		this.estrenoService = estrenoService;
 	}
 	
-	public boolean addEstreno(Estreno e) {
-		try {
-			Estreno createdEstreno = estrenoService.createEstreno(e);
-			if (createdEstreno != null) {
-	            return true;
-	        } else {
-	            return false;
-	        }
-		} catch (Exception ex) {
-			throw new RuntimeException("Error adding estreno", ex);
-		}
+	public Estreno getEstrenoByYear(int year) {
+		Estreno estrenoByYear = estrenoService.getEstrenoByYear(year);
+		return estrenoByYear;
 	}
 	
-	public Estreno getEstrenoByYear(int year) {
-		try {
-			Estreno estrenoByYear = estrenoService.getEstrenoByYear(year);
-			return estrenoByYear;
-		} catch (Exception e) {
-			throw new RuntimeException("Error getting estreno by year", e);
-		}	
+	public List<Estreno> getEstrenos() {
+		List<Estreno> estrenos = estrenoService.getAllEstrenos();
+		return estrenos;
+	}
+	
+	public Estreno getEstrenoById(int id) {
+		Estreno estreno = estrenoService.getEstrenoById(id);
+		return estreno;
+	}
+	
+	public Estreno createEstreno(Estreno estreno) {
+			return estrenoService.createEstreno(estreno);
+	}
+	
+	public Estreno modifyEstreno(Estreno estreno) {
+		return estrenoService.updateEstreno(estreno);
+	}
+	
+	public void removeEstreno(Estreno estreno) {
+		estrenoService.deleteEstreno(estreno);
 	}
 }
+*/
