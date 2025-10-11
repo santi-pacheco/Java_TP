@@ -3,6 +3,7 @@ package service;
 import entity.Person;
 import repository.PersonRepository;
 import java.util.List;
+import exception.ErrorFactory;
 
 public class PersonService {
 	
@@ -27,6 +28,9 @@ public class PersonService {
 	
 	public Person getPerson(int id) {
 		Person person = personRepository.findOne(id);
+		if (person == null) {
+			throw ErrorFactory.notFound("Person not found with ID: " + id);
+		}
 		return person;
 	}
 	
