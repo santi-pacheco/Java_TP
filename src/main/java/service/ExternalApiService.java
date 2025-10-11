@@ -5,11 +5,20 @@ import info.movito.themoviedbapi.tools.TmdbException;
 import info.movito.themoviedbapi.tools.builders.discover.*;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.time.format.DateTimeParseException;
 
@@ -185,6 +194,50 @@ public class ExternalApiService {
             return all;
         }
     }
+    
+    public static List<entity.Country> getMovieCountries() throws TmdbException, IOException {
+        System.out.println("📡 Obteniendo países desde TMDB API...");
+        
+        try {
+        	// Obtener lista de países de TMDB
+        	URL urlCountries = new URL("https://api.themoviedb.org/3/configuration/countries?api_key=a47ba0b127499b0e1b28ceb0a183ec57");
+        	
+        	HttpURLConnection conn = (HttpURLConnection)urlCountries.openConnection();
+        	conn.setRequestMethod("GET");
+        	//Revisar el in
+        	BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            //se convierte a plano
+            while((line = reader.readLine()) != null) {
+            	response.append(line); //nos permite agregar valores
+            	System.out.println("Nro Linea"+ line);
+            	
+            	
+            }
+            reader.close();
+			System.out.println("LOCURA" + response.toString());
+			
+			//Página web, parsear JSON
+			
+			Gson gson = new Gson();
+			entity.Country[] countriesArray = gson.fromJson(response.toString(), entity.Country[].class);
+			List<entity.Country> countriesList = new ArrayList<>();
+			
+			for(entity.Country c : countriesArray) {
+				countriesList.add(c);
+				
+			}
+			
+			System.out.println("✅ Países obtenidos: " + countriesList.size());
+			return countriesList;
+			}
+	        	catch(IOException e) {
+	            System.err.println("❌ Error al obtener países: " + e.getMessage());
+	            throw e;
+	        	}
+    
+        }
     
     public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
     	
