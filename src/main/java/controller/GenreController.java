@@ -1,7 +1,6 @@
 package controller;
 
 import entity.Genre;
-import repository.GenreRepository;
 import service.GenreService;
 
 import java.util.List;
@@ -10,39 +9,36 @@ public class GenreController {
     
     private GenreService genreService;
     
-    public GenreController() {
+    public GenreController(GenreService genreService) {
     	//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
-        GenreRepository genreRepository = new GenreRepository();
-    	this.genreService = new GenreService(genreRepository);
+    	this.genreService = genreService;
     }
     
-    public List<Genre> getGenres() {
-        try {
-            List<Genre> genres = genreService.getAllGenres();
-            System.out.println("Géneros obtenidos exitosamente: " + genres.size() + " registros");
-            return genres;
-        } catch (Exception e) {
-            System.err.println("Error al obtener géneros: " + e.getMessage());
-            throw new RuntimeException("Error getting genres", e);
-        }
+    public List<Genre> getGenres(){
+			List<Genre> genres = genreService.getAllGenres();
+			System.out.println("Géneros obtenidos exitosamente: " + genres.size() + " registros");
+			return genres;
+	}
+    
+    public Genre getGenreById(int id) {
+    	Genre genre = genreService.getGenreById(id);
+    	return genre;
     }
-    /*
-    public static void main(String[] args) {
-        String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
-        
-        try {
-            GenreController controller = new GenreController(apiKey);
-            List<Genre> genres = controller.getGenres();
-            
-            System.out.println("Géneros obtenidos:");
-            for (Genre genre : genres) {
-                System.out.println(genre.getId() + " - " + genre.getName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            DatabaseConnection.closeConnection();
-        }
+    
+    public Genre createGenre(Genre genre) {
+		return genreService.CreateGenre(genre);
+	}
+    
+    public Genre modifyGenre(Genre genre) {
+    	return genreService.updateGenre(genre);
     }
-    */
+    
+    public Genre removeGenre(Genre genre) {
+		Genre genreToDelete = genreService.deleteGenre(genre);
+		return genreToDelete;
+	}
+
+    public void saveAllGenres(List<Genre> genres) {
+		genreService.saveAllGenres(genres);
+	}
 }

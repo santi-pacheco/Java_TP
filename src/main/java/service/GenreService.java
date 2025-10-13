@@ -3,6 +3,7 @@ package service;
 import entity.Genre;
 import repository.GenreRepository;
 import java.util.List;
+import exception.ErrorFactory;
 
 public class GenreService {
     
@@ -17,15 +18,32 @@ public class GenreService {
     }
 
     public Genre getGenreById(int id) {
-		return genreRepository.findOne(id);
+		Genre genre = genreRepository.findOne(id);
+		if (genre == null) {
+			throw ErrorFactory.notFound("Genre not found with ID: " + id);
+		}
+		return genre;
 	}
     
     public Genre CreateGenre(Genre genre) {
-		if (genre != null && genre.getName() != null && !genre.getName().isEmpty()) {
-			return genreRepository.add(genre);
-		} else {
-			throw new IllegalArgumentException("Invalid user data");
-		}
+    	return genreRepository.add(genre);
 	}
     
+    public Genre updateGenre(Genre genre) {
+		// 1. Primero, verifica que el género exista
+	    Genre existingGenre = genreRepository.findOne(genre.getId());
+	    if (existingGenre == null) {
+	        throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getId() + " no encontrado.");
+	    }
+	    // 2. Si existe, ahora sí actualiza
+	    return genreRepository.update(genre);
+    }
+    
+    public Genre deleteGenre(Genre genre) {
+		return genreRepository.delete(genre);
+    }
+    
+    public void saveAllGenres(List<Genre> genres) {
+    	genreRepository.saveAll(genres);
+    }
 }
