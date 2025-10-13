@@ -26,7 +26,7 @@ public class GenreServlet extends HttpServlet {
         super.init();
         // Inicializar el controlador con la API key
         //String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
-        this.genreController = new GenreController();
+        this.genreController = new GenreController(null);
     }
     
     @Override
