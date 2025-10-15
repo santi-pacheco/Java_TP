@@ -13,15 +13,21 @@ import repository.GenreRepository;
 import info.movito.themoviedbapi.tools.TmdbException;
 import entity.Genre;
 import controller.MovieController;
+import controller.WatchlistController;
 import entity.Movie;
 import repository.MovieRepository;
+import repository.UserRepository;
 import service.MovieService;
+import service.UserService;
+import service.WatchlistService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import controller.GenreController;
 import service.GenreService;
 import repository.GenreRepository;
-
+import entity.Country;
+import entity.Watchlist;
+import repository.WatchlistRepository;
 
 public class DiscoverReflectionMain {
 
@@ -62,7 +68,7 @@ public class DiscoverReflectionMain {
     	// 1. Necesitas una instancia de tu ExternalApiService.
 //    	    Recuerda que el constructor espera tu clave de la API de TMDB.
 //------------------------------------------------------------------------------------------------------------
-    	/*
+    /*
     	ExternalApiService apiService = new ExternalApiService("a47ba0b127499b0e1b28ceb0a183ec57");
 
     	// 2. Necesitas una instancia de tu GenreController.
@@ -98,13 +104,13 @@ public class DiscoverReflectionMain {
     	    System.err.println("Ha ocurrido un error inesperado: " + e.getMessage());
     	    e.printStackTrace();
     	}
-    }
-    */
+    
+
 //------------------------------------------------------------------------------------------------------------
     	// --- CONFIGURACIÓN INICIAL ---
         // 1. Instancia de tu servicio de API externa.
         //    ¡IMPORTANTE! Reemplaza "TU_API_KEY_AQUI" con tu clave real.
-        ExternalApiService apiService = new ExternalApiService("a47ba0b127499b0e1b28ceb0a183ec57");
+        ExternalApiService apiService1 = new ExternalApiService("a47ba0b127499b0e1b28ceb0a183ec57");
 
         // 2. Instancia de tu controlador de películas.
         //    (La forma de obtenerlo puede variar según tu framework,
@@ -116,22 +122,22 @@ public class DiscoverReflectionMain {
         System.out.println("--- INICIANDO PROCESO DE IMPORTACIÓN DE PELÍCULAS ---");
 
         try {
-        	GenreRepository genreRepository = new GenreRepository();
-        	GenreService genreService = new GenreService(genreRepository);
-        	GenreController genreController = new GenreController(genreService);
-            List<Genre> localGenres = genreController.getGenres();
+        	GenreRepository genreRepository1 = new GenreRepository();
+        	GenreService genreService1 = new GenreService(genreRepository1);
+        	GenreController genreController1 = new GenreController(genreService1);
+            List<Genre> localGenres = genreController1.getGenres();
 
             // --- PASO 2: OBTENER PELÍCULAS POR GÉNEROS ---
             // Usamos la lista de géneros obtenida para buscar las películas.
             System.out.println("\nPaso 2: Buscando películas populares basadas en los géneros encontrados...");
-            List<info.movito.themoviedbapi.model.core.Movie> tmdbMovies = apiService.getMoviesByGenre(localGenres);
+            List<info.movito.themoviedbapi.model.core.Movie> tmdbMovies = apiService1.getMoviesByGenre(localGenres);
             System.out.println("Se encontraron " + tmdbMovies.size() + " películas.");
 
          // --- PASO 3: MAPEAR LAS PELÍCULAS AL FORMATO LOCAL ---
             System.out.println("\nPaso 3: Mapeando películas al formato de la base de datos...");
             List<Movie> localMovies = tmdbMovies.stream()
                     // Usamos una lambda para llamar al método con sus dos parámetros.
-                    .map(tmdbMovie -> apiService.mapAndUpsertFromDiscover(tmdbMovie))
+                    .map(tmdbMovie -> apiService1.mapAndUpsertFromDiscover(tmdbMovie))
                     .collect(Collectors.toList());
             System.out.println("Mapeo completado.");
            
@@ -166,5 +172,33 @@ public class DiscoverReflectionMain {
         }
 
         System.out.println("\n--- PROCESO DE IMPORTACIÓN FINALIZADO ---");
+    
+    */
+    
+    
+    // TESTING
+    	
+        UserRepository userRepository = new UserRepository();
+        UserService userService = new UserService(userRepository);
+        
+        MovieRepository movieRepository = new MovieRepository();
+        MovieService movieService = new MovieService(movieRepository);
+       
+        
+        System.out.println("Obteniendo watchlist del usuario con ID 2...");
+ 
+        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+    
+        WatchlistController watchlistController = new WatchlistController(watchlistService);
+    
+        List<String> wl = watchlistController.getMoviesInWatchlist(2);
+        System.out.println("PELIS EN WATCHLIST: " + wl);
+    
+    
+    
+    
+    
+    
     }
 }
