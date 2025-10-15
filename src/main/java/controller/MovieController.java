@@ -40,4 +40,15 @@ public class MovieController {
 		movieService.saveAllMovies(movies);
 	}
 	
+	public void updateMovieGenres(int movieId, List<Integer> genres, GenreController genreController) {
+		movieService.updateMovieGenres(movieId, genres, genreController);
+	}
+	
+	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
+		movieService.updateMovieActors(movieId, ac);
+	}
+	
+	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
+		movieService.updateMovieDirectors(movieId, directors);
+	}
 }

@@ -1,6 +1,5 @@
 package controller;
 
-import repository.PersonRepository;
 import service.PersonService;
 import entity.Person;
 import java.util.List;
@@ -9,65 +8,40 @@ public class PersonController {
 
 	private PersonService personService;
 
-	public void setPersonService(PersonService personService) {
-			this.personService = personService;
-		}
-
-	public PersonController() {
-            PersonRepository personRepository = new PersonRepository();
-            this.personService = new PersonService(personRepository);
+	public PersonController(PersonService personService) {
+            this.personService = personService;
     }
 	
 	public List<Person> getPersons() {
-		try {
-			List<Person> persons = personService.getAllPersons();
-			return persons;
-		} catch (Exception e) {
-			throw new RuntimeException("Error getting persons", e);
-		}
+		List<Person> persons = personService.getAllPersons();
+		return persons;
 	}
 	
 	public Person getPersonById(int id) {
-		try {
-			Person personById = personService.getPerson(id);
-			return personById;
-		} catch (Exception e) {
-			throw new RuntimeException("Error getting person by ID", e);
-		}	
+		Person personById = personService.getPersonById(id);
+		return personById;
 	}
 	
-	public boolean addPerson(Person per) {
-		try {
-			Person createdPerson = personService.createPerson(per);
-			if (createdPerson != null) {
-	            return true;
-	        } else {
-	            return false;
-	        }
-		} catch (Exception e) {
-			throw new RuntimeException("Error adding person", e);
-		}
+	public Person createPerson(Person per) {
+		Person createdPerson = personService.createPerson(per);
+		return createdPerson;
 	}
 	
-	public boolean modifyPerson(Person per) {
-		try {
-			Person createdPerson = personService.updatePerson(per);
-			if (createdPerson != null) {
-	            return true;
-	        } else {
-	            return false;
-	        }
-		} catch (Exception e) {
-			throw new RuntimeException("Error modifying person", e);
-		}
+	public Person modifyPerson(Person per) {
+		Person createdPerson = personService.updatePerson(per);
+		return createdPerson;
 	}
 	
-	public Person removePerson(Person per) {
-		try {
-			Person deleted = personService.deletePerson(per);
-			return deleted;
-		} catch (Exception e) {
-			throw new RuntimeException("Error removing person", e);
-		}
+	public void removePerson(Person per) {
+		personService.deletePerson(per);
 	}
+	
+	public List<util.DiscoverReflectionMain.actorCharacter> saveActors(List <service.ExternalApiService.PersonWithCharacter> personWithCharacter){
+		return personService.saveActors(personWithCharacter);
+	}
+	
+	public List<Person> saveDirectors(List<Person> director) {
+		return personService.saveDirectors(director);
+	}
+	
 }

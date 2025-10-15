@@ -41,4 +41,10 @@ public class GenreController {
     public void saveAllGenres(List<Genre> genres) {
 		genreService.saveAllGenres(genres);
 	}
+    
+    public Integer getGeneresByIdApi(Integer idApi) {
+    	Integer genreId = genreService.getGeneresByIdApi(idApi);
+		return genreId;
+	}
+    
 }

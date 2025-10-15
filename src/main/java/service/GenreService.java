@@ -46,4 +46,12 @@ public class GenreService {
     public void saveAllGenres(List<Genre> genres) {
     	genreRepository.saveAll(genres);
     }
+    
+    public Integer getGeneresByIdApi(Integer idApi) {
+    	Integer genreId = genreRepository.findByIdApi(idApi);
+		if (genreId == null) {
+			System.out.println("Genre not found with idApi: " + idApi);
+		}
+		return genreId;
+    }
 }

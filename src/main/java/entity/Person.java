@@ -5,8 +5,10 @@ import java.sql.Date;
 public class Person {
 	
 	private int id;
+	private int id_api;
 	private String name;
-	private String apellido;
+	private String also_known_as;
+	private String place_of_birth;
 	private Date BirthDate;
 
 	public int getId() {
@@ -25,12 +27,28 @@ public class Person {
 		this.name = name;
 	}
 
-	public String getApellido() {
-		return apellido;
+	public int getId_api() {
+		return id_api;
 	}
 
-	public void setApellido(String apellido) {
-		this.apellido = apellido;
+	public void setId_api(int id_api) {
+		this.id_api = id_api;
+	}
+
+	public String getAlso_known_as() {
+		return also_known_as;
+	}
+
+	public void setAlso_known_as(String also_known_as) {
+		this.also_known_as = also_known_as;
+	}
+
+	public String getPlace_of_birth() {
+		return place_of_birth;
+	}
+
+	public void setPlace_of_birth(String place_of_birth) {
+		this.place_of_birth = place_of_birth;
 	}
 
 	public Date getBirthDate() {

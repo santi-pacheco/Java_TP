@@ -12,6 +12,7 @@ public class Movie {
     private Boolean adulto; //
     private String titulo; //
     private Double popularidad; //
+    private String id_imdb; //
     //@Column(name = "votos_api")
     private int votosApi; //
     //@Column(name = "titulo_original")
@@ -102,6 +103,12 @@ public class Movie {
 	}
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
+	}
+	public String getId_imdb() {
+		return id_imdb;
+	}
+	public void setId_imdb(String id_imdb) {
+		this.id_imdb = id_imdb;
 	}
 	
 	@Override

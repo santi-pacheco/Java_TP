@@ -4,6 +4,10 @@ import java.util.List;
 import entity.Movie;
 import repository.MovieRepository;
 import exception.ErrorFactory;
+import controller.GenreController;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 
 public class MovieService {
 
@@ -46,4 +50,27 @@ public class MovieService {
 		movieRepository.saveAll(movies);
 	}
 	
+	public void updateMovieGenres(int movieId, List<Integer> genres, GenreController genreController) {
+		Movie movie = movieRepository.findOne(movieId);
+		if (movie == null) {
+			throw ErrorFactory.notFound("Movie not found with ID: " + movieId);
+		}
+		 List<Integer> genresId = genres.stream()                        // 1. Convierte la lista en un "flujo" de datos.
+                 .map(idApi -> genreController.getGeneresByIdApi(idApi)) // 2. Para cada idApi, llama al método.
+                 .filter(Objects::nonNull)                               // 3. Filtra y descarta cualquier resultado que sea null.
+                 .distinct()                                             // 4. Elimina todos los duplicados.
+                 .collect(Collectors.toList());
+		System.out.println("Genres to update: " + genresId);
+		System.out.println("Id of movie to update genres: " + movieId);
+		//genresId puede tener algún null? No, porque se filtran en el stream
+		movieRepository.updateMovieGenres(movieId, genresId);
+	}
+	
+	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
+		movieRepository.updateMovieActors(movieId, ac);
+	}
+	
+	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
+		movieRepository.updateMovieDirectors(movieId, directors);
+	}
 }
