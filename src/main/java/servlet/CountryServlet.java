@@ -49,6 +49,8 @@ public class CountryServlet extends HttpServlet {
 		
 		try {
 
+			
+		
 			CountryRepository countryRepository = new CountryRepository();
 			List<Country> countries = countryRepository.findAll();
 			// Si es una solicitud AJAX, devuelve JSON
@@ -73,6 +75,7 @@ public class CountryServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		// Obtener la lista de países
+
 		
 		
 		

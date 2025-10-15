@@ -1,11 +1,13 @@
 package service;
 
 import info.movito.themoviedbapi.TmdbApi;
+import repository.WatchlistRepository;
 import info.movito.themoviedbapi.tools.TmdbException;
 import info.movito.themoviedbapi.tools.builders.discover.*;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
@@ -18,13 +20,21 @@ import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.time.format.DateTimeParseException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.time.format.DateTimeParseException;
 
 import controller.MovieController;
 
 import entity.Movie;
+import entity.Watchlist;
 import entity.Genre;
 
 public class ExternalApiService {
@@ -197,7 +207,7 @@ public class ExternalApiService {
     
     public static List<entity.Country> getMovieCountries() throws TmdbException, IOException {
         System.out.println("📡 Obteniendo países desde TMDB API...");
-        
+
         try {
         	// Obtener lista de países de TMDB
         	URL urlCountries = new URL("https://api.themoviedb.org/3/configuration/countries?api_key=a47ba0b127499b0e1b28ceb0a183ec57");
@@ -239,6 +249,10 @@ public class ExternalApiService {
     
         }
     
+
+
+    
+
     public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
     	
     	Movie m = new Movie();
@@ -273,4 +287,5 @@ public class ExternalApiService {
         // guarda o actualiza
         return m;
     }  
+
 }

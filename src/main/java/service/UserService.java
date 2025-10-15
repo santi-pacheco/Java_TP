@@ -2,6 +2,7 @@ package service;
 import java.util.List;
 
 import entity.User;
+import repository.MovieRepository;
 import repository.UserRepository;
 import exception.ErrorFactory;
 
@@ -11,7 +12,7 @@ public class UserService {
 	public UserService(UserRepository userRepository) {
 		this.userRepository = userRepository;
 	}
-	
+
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}

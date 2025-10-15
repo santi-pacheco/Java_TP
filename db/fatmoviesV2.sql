@@ -155,6 +155,35 @@ CREATE TABLE `usuarios` (
 -- Dumping data for table `usuarios`
 --
 
+-- Table structure for table `Watchlist`
+
+
+DROP TABLE IF EXISTS `watchlists`;
+
+CREATE TABLE `watchlists` (
+	id_list INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(50) NOT NULL,
+	id_user INT NOT NULL ,
+	PRIMARY KEY (id_list, id_user),
+	FOREIGN KEY (id_user) REFERENCES usuarios(id_user)
+);
+
+DROP TABLE IF EXISTS `watchlists_peliculas`;
+
+CREATE TABLE `watchlists_peliculas` (
+	id_list INT NOT NULL ,
+    id_usuario INT NOT NULL,
+    id_pelicula INT NOT NULL,
+	PRIMARY KEY (id_list, id_usuario, id_pelicula),
+    FOREIGN KEY (id_list) REFERENCES watchlist(id_user),
+    FOREIGN KEY (id_usuario) REFERENCES watchlist(id_list)
+    
+);
+
+
+----------------------------------
+
+
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
