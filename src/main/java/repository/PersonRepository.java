@@ -143,7 +143,7 @@ import exception.ErrorFactory;
 	}
 	
 	public void saveAll(List<Person> persons) {
-        String sql = "INSERT INTO personas (id_persona, id_api, name, birthdate, also_known_as, place_of_birth) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), birthdate = VALUES(birthdate, also_known_as = VALUES(also_known_as), place_of_birth = VALUES(place_of_birth)";
+        String sql = "INSERT INTO personas (id_persona, id_api, name, birthdate, also_known_as, place_of_birth) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_persona = VALUES(id_persona), id_api = VALUES(id_api), name = VALUES(name), birthdate = VALUES(birthdate, also_known_as = VALUES(also_known_as), place_of_birth = VALUES(place_of_birth)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
