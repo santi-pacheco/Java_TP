@@ -282,7 +282,7 @@ public class ExternalApiService {
     }
     //--------------------------------------------------------------------------------------------------------
     /*
-    DTO sencillo que devuelve lo pedido: runtime (minutos), géneros y credits.
+    DTO sencillo que devuelve lo pedido: runtime (minutos), géneros y credits e id_imdb.
     */
     public static class MovieDetailsDTO {
         private final Integer runtime;

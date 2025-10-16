@@ -58,4 +58,9 @@ public class Person {
 	public void setBirthDate(Date BirthDate) {
 		this.BirthDate = BirthDate;
 	}
+	@Override
+	public String toString() {
+		return "Person [id=" + id + ", id_api=" + id_api + ", name=" + name + ", also_known_as=" + also_known_as
+				+ ", place_of_birth=" + place_of_birth + ", BirthDate=" + BirthDate + "]";
+	}
 }

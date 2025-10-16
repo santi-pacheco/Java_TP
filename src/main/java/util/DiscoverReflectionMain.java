@@ -212,7 +212,7 @@ public class DiscoverReflectionMain {
     	
     	
     	
-    	
+    	/*
     	//------------------------------------------------------------------------------------------------------
     	// CARGA DE LAS TABLAS actores_peliculas, directores_peliculas, generos_peliculas y personas.
     	// Se necesitan tener cargadas las peliculas y los generos.
@@ -334,13 +334,49 @@ public class DiscoverReflectionMain {
         System.out.println("------------------------------------");
         System.out.println("Películas actualizadas con éxito: " + successCount);
         System.out.println("Películas con error: " + errorCount);
-      
+      */
       //------------------------------------------------------------------------------------------------------
-      
     	
     	
     	
     	
+    	//TESTEO DE OBTENCIÓN DE ACTORES Y DIRECTORES DE UNA PELÍCULA
+    	/*
+    	//--------------------------------------------------------------------------------------------------
+    	final String YOUR_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDdiYTBiMTI3NDk5YjBlMWIyOGNlYjBhMTgzZWM1NyIsIm5iZiI6MTc1NTYwOTMwOC44NzIsInN1YiI6IjY4YTQ3OGRjNWJkMTI3ZjcyY2RhNThjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mkAgrQSPf-YCaYm1TFxuNDEgAtESQEaBOPI5t-8i8Q"; // ⚠️ Reemplaza con tu API key real
+
+        // Inicializamos las clases necesarias según tus indicaciones
+        MovieRepository movieRepository = new MovieRepository(); // Asumo que el controller lo necesita
+        MovieService movieService = new MovieService(movieRepository);
+        MovieController movieController = new MovieController(movieService);
+        ExternalApiService externalApiService = new ExternalApiService(YOUR_API_KEY);
+        
+        GenreRepository genreRepository = new GenreRepository();
+        GenreService genreService = new GenreService(genreRepository);
+        GenreController genreController = new GenreController(genreService);
+        
+        PersonRepository personRepository = new PersonRepository();
+        PersonService personService = new PersonService(personRepository);
+        PersonController personController = new PersonController(personService);
+        MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(823219, null);
+        List<service.ExternalApiService.PersonWithCharacter> personWithCharacter = externalApiService.mapCast(details.getCredits().getCast());
+        List<entity.Person> director = externalApiService.mapCrew(details.getCredits().getCrew());
+        System.out.println("----------------------------------------------------------");
+        System.out.println("Directores:");
+    	System.out.println(director);
+    	System.out.println("----------------------------------------------------------");
+    	System.out.println("Actores:");
+    	System.out.println(personWithCharacter);
+    	//Hagamos lo siguiente: quiero que guardes en una lista todas las tuplas que posean el character en un string vacio.
+    	List<service.ExternalApiService.PersonWithCharacter> personWithCharacterNoRole = personWithCharacter.stream()
+				.filter(pwc -> pwc.getCharacterName() == null || pwc.getCharacterName().isBlank())
+				.collect(Collectors.toList());
+    	System.out.println("----------------------------------------------------------");
+    	System.out.println("Actores sin rol asignado:");
+    	System.out.println(personWithCharacterNoRole);
+    	*/
+    	//--------------------------------------------------------------------------------------------------
+    	//HAY PELICULAS DE ANIMACION QUE NO TIENEN ACTORES
     	
     	
     }
