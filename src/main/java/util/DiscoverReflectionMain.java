@@ -12,6 +12,10 @@ import service.GenreService;
 import repository.GenreRepository;
 import info.movito.themoviedbapi.tools.TmdbException;
 import entity.Genre;
+import controller.WatchlistController;
+import repository.UserRepository;
+import service.UserService;
+import service.WatchlistService;
 import controller.MovieController;
 import entity.Movie;
 import repository.MovieRepository;
@@ -29,6 +33,10 @@ import java.util.concurrent.TimeUnit;
 import controller.PersonController;
 import repository.PersonRepository;
 import service.PersonService;
+import entity.Country;
+import entity.Watchlist;
+import repository.WatchlistRepository;
+
 
 public class DiscoverReflectionMain {
 	
@@ -378,6 +386,27 @@ public class DiscoverReflectionMain {
     	//--------------------------------------------------------------------------------------------------
     	//HAY PELICULAS DE ANIMACION QUE NO TIENEN ACTORES
     	
+    	//--------------------------------------------------------------------------------------------------
+		/*
+    	// TESTING WATCHLIST
     	
+        UserRepository userRepository = new UserRepository();
+        UserService userService = new UserService(userRepository);
+        
+        MovieRepository movieRepository = new MovieRepository();
+        MovieService movieService = new MovieService(movieRepository);
+       
+        
+        System.out.println("Obteniendo watchlist del usuario con ID 2...");
+ 
+        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+    
+        WatchlistController watchlistController = new WatchlistController(watchlistService);
+    
+        List<String> wl = watchlistController.getMoviesInWatchlist(2);
+        System.out.println("PELIS EN WATCHLIST: " + wl);
+        */
+    	//--------------------------------------------------------------------------------------------------
     }
 }

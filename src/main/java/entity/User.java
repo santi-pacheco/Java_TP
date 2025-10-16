@@ -2,6 +2,7 @@ package entity;
 
 import java.sql.Date;
 import jakarta.validation.constraints.*;
+import java.util.LinkedList;
 
 public class User {
     private int id; // El ID no se valida porque lo genera la base de datos.
@@ -27,40 +28,73 @@ public class User {
     @Past(message = "La fecha de nacimiento debe ser una fecha en el pasado.")
     private Date birthDate;
     
+    private LinkedList<String> watchList;
+    
+    
+	public LinkedList<String> getWatchList() {
+		return watchList;
+	}
+
+	public void setWatchList(LinkedList<String> watchList) {
+		this.watchList = watchList;
+	}
+
+	public void addToWatchList(String movie) {
+		if (this.watchList == null) {
+			this.watchList = new LinkedList<>();
+		}
+		this.watchList.add(movie);
+	}
+	
 	public int getId() {
 		return id;
 	}
+	
 	public void setId(int id) {
 		this.id = id;
 	}
+	
 	public String getUsername() {
 		return username;
 	}
+	
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	
 	public String getPassword() {
 		return password;
 	}
+	
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
 	public String getRole() {
 		return role;
 	}
+	
 	public void setRole(String role) {
 		this.role = role;
 	}
+	
 	public String getEmail() {
 		return email;
 	}
+	
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
 	public Date getBirthDate() {
 		return birthDate;
 	}
+	
 	public void setBirthDate(Date b) {
 		birthDate = b;
 	}
+	
+	
+	
+	
 }
