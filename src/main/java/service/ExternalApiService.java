@@ -1,13 +1,16 @@
 package service;
 
 import info.movito.themoviedbapi.TmdbApi;
-import repository.WatchlistRepository;
+import info.movito.themoviedbapi.TmdbMovies;
 import info.movito.themoviedbapi.tools.TmdbException;
+import info.movito.themoviedbapi.tools.appendtoresponse.*;
 import info.movito.themoviedbapi.tools.builders.discover.*;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
+import info.movito.themoviedbapi.model.movies.Credits;
+import info.movito.themoviedbapi.model.people.credits.*;
+import info.movito.themoviedbapi.model.movies.MovieDb;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
@@ -20,21 +23,14 @@ import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.time.format.DateTimeParseException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Arrays;
-import java.time.format.DateTimeParseException;
-
+import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import controller.MovieController;
 
 import entity.Movie;
-import entity.Watchlist;
 import entity.Genre;
 
 public class ExternalApiService {
@@ -207,7 +203,7 @@ public class ExternalApiService {
     
     public static List<entity.Country> getMovieCountries() throws TmdbException, IOException {
         System.out.println("📡 Obteniendo países desde TMDB API...");
-
+        
         try {
         	// Obtener lista de países de TMDB
         	URL urlCountries = new URL("https://api.themoviedb.org/3/configuration/countries?api_key=a47ba0b127499b0e1b28ceb0a183ec57");
@@ -249,10 +245,6 @@ public class ExternalApiService {
     
         }
     
-
-
-    
-
     public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
     	
     	Movie m = new Movie();
@@ -284,8 +276,123 @@ public class ExternalApiService {
             }
         }
         m.setDuracion(null); // no viene en discover, se podría buscar aparte si se quiere
+        m.setId_imdb(null);
         // guarda o actualiza
         return m;
-    }  
+    }
+    //--------------------------------------------------------------------------------------------------------
+    /*
+    DTO sencillo que devuelve lo pedido: runtime (minutos), géneros y credits e id_imdb.
+    */
+    public static class MovieDetailsDTO {
+        private final Integer runtime;
+        private final String id_imdb;
+        private final List<info.movito.themoviedbapi.model.core.Genre> genres;
+        private final info.movito.themoviedbapi.model.movies.Credits credits;
 
+        public MovieDetailsDTO(Integer runtime,String id_imdb , List<info.movito.themoviedbapi.model.core.Genre> genres, Credits credits) {
+            this.runtime = runtime;
+            this.id_imdb = id_imdb;
+            this.genres = genres;
+            this.credits = credits;
+        }
+
+        public Integer getRuntime() { return runtime; }
+        public String getId_imdb() { return id_imdb; }
+        public List<info.movito.themoviedbapi.model.core.Genre> getGenres() { return genres; }
+        public info.movito.themoviedbapi.model.movies.Credits getCredits() { return credits; }
+    }
+
+    public MovieDetailsDTO fetchMovieDetailsWithCredits(int tmdbMovieId, String language) throws TmdbException {
+
+        // 1. Obtiene el servicio de películas.
+        TmdbMovies moviesApi = tmdbApi.getMovies();
+
+        // 2. Llama al método getDetails, que sí existe, pasando los enums correspondientes.
+        MovieDb movieDb = moviesApi.getDetails(tmdbMovieId, language,
+            MovieAppendToResponse.CREDITS,
+            MovieAppendToResponse.EXTERNAL_IDS
+        );
+
+        if (movieDb == null) {
+            throw new IllegalStateException("El resultado de MovieDb es nulo para el id=" + tmdbMovieId);
+        }
+
+        // 3. Extrae los datos (esta parte ya estaba correcta).
+        Integer runtime = movieDb.getRuntime();
+        List<info.movito.themoviedbapi.model.core.Genre> genres = movieDb.getGenres();
+        Credits credits = movieDb.getCredits();
+        String imdbId = null;
+
+        if (movieDb.getExternalIds() != null) {
+            imdbId = movieDb.getExternalIds().getImdbId();
+        }
+
+        // 4. Devuelve el DTO con toda la información.
+        return new MovieDetailsDTO(runtime, imdbId, genres, credits);
+    }
+
+    //---------------------------------------------------------------------------------------------------
+    public class PersonWithCharacter extends entity.Person {
+
+        private String characterName;
+
+        // Getter para el nuevo campo
+        public String getCharacterName() {
+            return characterName;
+        }
+
+        // Setter para el nuevo campo
+        public void setCharacterName(String characterName) {
+            this.characterName = characterName;
+        }
+    }
+    
+    public List<PersonWithCharacter> mapCast(List<info.movito.themoviedbapi.model.movies.Cast> tmdbCast) {
+        // Si la lista es nula, devuelve una lista vacía.
+        if (tmdbCast == null) {
+            return new ArrayList<>();
+        }
+
+        return tmdbCast.stream()
+                //Limita el stream a los primeros 15 actores.
+                .limit(20) 
+                .map(tmdbPerson -> {
+                    PersonWithCharacter personWithRole = new PersonWithCharacter();
+
+                    personWithRole.setId_api(tmdbPerson.getId());
+                    personWithRole.setName(tmdbPerson.getName());
+                    personWithRole.setCharacterName(tmdbPerson.getCharacter());
+
+                    return personWithRole;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    //------------------------------------------------------------------------------------------------------
+    public List<entity.Person> mapCrew(List<info.movito.themoviedbapi.model.movies.Crew> tmdbCrew) {
+        if (tmdbCrew == null) {
+            return new ArrayList<>();
+        }
+
+        return tmdbCrew.stream()
+                // Filtramos para quedarnos solo con los directores
+                .filter(tmdbMember -> "Director".equals(tmdbMember.getJob()))
+
+                // Mapeamos los directores a nuestro objeto Person
+                .map(director -> {
+                    entity.Person localPerson = new entity.Person();
+                    
+                    // Mapeamos el nombre
+                    localPerson.setName(director.getName());
+
+                    // ✅ AHORA SÍ: Usamos el getId() que tu versión provee para el id_api
+                    localPerson.setId_api(director.getId()); 
+
+                    return localPerson;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    //----------------------------------------------------------------------    
 }

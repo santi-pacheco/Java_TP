@@ -9,18 +9,28 @@ import java.sql.ResultSet;
 import util.DataSourceProvider;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import exception.ErrorFactory;
 
 	public class PersonRepository {
 		
 	//private Connection connection;
 	
+		/*
+		 id_persona
+		 id_api
+		 name
+		 birthdate
+		 also_known_as
+		 place_of_birth
+		*/
+		
 	public PersonRepository() {
 		//Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
 	}
 
 	public List<Person> findAll() {
 		List<Person> persons = new ArrayList<>();
-		String sql = "SELECT id_persona, name, apellido, birthdate FROM personas ORDER BY name";
+		String sql = "SELECT id_persona, id_api, name, birthdate, also_known_as, place_of_birth  FROM personas ORDER BY name";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql);
@@ -29,20 +39,22 @@ import java.sql.SQLException;
 			while (rs.next()) {
 				Person person = new Person();
 				person.setId(rs.getInt("id_persona"));
+				person.setId_api(rs.getInt("id_api"));
 				person.setName(rs.getString("name"));
-				person.setApellido(rs.getString("apellido"));
+				person.setAlso_known_as(rs.getString("also_known_as"));
+				person.setPlace_of_birth(rs.getString("place_of_birth"));
 				person.setBirthDate(rs.getDate("birthdate"));
 				persons.add(person);
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching persons from database", e);
+			throw ErrorFactory.internal("Error fetching persons from database");
 		}
 		return persons;
 	}
 	
 	public Person findOne(int id) {
 		Person per = null;
-		String sql = "SELECT id_persona, name, apellido, birthdate FROM personas WHERE id_persona = ?";
+		String sql = "SELECT id_persona, id_api, name, birthdate, also_known_as, place_of_birth FROM personas WHERE id_persona = ?";
 		
 		try ( Connection conn = DataSourceProvider.getDataSource().getConnection();
 			PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -52,26 +64,30 @@ import java.sql.SQLException;
 				if (rs.next()) {
 					per = new Person();
 					per.setId(rs.getInt("id_persona"));
+					per.setId_api(rs.getInt("id_api"));
 					per.setName(rs.getString("name"));
-					per.setApellido(rs.getString("apellido"));
+					per.setAlso_known_as(rs.getString("also_known_as"));
+					per.setPlace_of_birth(rs.getString("place_of_birth"));
 					per.setBirthDate(rs.getDate("birthdate"));
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching person by ID from database", e);
+			throw ErrorFactory.internal("Error fetching person by ID from database");
 		}
 		return per;
 	}
 	
 	public Person add(Person per) {
-		String sql = "INSERT INTO personas (name, apellido, birthdate) VALUES (?, ?, ?)";
+		String sql = "INSERT INTO personas (id_api, name, birthdate, also_known_as, place_of_birth) VALUES (?, ?, ?, ?, ?)";
 
 		try (Connection connection = DataSourceProvider.getDataSource().getConnection();
 				PreparedStatement stmt = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			
-			stmt.setString(1, per.getName());
-			stmt.setString(2, per.getApellido());
+			stmt.setInt(1, per.getId_api());
+			stmt.setString(2, per.getName());
 			stmt.setDate(3, per.getBirthDate());
+			stmt.setString(4, per.getAlso_known_as());
+			stmt.setString(5, per.getPlace_of_birth());
 			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows > 0) {
@@ -82,25 +98,31 @@ import java.sql.SQLException;
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error adding person to database", e);
+			if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+				throw ErrorFactory.duplicate("A person with the same API ID already exists.");
+			} else {
+				throw ErrorFactory.internal("Error adding person to database");
+			}
 		}
 		return per;
 	}
 	
 	public Person update(Person per) {
-		String sql = "UPDATE personas SET name = ?, apellido = ?, birthdate = ? WHERE id_persona = ?";
+		String sql = "UPDATE personas SET id_api = ?, name = ?, birthdate = ?, also_known_as = ?, place_of_birth = ? WHERE id_persona = ?";
 		
 		try (Connection connection = DataSourceProvider.getDataSource().getConnection();
 			PreparedStatement stmt = connection.prepareStatement(sql)) {
 			
-			stmt.setString(1, per.getName());
-			stmt.setString(2, per.getApellido());
+			stmt.setInt(1, per.getId_api());
+			stmt.setString(2, per.getName());
 			stmt.setDate(3, per.getBirthDate());
-			stmt.setInt(4, per.getId());
+			stmt.setString(4, per.getAlso_known_as());
+			stmt.setString(5, per.getPlace_of_birth());
+			stmt.setInt(6, per.getId());
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw new RuntimeException("Error preparing update statement for person", e);
+			throw ErrorFactory.internal("Error preparing update statement for person");
 		}
 		return per;
 	}
@@ -115,21 +137,24 @@ import java.sql.SQLException;
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw new RuntimeException("Error deleting person from database", e);
+			throw ErrorFactory.internal("Error deleting person from database");
 		}
 		return per;
 	}
 	
 	public void saveAll(List<Person> persons) {
-        String sql = "INSERT INTO personas (id_persona, name, apellido, birthdate) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), apellido = VALUES(apellido), birthdate = VALUES(birthdate)";
+        String sql = "INSERT INTO personas (id_persona, id_api, name, birthdate, also_known_as, place_of_birth) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_persona = VALUES(id_persona), id_api = VALUES(id_api), name = VALUES(name), birthdate = VALUES(birthdate, also_known_as = VALUES(also_known_as), place_of_birth = VALUES(place_of_birth)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Person person : persons) {
-                stmt.setInt(1, person.getId());
-                stmt.setString(2, person.getName());
-                stmt.setString(3, person.getApellido());
-                stmt.setDate(4, person.getBirthDate());
+            	stmt.setInt(1, person.getId());
+            	stmt.setInt(2, person.getId_api());
+    			stmt.setString(3, person.getName());
+    			stmt.setDate(4, person.getBirthDate());
+    			stmt.setString(5, person.getAlso_known_as());
+    			stmt.setString(6, person.getPlace_of_birth());
+    			
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -137,5 +162,29 @@ import java.sql.SQLException;
             throw new RuntimeException("Error saving genres to database", e);
         }
     }
+
+	public Person findByApiId(int id_api) {
+		Person per = null;
+		String sql = "SELECT id_persona, id_api, name, birthdate, also_known_as, place_of_birth FROM personas WHERE id_api = ?";
 		
+		try ( Connection conn = DataSourceProvider.getDataSource().getConnection();
+			PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, id_api);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					per = new Person();
+					per.setId(rs.getInt("id_persona"));
+					per.setId_api(rs.getInt("id_api"));
+					per.setName(rs.getString("name"));
+					per.setAlso_known_as(rs.getString("also_known_as"));
+					per.setPlace_of_birth(rs.getString("place_of_birth"));
+					per.setBirthDate(rs.getDate("birthdate"));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching person by API ID from database");
+		}
+		return per;
+	}	
 }

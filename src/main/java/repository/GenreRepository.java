@@ -135,4 +135,25 @@ public class GenreRepository {
             throw ErrorFactory.internal("Error saving genres to database");
         }
     }
+    
+    public Integer findByIdApi(Integer idApi) {
+		//Cambia el metodo... Ahora busca por idApi, y devuelve el id. (La PK de mi BD)
+		Integer generoId = null;
+		String sql = "SELECT id_genero FROM generos WHERE id_api = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, idApi);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					generoId = rs.getInt("id_genero");
+				}
+				//Pasar a Integer
+				generoId = Integer.valueOf(rs.getInt("id_genero"));
+			}
+		} catch (SQLException e) {
+				throw ErrorFactory.internal("Error fetching genre by API ID");
+		}
+		return generoId;
+	} 
 }

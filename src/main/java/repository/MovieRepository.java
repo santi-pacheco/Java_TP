@@ -30,10 +30,11 @@ public class MovieRepository {
 	 popularidad / getPopularidad() setPopularidad(Double popularidad)
 	 votos_api / getVotosApi() setVotosApi(Integer votosApi)
 	 anioEstreno / getEstrenoYear() setEstrenoYear(int estrenoYear)
-	*/
+	 id_imdb / getId_imdb() setId_imdb(String id_imdb)
+	 */
 	public List<Movie> findAll() {
 	    List<Movie> movies = new ArrayList<>();
-	    String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno FROM peliculas ORDER BY id_pelicula";
+	    String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY id_pelicula";
 	    
 	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql);
@@ -54,6 +55,7 @@ public class MovieRepository {
 	            movie.setPopularidad(rs.getDouble("popularidad"));
 	            movie.setVotosApi(rs.getInt("votos_api"));
 	            movie.setEstrenoYear(rs.getInt("anioEstreno"));
+	            movie.setId_imdb(rs.getString("id_imdb"));
 	            
 	            movies.add(movie);
 	        }
@@ -63,9 +65,8 @@ public class MovieRepository {
 	    return movies;
 	}
 	public Movie findOne(int id) {
-		System.out.println("🔍 Buscando película con ID: " + id);
 		Movie movie = null;
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno FROM peliculas WHERE id_api = ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -87,6 +88,7 @@ public class MovieRepository {
 		            movie.setPopularidad(rs.getDouble("popularidad"));
 		            movie.setVotosApi(rs.getInt("votos_api"));
 		            movie.setEstrenoYear(rs.getInt("anioEstreno"));
+		            movie.setId_imdb(rs.getString("id_imdb"));
 				}
 			}
 		} catch (SQLException e) {
@@ -95,7 +97,7 @@ public class MovieRepository {
 		return movie;
 	}
 	public Movie add(Movie m) {
-		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -112,6 +114,7 @@ public class MovieRepository {
 			stmt.setObject(10, m.getPopularidad());
 			stmt.setObject(11, m.getVotosApi());
 			stmt.setObject(12, m.getEstrenoYear());
+			stmt.setString(13, m.getId_imdb());
 			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows > 0) {
@@ -132,7 +135,7 @@ public class MovieRepository {
 	}
 	
 	public Movie update(Movie m) {
-		String sql = "UPDATE peliculas SET id_api = ?, name = ?, sinopsis = ?, duracion = ?, adulto = ?, titulo_original = ?, puntuacion_api = ?, idioma_original = ?, poster_path = ?, popularidad = ?, votos_api = ?, anioEstreno = ? WHERE id_pelicula = ?";
+		String sql = "UPDATE peliculas SET id_api = ?, name = ?, sinopsis = ?, duracion = ?, adulto = ?, titulo_original = ?, puntuacion_api = ?, idioma_original = ?, poster_path = ?, popularidad = ?, votos_api = ?, anioEstreno = ?, id_imdb = ? WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -149,7 +152,8 @@ public class MovieRepository {
 			stmt.setObject(10, m.getPopularidad());
 			stmt.setObject(11, m.getVotosApi());
 			stmt.setObject(12, m.getEstrenoYear());
-			stmt.setInt(13, m.getId());
+			stmt.setString(13, m.getId_imdb());
+			stmt.setInt(14, m.getId());
 			
 			stmt.executeUpdate();
 			
@@ -175,7 +179,9 @@ public class MovieRepository {
 	}
 	
 	public void saveAll(List<Movie> movies) {
-		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), sinopsis = VALUES(sinopsis), duracion = VALUES(duracion), adulto = VALUES(adulto), titulo_original = VALUES(titulo_original), puntuacion_api = VALUES(puntuacion_api), idioma_original = VALUES(idioma_original), poster_path = VALUES(poster_path), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), anioEstreno = VALUES(anioEstreno)";
+		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), sinopsis = VALUES(sinopsis), duracion = VALUES(duracion), adulto = VALUES(adulto), titulo_original = VALUES(titulo_original), puntuacion_api = VALUES(puntuacion_api), idioma_original = VALUES(idioma_original), poster_path = VALUES(poster_path), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), anioEstreno = VALUES(anioEstreno), id_imdb = VALUES(id_imdb)";
+		
+		 // Usamos try-with-resources para asegurar que la conexión y el statement se cierren automáticamente
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -193,6 +199,7 @@ public class MovieRepository {
 				stmt.setObject(10, m.getPopularidad());
 				stmt.setObject(11, m.getVotosApi());
 				stmt.setObject(12, m.getEstrenoYear());
+				stmt.setString(13, m.getId_imdb());
 				
 				stmt.addBatch();
 			}
@@ -202,4 +209,77 @@ public class MovieRepository {
 			throw ErrorFactory.internal("Error saving movies to database");
 		}
 	}
+	
+	public void updateMovieGenres(int movieId, List<Integer> genres) {
+		String sql = "INSERT INTO generos_peliculas (id_pelicula, id_genero) VALUES (?, ?)";
+
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			for (Integer genreId : genres) {
+				stmt.setInt(1, movieId);
+				stmt.setInt(2, genreId);
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating movie genres in database");
+		}
+		
+	}
+	
+	//Antes hay tener esto en cuenta:
+	//TABLE actor_pelicula
+	//id_persona INT NOT NULL,
+    //id_pelicula INT NOT NULL,
+    //character_name VARCHAR(255) NULL,
+	//Hay que crear tuplas de esta tabla. Me llega un id de una pelicula, y me llega una
+	//lista de actorCharacter, que tiene id_persona y character_name.
+	//Entonces por cada id_persona y character_name creo una tupla actor_pelicula
+	//para ese unico id_pelicula.
+	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
+		String sql = "INSERT INTO actores_peliculas (id_persona, id_pelicula, character_name) VALUES (?, ?, ?)";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			for (util.DiscoverReflectionMain.actorCharacter actorChar : ac) {
+				stmt.setInt(1, actorChar.getIdActor());
+				stmt.setInt(2, movieId);
+				stmt.setString(3, actorChar.getCharacter());
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating movie actors in database");
+		}
+	}
+	
+	
+	//Ahora es lo mismo... La tabla es:
+	//TABLE director_pelicula
+    //id_persona INT NOT NULL,
+    //id_pelicula INT NOT NULL,
+	//Hay que hacer lo mismo que en actores, pero sin character_name.
+	
+	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
+		String sql = "INSERT INTO directores_peliculas (id_persona, id_pelicula) VALUES (?, ?)";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			for (entity.Person director : directors) {
+				stmt.setInt(1, director.getId());
+				stmt.setInt(2, movieId);
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating movie directors in database");
+		}
+	}
+	
 }
