@@ -24,6 +24,7 @@ public class MovieController {
 		return movie;
 	}
 	
+	
 	public Movie createMovie(Movie m) {
 			return movieService.createMovie(m);
 	}

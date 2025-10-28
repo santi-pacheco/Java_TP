@@ -61,11 +61,19 @@ public class MovieService {
 	}
 	
 
-    public static float getMovieRating(String movieId) throws IOException, InterruptedException {
+    public float getMovieRating(int movieId) throws IOException, InterruptedException {
     	System.out.println("📡 Obteniendo rating para movieId: " + movieId);
     	
     	try {
-    		URL url = new URL("https://api.imdbapi.dev/titles/" + movieId );
+    		// Primero obtenemos la pelicula para sacar su id_imdb
+    		Movie movie = movieRepository.findOne(movieId);
+    		if (movie == null) {
+    			// Comprobamos si la pelicula existe
+				System.out.println("❌ Movie with ID " + movie.getId_imdb() + " not found in the database.");
+				return 0.0f;
+			}
+			// Hacemos la llamada a la API externa
+    		URL url = new URL("https://api.imdbapi.dev/titles/" + movie.getId_imdb() );
     		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
     		conn.setRequestMethod("GET");
     		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -73,6 +81,7 @@ public class MovieService {
     		Gson gson = new Gson();
     		JsonObject json = gson.fromJson(reader.readLine(), JsonObject.class);
 			reader.close();
+			conn.disconnect();
             if (json.has("rating") && !json.get("rating").isJsonNull()) {
             	System.out.println("Rating encontrado: " + json.get("metacritic").toString());
                 JsonObject ratingObj = json.getAsJsonObject("metacritic");
@@ -85,7 +94,7 @@ public class MovieService {
 			System.err.println("❌ Error al obtener rating: " + e.getMessage());
 			throw e;
 		}
-    	return 0.0f; // Valor por defecto si hay errorS
+    	return 0.0f; // Valor por defecto si hay errores
     }
 	
 	

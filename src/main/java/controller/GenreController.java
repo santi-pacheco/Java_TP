@@ -39,6 +39,7 @@ public class GenreController {
 	}
 
     public void saveAllGenres(List<Genre> genres) {
+    	System.out.println("Guardando géneros en la base de datos: " + genres.size() + " registros GenreController");
 		genreService.saveAllGenres(genres);
 	}
     

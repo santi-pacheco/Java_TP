@@ -121,7 +121,7 @@ public class GenreRepository {
     
     public void saveAll(List<Genre> genres) {
         String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
-        
+        System.out.println("Guardando géneros en la base de datos... repository");
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Genre genre : genres) {

@@ -18,6 +18,7 @@ import service.UserService;
 import service.WatchlistService;
 import controller.MovieController;
 import entity.Movie;
+import entity.Review;
 import repository.MovieRepository;
 import service.MovieService;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import repository.GenreRepository;
 import com.google.common.util.concurrent.RateLimiter;
 import service.ExternalApiService.MovieDetailsDTO;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.concurrent.TimeUnit;
 import controller.PersonController;
@@ -36,7 +38,7 @@ import service.PersonService;
 import entity.Country;
 import entity.Watchlist;
 import repository.WatchlistRepository;
-
+import repository.ReviewRepository;
 
 public class DiscoverReflectionMain {
 	
@@ -408,5 +410,34 @@ public class DiscoverReflectionMain {
         System.out.println("PELIS EN WATCHLIST: " + wl);
         */
     	//--------------------------------------------------------------------------------------------------
+    	
+    	// TESTING RATING
+    	
+    	/*
+    	MovieRepository mr = new MovieRepository();
+    	
+    	MovieService ms = new MovieService(mr);
+    	
+    	int idMovie = 76;
+    	
+    	float rating = ms.getMovieRating(idMovie);
+    	
+    	System.out.println("RATING DE LA PELICULA CON ID " + idMovie + ": " + rating);
+    	
+    	*/
+    	
+    	ReviewRepository rr = new ReviewRepository();
+    	
+    	Review rv = new Review();
+    	rv.setId_movie(76);
+    	rv.setId_user(2);
+    	rv.setReview_text("Muy buena pelicula, me gusto mucho la trama y los personajes.");
+    	rv.setRating(8.5);
+    	rv.setReview_date(LocalDate.now());
+    	Review rs = rr.saveReview(rv);
+    	
+    	System.out.println("REVIEW GUARDADA: " + rs);
+    	
+    	
     }
 }
