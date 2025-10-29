@@ -69,6 +69,7 @@ public class PersonService {
 				newPerson.setAlso_known_as(pwc.getAlso_known_as());
 				newPerson.setPlace_of_birth(pwc.getPlace_of_birth());
 				newPerson.setBirthDate(pwc.getBirthDate());
+				System.out.println("Saving new person: " + newPerson);
 				Person savedPerson = personRepository.add(newPerson);
 				actorCharacter ac = new actorCharacter(savedPerson.getId(), pwc.getCharacterName());
 				actorCharacters.add(ac);
