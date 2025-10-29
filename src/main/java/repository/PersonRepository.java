@@ -159,7 +159,7 @@ import exception.ErrorFactory;
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving genres to database", e);
+            throw ErrorFactory.internal("Error saving genres to database");
         }
     }
 

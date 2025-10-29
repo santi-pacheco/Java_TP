@@ -7,23 +7,55 @@ public class Movie {
 
     private int id;
     private int id_api; //
+    
+    @NotNull(message = "El año de estreno es obligatorio")
+    @Min(value = 1888, message = "El año de estreno debe ser 1888 o posterior")
+    @Max(value = 2030, message = "El año de estreno no puede ser tan a futuro")
     private int estrenoYear; //
+    
+    @NotNull(message = "La duración no puede ser nula")
     private Time duracion;
+    
+    @NotNull(message = "Debe especificar si la película es para adultos")
     private Boolean adulto; //
+    
+    @NotBlank(message = "El título no puede estar vacío")
+    @Size(max = 255, message = "El título no debe exceder los 255 caracteres")
     private String titulo; //
+    
+    @NotNull(message = "La popularidad no puede ser nula")
+    @PositiveOrZero(message = "La popularidad debe ser 0 o un número positivo")
     private Double popularidad; //
+    
     private String id_imdb; //
+    
     //@Column(name = "votos_api")
+    @NotNull(message = "El conteo de votos no puede ser nulo")
+    @PositiveOrZero(message = "El número de votos debe ser 0 o más")
     private int votosApi; //
+    
     //@Column(name = "titulo_original")
+    @NotBlank(message = "El título original no puede estar vacío")
+    @Size(max = 255, message = "El título original no debe exceder los 255 caracteres")
     private String tituloOriginal; //
+    
     //@Column(columnDefinition = "TEXT")
+    @NotBlank(message = "La sinopsis no puede estar vacía")
     private String sinopsis; //
+    
     //@Column(name = "puntuacion_api")
+    @NotNull(message = "La puntuación no puede ser nula")
+    @DecimalMin(value = "0.0", message = "La puntuación debe ser como mínimo 0.0")
+    @DecimalMax(value = "10.0", message = "La puntuación debe ser como máximo 10.0")
     private Double puntuacionApi; //
+    
     //@Column(name = "idioma_original")
+    @NotBlank(message = "El idioma original no puede estar vacío")
+    @Size(min = 2, max = 2, message = "El idioma original debe ser un código ISO de 2 letras")
     private String idiomaOriginal; //
+    
     //@Column(name = "poster_path")
+    @NotBlank(message = "La ruta del póster (poster_path) es obligatoria")
     private String posterPath; //
     
 	public int getId() {

@@ -8,12 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entity.Country;
+import exception.ErrorFactory;
 import util.DataSourceProvider;
 
 public class CountryRepository {
+	
 	public List<Country> findAll() {
 		List<Country> countries = new ArrayList<>(); 
 		String sql = "SELECT id_country, name, iso_country FROM paises ORDER BY id_country";
+		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
@@ -26,7 +29,7 @@ public class CountryRepository {
 				countries.add(country);
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching countries from database", e);
+			throw ErrorFactory.internal("Error fetching countries from database");
 		}
 		return countries;
 	}
@@ -47,12 +50,39 @@ public class CountryRepository {
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching country by ID", e);
+			throw ErrorFactory.internal("Error fetching country by ID");
 		}
 		
 		return country;
 	}
 	
+	public Country add(Country c) {
+		String sql = "INSERT INTO paises (iso_country, name) VALUES (?, ?)";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+			
+			stmt.setString(1, c.getIso_3166_1());
+			stmt.setString(2, c.getEnglish_name());
+			
+			int affectedRows = stmt.executeUpdate();
+			if (affectedRows > 0) {
+				try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+					if (generatedKeys.next()) {
+						c.setId(generatedKeys.getInt(1));
+					}
+				}
+			}
+		} catch (SQLException e) {
+			if (e.getSQLState().equals("23505")) { // Unique violation
+				throw ErrorFactory.duplicate("Country already exists");
+			} else {
+				throw ErrorFactory.internal("Error adding country to database");
+			}
+		}
+		
+		return c;
+	}
 	
 	public Country update(Country c) {
 		String sql = "UPDATE paises SET name = ? WHERE id_country = ?";
@@ -65,10 +95,10 @@ public class CountryRepository {
 			
 			int rowsAffected = stmt.executeUpdate();
 			if (rowsAffected == 0) {
-				throw new RuntimeException("No country found with ID: " + c.getId());
+				throw ErrorFactory.internal("No country found with ID: " + c.getId());
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error updating country", e);
+			throw ErrorFactory.internal("Error updating country");
 		}
 		
 		return c;
@@ -80,25 +110,16 @@ public class CountryRepository {
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
 			
 			stmt.setInt(1, c.getId());
-			
-			int rowsAffected = stmt.executeUpdate();
-			if (rowsAffected == 0) {
-				throw new RuntimeException("No country found with ID: " + c.getId());
-			}
+			stmt.executeUpdate();
+
 		} catch (SQLException e) {
-			throw new RuntimeException("Error deleting country", e);
+			throw ErrorFactory.internal("Error deleting country");
 		}
 		return c;
 	}
 	
-	
-	
 	public void saveAll(List<Country> countries) { 
-		
-		
-		
 		System.out.println("Creando tabla countries..." + countries.size());
-		
 		String sql = "INSERT INTO paises (iso_country, name) VALUES (?, ?)";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
@@ -114,21 +135,7 @@ public class CountryRepository {
 			stmt.executeBatch();
 			System.out.println("Países guardados en batch correctamente.");
 		} catch (SQLException e) {
-			throw new RuntimeException("Error saving countries in batch", e);
+			throw ErrorFactory.internal("Error saving countries in batch");
 		}
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	}	
 }

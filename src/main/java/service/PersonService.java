@@ -11,13 +11,8 @@ import exception.ErrorFactory;
 
 public class PersonService {
 	
-	//private ExternalApiService externalApiService;
 	private PersonRepository personRepository;
-	/*
-	public void setExternalApiService(ExternalApiService externalApiService) {
-		this.externalApiService = externalApiService;
-	}
-	*/
+	
 	public PersonService(PersonRepository personRepository) {
 		this.personRepository = personRepository;
     }
@@ -45,13 +40,18 @@ public class PersonService {
 	    if (existingPerson == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Persona con ID " + per.getId() + " no encontrada.");
 	    }
+	    
+	    existingPerson.setName(per.getName());
+	    existingPerson.setAlso_known_as(per.getAlso_known_as());
+	    existingPerson.setPlace_of_birth(per.getPlace_of_birth());
+	    existingPerson.setBirthDate(per.getBirthDate());
+	    
 	    // 2. Si existe, ahora sí actualiza
-	    return personRepository.update(per);
+	    return personRepository.update(existingPerson);
 	}
 	
-	public Person deletePerson(Person per) {
-		Person perToDelete = personRepository.delete(per);
-		return perToDelete;
+	public void deletePerson(Person per) {
+		personRepository.delete(per);
 	}
 	
 	public List<actorCharacter> saveActors(List <service.ExternalApiService.PersonWithCharacter> personWithCharacter){
@@ -69,6 +69,7 @@ public class PersonService {
 				newPerson.setAlso_known_as(pwc.getAlso_known_as());
 				newPerson.setPlace_of_birth(pwc.getPlace_of_birth());
 				newPerson.setBirthDate(pwc.getBirthDate());
+				System.out.println("Saving new person: " + newPerson);
 				Person savedPerson = personRepository.add(newPerson);
 				actorCharacter ac = new actorCharacter(savedPerson.getId(), pwc.getCharacterName());
 				actorCharacters.add(ac);

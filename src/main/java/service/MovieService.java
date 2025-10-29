@@ -47,13 +47,23 @@ public class MovieService {
 	    if (existingMovie == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Película con ID " + movie.getId() + " no encontrada.");
 	    }
+	    existingMovie.setEstrenoYear(movie.getEstrenoYear());
+	    existingMovie.setDuracion(movie.getDuracion());
+	    existingMovie.setAdulto(movie.getAdulto());
+	    existingMovie.setTitulo(movie.getTitulo());
+	    existingMovie.setPopularidad(movie.getPopularidad());
+	    existingMovie.setTituloOriginal(movie.getTituloOriginal());
+	    existingMovie.setSinopsis(movie.getSinopsis());
+	    existingMovie.setPuntuacionApi(movie.getPuntuacionApi());
+	    existingMovie.setIdiomaOriginal(movie.getIdiomaOriginal());
+	    existingMovie.setPosterPath(movie.getPosterPath());
+	    
 	    // 2. Si existe, ahora sí actualiza
-	    return movieRepository.update(movie);	
+	    return movieRepository.update(existingMovie);	
 	}
 	
-	public Movie deleteMovie(Movie movie) {
-		Movie movieToDelete = movieRepository.delete(movie);
-		return movieToDelete;
+	public void deleteMovie(Movie movie) {
+		movieRepository.delete(movie);
 	}
 	
 	public void saveAllMovies(List<Movie> movies) {

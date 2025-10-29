@@ -141,9 +141,9 @@ public class DiscoverReflectionMain {
     	    System.err.println("Ha ocurrido un error inesperado: " + e.getMessage());
     	    e.printStackTrace();
     	}
-    	*/
-    //------------------------------------------------------------------------------------------------
     	
+    //------------------------------------------------------------------------------------------------
+    */	
     	
     	/*
     	//CARGA DE PELICULAS EN LA BASE DE DATOS.
@@ -215,12 +215,12 @@ public class DiscoverReflectionMain {
         }
 
         System.out.println("\n--- PROCESO DE IMPORTACIÓN FINALIZADO ---");
-        */
+        
     	//------------------------------------------------------------------------------------------------------
+    	*/
     	
     	
     	
-    	/*
     	//------------------------------------------------------------------------------------------------------
     	// CARGA DE LAS TABLAS actores_peliculas, directores_peliculas, generos_peliculas y personas.
     	// Se necesitan tener cargadas las peliculas y los generos.
@@ -342,7 +342,7 @@ public class DiscoverReflectionMain {
         System.out.println("------------------------------------");
         System.out.println("Películas actualizadas con éxito: " + successCount);
         System.out.println("Películas con error: " + errorCount);
-      */
+      
       //------------------------------------------------------------------------------------------------------
     	
     	
