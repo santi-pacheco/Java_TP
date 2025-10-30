@@ -425,7 +425,8 @@ public class DiscoverReflectionMain {
     	System.out.println("RATING DE LA PELICULA CON ID " + idMovie + ": " + rating);
     	
     	*/
-    	
+//    /*
+    	/*
     	ReviewRepository rr = new ReviewRepository();
     	
     	Review rv = new Review();
@@ -438,6 +439,6 @@ public class DiscoverReflectionMain {
     	
     	System.out.println("REVIEW GUARDADA: " + rs);
     	
-    	
+    	*/
     }
 }
