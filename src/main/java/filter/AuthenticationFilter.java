@@ -22,7 +22,7 @@ public class AuthenticationFilter implements Filter {
         // 1. Convertimos los objetos request/response
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-
+        System.out.println("--- FILTRO CAPTURÓ: " + httpRequest.getRequestURI());
         // 2. Obtenemos la URI que el usuario está intentando visitar
         String requestURI = httpRequest.getRequestURI();
         

@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import validations.OnCreate;
 
 import entity.User;
@@ -25,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.validation.groups.Default;
+import jakarta.servlet.ServletContext;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
@@ -40,8 +39,8 @@ public class RegisterServlet extends HttpServlet {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.userService = new UserService(userRepository, passwordEncoder);
         
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        ServletContext context = getServletContext();
+        this.validator = (Validator) context.getAttribute("miValidador");
     }
 
     @Override

@@ -12,9 +12,7 @@ import entity.User;
 import java.util.List;
 import repository.UserRepository;
 import service.UserService;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
 import exception.ErrorFactory;
 // import com.google.gson.GsonBuilder; // <-- Ya no se necesita
@@ -25,13 +23,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import exception.AppException;
 import validations.OnCreate;
 import jakarta.validation.groups.Default;
+import jakarta.servlet.ServletContext;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1L;
     private UserController userController;
-    private Validator validator; // El validador sigue siendo muy útil
+    private Validator validator;
     // private Gson gson; // <-- Ya no se necesita
 
     @Override
@@ -42,8 +41,8 @@ public class UserServlet extends HttpServlet {
         UserService userService = new UserService(userRepository, passwordEncoder);
         this.userController = new UserController(userService);
         
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        this.validator = factory.getValidator();
+        ServletContext context = getServletContext();
+        this.validator = (Validator) context.getAttribute("miValidador");
     }
     
     @Override
