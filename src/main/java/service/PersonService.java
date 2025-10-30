@@ -1,6 +1,7 @@
 package service;
 
 import entity.Person;
+import entity.ActorWithCharacter;
 
 import repository.PersonRepository;
 import util.DiscoverReflectionMain.actorCharacter;
@@ -91,5 +92,13 @@ public class PersonService {
 				}
 			}
 			return savedDirectors;
+		}
+		
+		public List<ActorWithCharacter> getActorsByMovieId(int movieId) {
+			return personRepository.findActorsByMovieId(movieId);
+		}
+		
+		public List<Person> getDirectorsByMovieId(int movieId) {
+			return personRepository.findDirectorsByMovieId(movieId);
 		}
 }

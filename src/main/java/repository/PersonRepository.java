@@ -3,6 +3,7 @@ package repository;
 import java.sql.Connection;
 
 import entity.Person;
+import entity.ActorWithCharacter;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.ResultSet;
@@ -186,5 +187,69 @@ import exception.ErrorFactory;
 			throw ErrorFactory.internal("Error fetching person by API ID from database");
 		}
 		return per;
+	}
+	
+	public List<ActorWithCharacter> findActorsByMovieId(int movieId) {
+		List<ActorWithCharacter> actors = new ArrayList<>();
+		String sql = "SELECT p.id_persona, p.id_api, p.name, p.birthdate, p.also_known_as, p.place_of_birth, ap.character_name " +
+					 "FROM personas p " +
+					 "JOIN actores_peliculas ap ON p.id_persona = ap.id_persona " +
+					 "WHERE ap.id_pelicula = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, movieId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Person actor = new Person();
+					actor.setId(rs.getInt("id_persona"));
+					actor.setId_api(rs.getInt("id_api"));
+					actor.setName(rs.getString("name"));
+					actor.setAlso_known_as(rs.getString("also_known_as"));
+					actor.setPlace_of_birth(rs.getString("place_of_birth"));
+					actor.setBirthDate(rs.getDate("birthdate"));
+					
+					String characterName = rs.getString("character_name");
+					actors.add(new ActorWithCharacter(actor, characterName));
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error fetching actors: " + e.getMessage());
+			// Return empty list instead of throwing exception
+			return new ArrayList<>();
+		}
+		return actors;
+	}
+	
+	public List<Person> findDirectorsByMovieId(int movieId) {
+		List<Person> directors = new ArrayList<>();
+		String sql = "SELECT p.id_persona, p.id_api, p.name, p.birthdate, p.also_known_as, p.place_of_birth " +
+					 "FROM personas p " +
+					 "JOIN directores_peliculas dp ON p.id_persona = dp.id_persona " +
+					 "WHERE dp.id_pelicula = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, movieId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Person director = new Person();
+					director.setId(rs.getInt("id_persona"));
+					director.setId_api(rs.getInt("id_api"));
+					director.setName(rs.getString("name"));
+					director.setAlso_known_as(rs.getString("also_known_as"));
+					director.setPlace_of_birth(rs.getString("place_of_birth"));
+					director.setBirthDate(rs.getDate("birthdate"));
+					directors.add(director);
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error fetching directors: " + e.getMessage());
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+		return directors;
 	}	
 }

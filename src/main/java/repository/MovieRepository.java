@@ -282,4 +282,126 @@ public class MovieRepository {
 		}
 	}
 	
+	public List<Movie> findByName(String searchTerm) {
+		List<Movie> movies = new ArrayList<>();
+		String sql = "SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb " +
+					 "FROM peliculas p " +
+					 "LEFT JOIN actores_peliculas ap ON p.id_pelicula = ap.id_pelicula " +
+					 "LEFT JOIN directores_peliculas dp ON p.id_pelicula = dp.id_pelicula " +
+					 "LEFT JOIN personas per_actor ON ap.id_persona = per_actor.id_persona " +
+					 "LEFT JOIN personas per_director ON dp.id_persona = per_director.id_persona " +
+					 "WHERE p.name LIKE ? OR p.titulo_original LIKE ? OR per_actor.name LIKE ? OR per_director.name LIKE ? " +
+					 "ORDER BY p.popularidad DESC LIMIT 20";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			String searchPattern = "%" + searchTerm + "%";
+			stmt.setString(1, searchPattern);
+			stmt.setString(2, searchPattern);
+			stmt.setString(3, searchPattern);
+			stmt.setString(4, searchPattern);
+			
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Movie movie = new Movie();
+					movie.setId(rs.getInt("id_pelicula"));
+					movie.setId_api(rs.getInt("id_api"));
+					movie.setTitulo(rs.getString("name"));
+					movie.setSinopsis(rs.getString("sinopsis"));
+					movie.setDuracion(rs.getTime("duracion"));
+					movie.setAdulto(rs.getBoolean("adulto"));
+					movie.setTituloOriginal(rs.getString("titulo_original"));
+					movie.setPuntuacionApi(rs.getDouble("puntuacion_api"));
+					movie.setIdiomaOriginal(rs.getString("idioma_original"));
+					movie.setPosterPath(rs.getString("poster_path"));
+					movie.setPopularidad(rs.getDouble("popularidad"));
+					movie.setVotosApi(rs.getInt("votos_api"));
+					movie.setEstrenoYear(rs.getInt("anioEstreno"));
+					movie.setId_imdb(rs.getString("id_imdb"));
+					
+					movies.add(movie);
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error searching movies by name");
+		}
+		return movies;
+	}
+	
+	public List<Movie> findMostPopular(int limit) {
+		List<Movie> movies = new ArrayList<>();
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY popularidad DESC LIMIT ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, limit);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					movies.add(mapResultSetToMovie(rs));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching most popular movies");
+		}
+		return movies;
+	}
+	
+	public List<Movie> findTopRated(int limit) {
+		List<Movie> movies = new ArrayList<>();
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE puntuacion_api > 7.0 ORDER BY puntuacion_api DESC LIMIT ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, limit);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					movies.add(mapResultSetToMovie(rs));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching top rated movies");
+		}
+		return movies;
+	}
+	
+	public List<Movie> findRecentMovies(int limit) {
+		List<Movie> movies = new ArrayList<>();
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE anioEstreno >= 2020 ORDER BY anioEstreno DESC, popularidad DESC LIMIT ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, limit);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					movies.add(mapResultSetToMovie(rs));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching recent movies");
+		}
+		return movies;
+	}
+	
+	private Movie mapResultSetToMovie(ResultSet rs) throws SQLException {
+		Movie movie = new Movie();
+		movie.setId(rs.getInt("id_pelicula"));
+		movie.setId_api(rs.getInt("id_api"));
+		movie.setTitulo(rs.getString("name"));
+		movie.setSinopsis(rs.getString("sinopsis"));
+		movie.setDuracion(rs.getTime("duracion"));
+		movie.setAdulto(rs.getBoolean("adulto"));
+		movie.setTituloOriginal(rs.getString("titulo_original"));
+		movie.setPuntuacionApi(rs.getDouble("puntuacion_api"));
+		movie.setIdiomaOriginal(rs.getString("idioma_original"));
+		movie.setPosterPath(rs.getString("poster_path"));
+		movie.setPopularidad(rs.getDouble("popularidad"));
+		movie.setVotosApi(rs.getInt("votos_api"));
+		movie.setEstrenoYear(rs.getInt("anioEstreno"));
+		movie.setId_imdb(rs.getString("id_imdb"));
+		return movie;
+	}
 }
