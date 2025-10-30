@@ -118,7 +118,11 @@ public User update(User u) {
 		stmt.executeUpdate();
 		
 	} catch (SQLException e) {
-		throw ErrorFactory.internal("Error preparing update statement for user");
+		if (e.getErrorCode() == 1062) { // Código SQLState para violación de restricción única en PostgreSQL
+			throw ErrorFactory.duplicate("Username or email already exists");
+		} else {
+			throw ErrorFactory.internal("Error updating user in database");
+		}
 	}
 	return u;
 }

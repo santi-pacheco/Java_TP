@@ -98,7 +98,11 @@ public class CountryRepository {
 				throw ErrorFactory.internal("No country found with ID: " + c.getId());
 			}
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating country");
+			if (e.getErrorCode() == 1062) { // Unique violation
+				throw ErrorFactory.duplicate("Country already exists");
+			} else {
+				throw ErrorFactory.internal("Error updating country in database");
+			}
 		}
 		
 		return c;
