@@ -74,7 +74,7 @@ public class CountryRepository {
 				}
 			}
 		} catch (SQLException e) {
-			if (e.getSQLState().equals("23505")) { // Unique violation
+			if (e.getErrorCode() == 1062) { // Unique violation
 				throw ErrorFactory.duplicate("Country already exists");
 			} else {
 				throw ErrorFactory.internal("Error adding country to database");

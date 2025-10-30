@@ -125,7 +125,7 @@ public class MovieRepository {
 				}
 			}
 		} catch (SQLException e) {
-			if (e.getSQLState().equals("23505")) { // Código SQL para violación de restricción de unicidad en PostgreSQL
+			if (e.getErrorCode() == 1062) { // Código SQL para violación de restricción de unicidad en PostgreSQL
 				throw ErrorFactory.duplicate("A movie with the same API ID already exists.");
 			} else {
 				throw ErrorFactory.internal("Error adding movie to database");

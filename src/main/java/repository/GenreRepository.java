@@ -81,7 +81,7 @@ public class GenreRepository {
     			}
     		}
     	} catch (SQLException e) {
-    		if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+    		if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
 				throw ErrorFactory.duplicate("Genre with the same API ID already exists");
 			}
 			throw ErrorFactory.internal("Error adding genre to database");
