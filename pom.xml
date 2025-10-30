@@ -28,30 +28,26 @@
 	  <artifactId>HikariCP</artifactId>
 	  <version>5.0.1</version>
 	</dependency>
-  
-    <dependency>
-  	  <groupId>jakarta.servlet</groupId>
-  	  <artifactId>jakarta.servlet-api</artifactId>
-  	  <version>6.0.0</version> <scope>provided</scope>
-	</dependency>
     
     <dependency>
-  	  <groupId>jakarta.servlet.jsp</groupId>
-  	  <artifactId>jakarta.servlet.jsp-api</artifactId>
-  	  <version>3.1.1</version> <scope>provided</scope>
-	</dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>5.0.0</version>
+      <scope>provided</scope>
+    </dependency>
     
     <dependency>
-      <groupId>jakarta.servlet.jsp.jstl</groupId>
-      <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      <groupId>jakarta.servlet.jsp</groupId>
+      <artifactId>jakarta.servlet.jsp-api</artifactId>
       <version>3.0.0</version>
+      <scope>provided</scope>
 	</dependency>
 
 	<dependency>
       <groupId>org.glassfish.web</groupId>
       <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-      <version>3.0.1</version>
-	</dependency>
+      <version>2.0.0</version>
+    </dependency>
     
     <dependency>
       <groupId>uk.co.conoregan</groupId>
@@ -96,6 +92,11 @@
       <version>1.2</version>
     </dependency>
 	
+	<dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.el</artifactId>
+      <version>4.0.2</version>
+    </dependency>
     
   </dependencies>
     
