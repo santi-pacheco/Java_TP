@@ -37,4 +37,8 @@ public class UserController {
 		userService.deleteUser(user);
 	}
 	
+	public User login(String username, String password) {
+		return userService.authenticateUser(username, password);
+	}
+	
 }

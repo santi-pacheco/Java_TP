@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat; // Para la fecha
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import exception.AppException;
 import validations.OnCreate;
+import jakarta.validation.groups.Default;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
@@ -117,7 +118,7 @@ public class UserServlet extends HttpServlet {
                     userFromForm.setBirthDate(birthDate);
 
                     // 3. VALIDAR: (¡Igual que antes!)
-                    Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, OnCreate.class);
+                    Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
                     if (!violations.isEmpty()) {
                         // Manejar error de validación (quizás reenviar al formulario con mensajes)
                         request.setAttribute("errors", getErrorMessages(violations));
