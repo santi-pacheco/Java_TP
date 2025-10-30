@@ -54,4 +54,33 @@ public class UserService {
 	public void deleteUser(User user) {
 		userRepository.delete(user);
 	}
+	
+	public User authenticateUser(String username, String password) {
+		User user;
+	    // --- 1. Buscar al usuario ---
+	    // Buscamos al usuario por su nombre de usuario en la BD
+		user = userRepository.findByUsername(username);
+
+	    // --- 2. Validar si el usuario existe ---
+	    // Guiándonos por getUserById: si es nulo, lanzamos un error.
+		if (user == null) {
+			// ERROR RECUPERABLE (401)
+			// Lanzamos "Unauthorized". Esto lo capturará el LoginServlet.
+			throw ErrorFactory.unauthorized("Invalid username or password");
+		}
+
+	    // --- 3. Validar la contraseña ---
+	    // Usamos el passwordEncoder (como en createUser) para comparar
+	    // la clave plana (password) con la hasheada (user.getPassword())
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+	        // ERROR RECUPERABLE (401)
+	        // Usamos el *mismo* mensaje para no dar pistas
+			throw ErrorFactory.unauthorized("Invalid username or password");
+		}
+	    // --- 4. ÉXITO: Preparar el retorno ---
+	    // Siguiendo el patrón de getUserById, quitamos la contraseña
+	    // antes de devolver el objeto.
+		user.setPassword(null);	
+		return user;
+	}
 }

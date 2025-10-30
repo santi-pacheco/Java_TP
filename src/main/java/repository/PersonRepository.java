@@ -98,7 +98,7 @@ import exception.ErrorFactory;
 				}
 			}
 		} catch (SQLException e) {
-			if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+			if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
 				throw ErrorFactory.duplicate("A person with the same API ID already exists.");
 			} else {
 				throw ErrorFactory.internal("Error adding person to database");
@@ -122,7 +122,11 @@ import exception.ErrorFactory;
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error preparing update statement for person");
+			if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
+				throw ErrorFactory.duplicate("A person with the same API ID already exists.");
+			} else {
+				throw ErrorFactory.internal("Error updating person in database");
+			}
 		}
 		return per;
 	}

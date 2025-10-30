@@ -81,10 +81,11 @@ public class GenreRepository {
     			}
     		}
     	} catch (SQLException e) {
-    		if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+    		if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
 				throw ErrorFactory.duplicate("Genre with the same API ID already exists");
+			} else {
+				throw ErrorFactory.internal("Error adding genre to database");
 			}
-			throw ErrorFactory.internal("Error adding genre to database");
     	}
     	
     	return g;
@@ -101,7 +102,11 @@ public class GenreRepository {
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error preparing update statement for genre");
+			if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
+				throw ErrorFactory.duplicate("Genre with the same API ID or name already exists");
+			} else {
+				throw ErrorFactory.internal("Error updating genre in database");
+			}
 		} 
 		return g;
 	}

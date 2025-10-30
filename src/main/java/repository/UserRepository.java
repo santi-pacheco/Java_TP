@@ -92,7 +92,7 @@ public User add(User u) {
 			}
 		}
 	} catch (SQLException e) {
-		if (e.getSQLState().equals("23505")) { // Código SQLState para violación de restricción única en PostgreSQL
+		if (e.getErrorCode() == 1062) { // Código SQLState para violación de restricción única en PostgreSQL
 			throw ErrorFactory.duplicate("Username or email already exists");
 		} else {
 			throw ErrorFactory.internal("Error adding user to database");
@@ -118,7 +118,11 @@ public User update(User u) {
 		stmt.executeUpdate();
 		
 	} catch (SQLException e) {
-		throw ErrorFactory.internal("Error preparing update statement for user");
+		if (e.getErrorCode() == 1062) { // Código SQLState para violación de restricción única en PostgreSQL
+			throw ErrorFactory.duplicate("Username or email already exists");
+		} else {
+			throw ErrorFactory.internal("Error updating user in database");
+		}
 	}
 	return u;
 }
@@ -138,4 +142,29 @@ public User delete(User u) {
 	return u;
 }
 
+public User findByUsername(String username) {
+	User user = null;
+	String sql = "SELECT id_user, password, username, role, email, birthdate FROM usuarios WHERE username = ?";
+	
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		 PreparedStatement stmt = conn.prepareStatement(sql)) {
+		
+		stmt.setString(1, username);
+		try (ResultSet rs = stmt.executeQuery()) {
+			if (rs.next()) {
+				user = new User();
+				user.setId(rs.getInt("id_user"));
+				user.setPassword(rs.getString("password"));
+				user.setUsername(rs.getString("username"));
+				user.setRole(rs.getString("role"));
+				user.setEmail(rs.getString("email"));
+				user.setBirthDate(rs.getDate("birthdate"));
+			}
+		}
+	} catch (SQLException e) {
+		throw ErrorFactory.internal("Error fetching user by username from database");
+	}
+	
+	return user;
+}
 }
