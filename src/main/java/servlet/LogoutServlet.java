@@ -29,6 +29,6 @@ public class LogoutServlet extends HttpServlet {
 
         // 4. Redirigir al usuario a la página de login.
         //    Esto se hace siempre, incluso si no había sesión (por si acaso).
-        response.sendRedirect(request.getContextPath() + "/login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login");
     }
 }
