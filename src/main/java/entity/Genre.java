@@ -1,9 +1,14 @@
 package entity;
 
+import jakarta.validation.constraints.*;
+
 public class Genre {
 	
 	private int id;
+	
+	@NotBlank(message = "El nombre del género no puede estar vacío")
 	private String name;
+	
 	private int id_api;
 	
 	public int getId() {

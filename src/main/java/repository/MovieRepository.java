@@ -66,7 +66,7 @@ public class MovieRepository {
 	}
 	public Movie findOne(int id) {
 		Movie movie = null;
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE id_api = ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -125,7 +125,7 @@ public class MovieRepository {
 				}
 			}
 		} catch (SQLException e) {
-			if (e.getSQLState().equals("23505")) { // Código SQL para violación de restricción de unicidad en PostgreSQL
+			if (e.getErrorCode() == 1062) { // Código SQL para violación de restricción de unicidad en PostgreSQL
 				throw ErrorFactory.duplicate("A movie with the same API ID already exists.");
 			} else {
 				throw ErrorFactory.internal("Error adding movie to database");
@@ -158,7 +158,11 @@ public class MovieRepository {
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating movie in database");
+			if (e.getErrorCode() == 1062) { // Código SQL para violación de restricción de unicidad en PostgreSQL
+				throw ErrorFactory.duplicate("A movie with the same API ID already exists.");
+			} else {
+				throw ErrorFactory.internal("Error updating movie in database");
+			}
 		}
 		return m;
 	}

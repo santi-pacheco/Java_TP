@@ -35,8 +35,9 @@ public class GenreService {
 	    if (existingGenre == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getId() + " no encontrado.");
 	    }
+	    existingGenre.setName(genre.getName());
 	    // 2. Si existe, ahora sí actualiza
-	    return genreRepository.update(genre);
+	    return genreRepository.update(existingGenre);
     }
     
     public Genre deleteGenre(Genre genre) {

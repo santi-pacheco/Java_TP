@@ -31,9 +31,6 @@ public class ReviewService {
 
         // 2. Verificar que la película existe
         Movie movie = movieService.getMovieById(review.getId_movie());
-        if (movie == null) {
-            throw ErrorFactory.notFound("La película con ID " + review.getId_movie() + " no existe");
-        }
 
         // 3. Verificar que no existe una reseña previa del mismo usuario para la misma película
         if (reviewRepository.existsByUserAndMovie(review.getId_user(), review.getId_movie())) {
@@ -77,9 +74,6 @@ public class ReviewService {
 
         // Verificar que la película existe
         Movie movie = movieService.getMovieById(movieId);
-        if (movie == null) {
-            throw ErrorFactory.notFound("La película con ID " + movieId + " no existe");
-        }
 
         return reviewRepository.findByUserAndMovie(userId, movieId);
     }
@@ -124,10 +118,7 @@ public class ReviewService {
 
     public List<Review> getReviewsByMovie(int movieId) {
         // Verificar que la película existe
-        Movie movie = movieService.getMovieById(movieId);
-        if (movie == null) {
-            throw ErrorFactory.notFound("La película con ID " + movieId + " no existe");
-        }
+    	Movie movie = movieService.getMovieById(movieId);
 
         return reviewRepository.findByMovie(movieId);
     }

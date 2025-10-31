@@ -33,9 +33,8 @@ public class GenreController {
     	return genreService.updateGenre(genre);
     }
     
-    public Genre removeGenre(Genre genre) {
-		Genre genreToDelete = genreService.deleteGenre(genre);
-		return genreToDelete;
+    public void removeGenre(Genre genre) {
+		genreService.deleteGenre(genre);
 	}
 
     public void saveAllGenres(List<Genre> genres) {
