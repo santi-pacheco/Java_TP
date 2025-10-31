@@ -13,9 +13,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <style>
-        body { background: #f5f5f5; }
+        body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
         .table-wrapper {
             background: #fff;
             padding: 20px;
@@ -35,6 +38,7 @@
 <body>
 
 <div class="container">
+    <a href="<%= request.getContextPath() %>/" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="glyphicon glyphicon-home"></i> Volver al Inicio</a>
     <div class="table-wrapper">
         <div class="table-title">
             <div class="row">

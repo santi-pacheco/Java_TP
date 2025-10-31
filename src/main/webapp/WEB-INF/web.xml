@@ -1,13 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
-	version="5.0">
-	<display-name>FatMovies</display-name>
-
-	<!-- Páginas de bienvenida -->
-	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+    <display-name>FatMovies</display-name>
+    
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>MovieDetailServlet</servlet-name>
+        <servlet-class>servlet.MovieDetailServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MovieDetailServlet</servlet-name>
+        <url-pattern>/movie/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>SearchApiServlet</servlet-name>
+        <servlet-class>servlet.SearchApiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchApiServlet</servlet-name>
+        <url-pattern>/search-api</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>MoviesPageServlet</servlet-name>
+        <servlet-class>servlet.MoviesPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoviesPageServlet</servlet-name>
+        <url-pattern>/peliculas</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Páginas de bienvenida -->
+    <welcome-file-list>
+        <welcome-file>landing.jsp</welcome-file>
+    </welcome-file-list>
 </web-app>

@@ -52,4 +52,20 @@ public class MovieController {
 	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
 		movieService.updateMovieDirectors(movieId, directors);
 	}
+	
+	public List<Movie> searchMoviesByName(String searchTerm) {
+		return movieService.searchMoviesByName(searchTerm);
+	}
+	
+	public List<Movie> getMostPopularMovies(int limit) {
+		return movieService.getMostPopularMovies(limit);
+	}
+	
+	public List<Movie> getTopRatedMovies(int limit) {
+		return movieService.getTopRatedMovies(limit);
+	}
+	
+	public List<Movie> getRecentMovies(int limit) {
+		return movieService.getRecentMovies(limit);
+	}
 }

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.List;
 import entity.Movie;
 import repository.MovieRepository;
@@ -70,6 +70,13 @@ public class MovieService {
 		movieRepository.saveAll(movies);
 	}
 	
+	public List<Movie> searchMoviesByName(String searchTerm) {
+		if (searchTerm == null || searchTerm.trim().isEmpty()) {
+			return new ArrayList<>();
+		}
+		return movieRepository.findByName(searchTerm.trim());
+	}
+	
 
     public float getMovieRating(int movieId) throws IOException, InterruptedException {
     	try {
@@ -121,5 +128,17 @@ public class MovieService {
 	
 	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
 		movieRepository.updateMovieDirectors(movieId, directors);
+	}
+	
+	public List<Movie> getMostPopularMovies(int limit) {
+		return movieRepository.findMostPopular(limit);
+	}
+	
+	public List<Movie> getTopRatedMovies(int limit) {
+		return movieRepository.findTopRated(limit);
+	}
+	
+	public List<Movie> getRecentMovies(int limit) {
+		return movieRepository.findRecentMovies(limit);
 	}
 }
