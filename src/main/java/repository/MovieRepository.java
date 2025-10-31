@@ -308,23 +308,7 @@ public class MovieRepository {
 			
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
-					Movie movie = new Movie();
-					movie.setId(rs.getInt("id_pelicula"));
-					movie.setId_api(rs.getInt("id_api"));
-					movie.setTitulo(rs.getString("name"));
-					movie.setSinopsis(rs.getString("sinopsis"));
-					movie.setDuracion(rs.getTime("duracion"));
-					movie.setAdulto(rs.getBoolean("adulto"));
-					movie.setTituloOriginal(rs.getString("titulo_original"));
-					movie.setPuntuacionApi(rs.getDouble("puntuacion_api"));
-					movie.setIdiomaOriginal(rs.getString("idioma_original"));
-					movie.setPosterPath(rs.getString("poster_path"));
-					movie.setPopularidad(rs.getDouble("popularidad"));
-					movie.setVotosApi(rs.getInt("votos_api"));
-					movie.setEstrenoYear(rs.getInt("anioEstreno"));
-					movie.setId_imdb(rs.getString("id_imdb"));
-					
-					movies.add(movie);
+					movies.add(mapResultSetToMovie(rs));
 				}
 			}
 		} catch (SQLException e) {
@@ -386,6 +370,25 @@ public class MovieRepository {
 			}
 		} catch (SQLException e) {
 			throw ErrorFactory.internal("Error fetching recent movies");
+		}
+		return movies;
+	}
+	
+	public List<Movie> findRandom(int limit) {
+		List<Movie> movies = new ArrayList<>();
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY RAND() LIMIT ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, limit);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					movies.add(mapResultSetToMovie(rs));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching random movies");
 		}
 		return movies;
 	}

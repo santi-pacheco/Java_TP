@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="entity.Movie" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -132,6 +134,12 @@
     </style>
 </head>
 <body>
+    <%
+        @SuppressWarnings("unchecked")
+        List<Movie> debugMovies = (List<Movie>) request.getAttribute("movies");
+        System.out.println("[JSP DEBUG] Movies attribute: " + debugMovies);
+        System.out.println("[JSP DEBUG] Movies size: " + (debugMovies != null ? debugMovies.size() : "null"));
+    %>
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     <div class="container">
         <div class="logo-container">
@@ -146,51 +154,49 @@
     <div class="poster-rows" id="posterRows"></div>
     
     <script>
-        const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDdiYTBiMTI3NDk5YjBlMWIyOGNlYjBhMTgzZWM1NyIsIm5iZiI6MTc1NTYwOTMwOC44NzIsInN1YiI6IjY4YTQ3OGRjNWJkMTI3ZjcyY2RhNThjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mkAgrQSPf-YCaYm1TFxuNDEgAtESQEaBOPI5t-8i8Q';
         const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
-        
-        async function fetchMovies() {
-            try {
-                const response = await fetch('https://api.themoviedb.org/3/movie/popular?language=es-ES&page=1', {
-                    headers: {
-                        'Authorization': 'Bearer ' + API_TOKEN,
-                        'accept': 'application/json'
+        const movies = [
+            <%
+                @SuppressWarnings("unchecked")
+                List<Movie> movieList = (List<Movie>) request.getAttribute("movies");
+                System.out.println("[JSP SCRIPT] Building movies array, list is: " + (movieList != null ? "not null, size=" + movieList.size() : "NULL"));
+                if (movieList != null && !movieList.isEmpty()) {
+                    for (int i = 0; i < movieList.size(); i++) {
+                        Movie m = movieList.get(i);
+                        out.print("{posterPath: '" + (m.getPosterPath() != null ? m.getPosterPath() : "") + "'}");
+                        if (i < movieList.size() - 1) out.print(",");
                     }
-                });
-                const data = await response.json();
-                return data.results;
-            } catch (error) {
-                console.error('Error fetching movies:', error);
-                return [];
-            }
-        }
+                } else {
+                    System.out.println("[JSP SCRIPT] Movie list is empty or null!");
+                }
+            %>
+        ];
         
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
+        console.log('Total movies:', movies.length);
+        console.log('Sample movie:', movies[0]);
         
-        async function initPosters() {
-            const movies = await fetchMovies();
+        function initPosters() {
+            if (movies.length === 0) {
+                console.error('No movies available');
+                return;
+            }
+            
             const posterRows = document.getElementById('posterRows');
+            let idx = 0;
             
             for (let i = 0; i < 3; i++) {
                 const row = document.createElement('div');
                 row.className = 'poster-row';
-                const shuffledMovies = shuffleArray(movies);
                 
                 for (let j = 0; j < 24; j++) {
-                    const movie = shuffledMovies[j % shuffledMovies.length];
+                    const movie = movies[idx % movies.length];
                     const poster = document.createElement('div');
                     poster.className = 'poster';
-                    if (movie && movie.poster_path) {
-                        poster.style.backgroundImage = 'url(' + IMAGE_BASE + movie.poster_path + ')';
+                    if (movie && movie.posterPath) {
+                        poster.style.backgroundImage = 'url(' + IMAGE_BASE + movie.posterPath + ')';
                     }
                     row.appendChild(poster);
+                    idx++;
                 }
                 
                 posterRows.appendChild(row);

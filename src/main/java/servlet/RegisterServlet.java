@@ -87,11 +87,21 @@ public class RegisterServlet extends HttpServlet {
             }
 
             // 3. ACTUAR: Llamamos al servicio (que hashea y guarda)
-            // Tu UserService ya tiene este método
-            userService.CreateUser(userFromForm);
+            User createdUser = userService.CreateUser(userFromForm);
+            
+            // Crear watchlist automáticamente para el nuevo usuario
+            try {
+                repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository(new repository.MovieRepository());
+                watchlistRepo.addWatchlist(createdUser.getId());
+            } catch (Exception e) {
+                System.err.println("Error creating watchlist for new user: " + e.getMessage());
+            }
+            
+            // Iniciar sesión automáticamente
+            request.getSession().setAttribute("usuarioLogueado", createdUser);
 
-            // 4. REDIRIGIR (PRG): Éxito. Redirigimos al Login con un mensaje.
-            response.sendRedirect(request.getContextPath() + "/login.jsp?success=true");
+            // 4. REDIRIGIR (PRG): Éxito. Redirigimos a home.
+            response.sendRedirect(request.getContextPath() + "/");
 
         } catch (AppException e) {
             if (e.getErrorType().equals("DUPLICATE_ERROR")) {

@@ -1,3 +1,4 @@
+
 <style>
     .navbar {
         background-color: #FAF8F3;
@@ -116,7 +117,7 @@
         <div class="navbar-links">
             <a href="${pageContext.request.contextPath}/peliculas">Películas</a>
             <a href="${pageContext.request.contextPath}/watchlist">Watchlist</a>
-            <a href="${pageContext.request.contextPath}/reseñas">Reseñas</a>
+            <a href="${pageContext.request.contextPath}/resenas">Reseñas</a>
         </div>
     </div>
     
@@ -128,8 +129,21 @@
     </div>
     
     <div class="navbar-right">
-        <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar Sesión</button>
-        <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/perfil'">P</button>
+        <%
+            Object usuarioLogueado = session.getAttribute("usuarioLogueado");
+            if (usuarioLogueado != null) {
+                entity.User user = (entity.User) usuarioLogueado;
+                String inicial = user.getUsername().substring(0, 1).toUpperCase();
+        %>
+            <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/perfil'" title="<%= user.getUsername() %>"><%= inicial %></button>
+            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/logout'" style="background:#666;">Cerrar Sesión</button>
+        <%
+            } else {
+        %>
+            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar Sesión</button>
+        <%
+            }
+        %>
     </div>
 </nav>
 
@@ -152,9 +166,6 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', '${pageContext.request.contextPath}/search-api?q=' + encodeURIComponent(query), true);
                 
-                // CORREGIDO (el comentario)
-                // IMPORTANTE: Asegúrate de que el servlet responda UTF-8 (Solución 2)
-                
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         try {
@@ -172,7 +183,6 @@
     
     function displaySearchResults(movies) {
         if (movies.length === 0) {
-            // CORREGIDO
             searchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No se encontraron películas</div>';
         } else {
             var html = '';
