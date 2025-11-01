@@ -44,4 +44,7 @@ public class PersonController {
 		return personService.saveDirectors(director);
 	}
 	
+	public void updateAllPersonsbyId_api(List<Person> persons) { 
+		personService.updateAllPersonsbyId_api(persons);
+	}
 }
