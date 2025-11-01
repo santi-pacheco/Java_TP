@@ -47,7 +47,7 @@ public class WatchlistService {
 		User user = userService.getUserById(id_user);
 		if (user != null && movie != null) {
 			
-			Watchlist wl = watchlistRepository.addMovie(id_user, Integer.parseInt(id_pelicula));
+			Watchlist wl = watchlistRepository.addMovie(Integer.parseInt(id_pelicula), id_user);
 			
 		} else {
 			throw new IllegalArgumentException("User with ID " + id_user + " does not exist.");
