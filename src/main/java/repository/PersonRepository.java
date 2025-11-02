@@ -219,9 +219,7 @@ import exception.ErrorFactory;
 				}
 			}
 		} catch (SQLException e) {
-			System.err.println("Error fetching actors: " + e.getMessage());
-			// Return empty list instead of throwing exception
-			return new ArrayList<>();
+			throw ErrorFactory.internal("Error fetching actors by movie ID from database");
 		}
 		return actors;
 	}
@@ -250,9 +248,7 @@ import exception.ErrorFactory;
 				}
 			}
 		} catch (SQLException e) {
-			System.err.println("Error fetching directors: " + e.getMessage());
-			e.printStackTrace();
-			return new ArrayList<>();
+			throw ErrorFactory.internal("Error fetching directors by movie ID from database");
 		}
 		return directors;
 	}

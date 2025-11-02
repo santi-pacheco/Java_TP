@@ -123,6 +123,24 @@
             font-size: 1rem;
         }
         
+        .btn-watchlist {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .btn-watchlist:hover {
+            background: #555;
+        }
+        
         .details-section {
             max-width: 1200px;
             margin: 60px auto;
@@ -307,6 +325,23 @@
                         ⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %>/10
                     </div>
                 <% } %>
+                
+                <% 
+                    if (session.getAttribute("usuarioLogueado") != null) {
+                        Boolean isInWatchlist = (Boolean) request.getAttribute("isInWatchlist");
+                        if (isInWatchlist != null && isInWatchlist) {
+                %>
+                    <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;">✓ En Watchlist</button>
+                <% } else { %>
+                    <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                        <button type="submit" class="btn-watchlist">+ Agregar a Watchlist</button>
+                    </form>
+                <% 
+                        }
+                    } 
+                %>
             </div>
         </div>
     </div>

@@ -8,13 +8,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import controller.MovieController;
+import controller.WatchlistController;
 import entity.Movie;
 import entity.Person;
 import entity.ActorWithCharacter;
+import entity.User;
 import repository.MovieRepository;
 import repository.PersonRepository;
+import repository.WatchlistRepository;
+import repository.UserRepository;
 import service.MovieService;
 import service.PersonService;
+import service.WatchlistService;
+import service.UserService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovieDetailServlet extends HttpServlet {
@@ -22,6 +31,7 @@ public class MovieDetailServlet extends HttpServlet {
     
     private MovieController movieController;
     private PersonService personService;
+    private WatchlistController watchlistController;
     
     @Override
     public void init() throws ServletException {
@@ -33,6 +43,13 @@ public class MovieDetailServlet extends HttpServlet {
             
             PersonRepository personRepository = new PersonRepository();
             this.personService = new PersonService(personRepository);
+            
+            UserRepository userRepository = new UserRepository();
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            UserService userService = new UserService(userRepository, passwordEncoder);
+            WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+            WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+            this.watchlistController = new WatchlistController(watchlistService);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
         }
@@ -52,16 +69,34 @@ public class MovieDetailServlet extends HttpServlet {
         try {
             int movieId = Integer.parseInt(pathInfo.substring(1));
             Movie movie = movieController.getMovieById(movieId);
-            List<ActorWithCharacter> actors = personService.getActorsByMovieId(movieId);
-            List<Person> directors = personService.getDirectorsByMovieId(movieId);
             
-            System.out.println("Movie ID: " + movieId);
-            System.out.println("Actors found: " + (actors != null ? actors.size() : "null"));
-            System.out.println("Directors found: " + (directors != null ? directors.size() : "null"));
+            List<ActorWithCharacter> actors = new ArrayList<>();
+            List<Person> directors = new ArrayList<>();
+            
+            try {
+                actors = personService.getActorsByMovieId(movieId);
+            } catch (Exception e) {
+                System.err.println("Error fetching actors: " + e.getMessage());
+            }
+            
+            try {
+                directors = personService.getDirectorsByMovieId(movieId);
+            } catch (Exception e) {
+                System.err.println("Error fetching directors: " + e.getMessage());
+            }
+            
+            HttpSession session = request.getSession(false);
+            boolean isInWatchlist = false;
+            if (session != null && session.getAttribute("usuarioLogueado") != null) {
+                User user = (User) session.getAttribute("usuarioLogueado");
+                List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
+                isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
+            }
             
             request.setAttribute("movie", movie);
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
+            request.setAttribute("isInWatchlist", isInWatchlist);
             request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
