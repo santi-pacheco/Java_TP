@@ -1,6 +1,8 @@
 package util;
 
 import info.movito.themoviedbapi.TmdbApi;
+import info.movito.themoviedbapi.model.people.PersonDb;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -18,6 +20,7 @@ import service.UserService;
 import service.WatchlistService;
 import controller.MovieController;
 import entity.Movie;
+import entity.Person;
 import repository.MovieRepository;
 import service.MovieService;
 import java.util.stream.Collectors;
@@ -36,7 +39,7 @@ import service.PersonService;
 import entity.Country;
 import entity.Watchlist;
 import repository.WatchlistRepository;
-
+import java.util.ArrayList;
 
 public class DiscoverReflectionMain {
 	
@@ -58,44 +61,15 @@ public class DiscoverReflectionMain {
     }
 	
     public static void main(String[] args) throws Exception {
-    	
-    	
-    	
-    	//TEST DEL OBJETO DISCOVER DE TMDBAPI
-    	//------------------------------------------------------------------------------------------------
-    	/*
-        // 1) API key: poné tu API key aquí o configúrala como variable de entorno TMDB_API_KEY
-        String apiKey = System.getenv("TMDB_API_KEY");
-        if (apiKey == null || apiKey.isBlank()) {
-            apiKey = ("eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDdiYTBiMTI3NDk5YjBlMWIyOGNlYjBhMTgzZWM1NyIsIm5iZiI6MTc1NTYwOTMwOC44NzIsInN1YiI6IjY4YTQ3OGRjNWJkMTI3ZjcyY2RhNThjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mkAgrQSPf-YCaYm1TFxuNDEgAtESQEaBOPI5t-8i8Q"); // <- reemplazá por tu API key si no usás variable de entorno
-        }
-
-        // 2) Crear instancia del wrapper (la clase proviene de themoviedbapi)
-        TmdbApi tmdbApi = new TmdbApi(apiKey);
-        
-        Arrays.stream(tmdbApi.getDiscover().getClass().getMethods())
-        .sorted(Comparator.comparing(Method::getName))
-        .forEach(System.out::println);
-        /*
-        // 3) Obtener el objeto discover y listar métodos relevantes
-        Object discoverObj = tmdbApi.getDiscover();
-        System.out.println("Discover CLASS: " + discoverObj.getClass().getName());
-        Method[] methods = discoverObj.getClass().getMethods();
-
-        System.out.println("=== Métodos getMovies() disponibles ===");
-        for (Method m : methods) {
-            if (m.getName().contains("getMovies") || m.getName().toLowerCase().contains("discover")) {
-                System.out.println(m.toGenericString());
-                System.out.println("  param types: " + Arrays.toString(m.getParameterTypes()));
-                System.out.println("---");
-            }
-        }
-    	*/
-    	//------------------------------------------------------------------------------------------------
-    	
-    	
-    	
-    /*	
+    //CARGA DE GENEROS
+		//loadGenres();
+	//CARGA DE PELICULAS
+		//loadMovies();
+	//CARGA DE ACTORES, DIRECTORES Y DURACION
+		//loadActorsDirectorsAndRuntime();
+    	loadPersons();
+    }   	
+    public static void loadGenres() {
     //CARGA DE GENEROS EN LA BASE DE DATOS	
     //------------------------------------------------------------------------------------------------
         // También imprimimos todos los métodos (opcional, comentar si hay demasiado)
@@ -141,19 +115,19 @@ public class DiscoverReflectionMain {
     	    System.err.println("Ha ocurrido un error inesperado: " + e.getMessage());
     	    e.printStackTrace();
     	}
-    	
+    }
     //------------------------------------------------------------------------------------------------
-    */	
+
     	
-    	/*
-    	//CARGA DE PELICULAS EN LA BASE DE DATOS.
-    	//SE NECESITAN TENER CARGADOS LOS GENEROS.
-    	//------------------------------------------------------------------------------------------------------------
+    public static void loadMovies() {
+    //CARGA DE PELICULAS EN LA BASE DE DATOS.
+    //SE NECESITAN TENER CARGADOS LOS GENEROS.
+    //------------------------------------------------------------------------------------------------------------
     	
     	// --- CONFIGURACIÓN INICIAL ---
-        // 1. Instancia de tu servicio de API externa.
-        //    ¡IMPORTANTE! Reemplaza "TU_API_KEY_AQUI" con tu clave real.
-        ExternalApiService apiService = new ExternalApiService("a47ba0b127499b0e1b28ceb0a183ec57");
+    	// 1. Instancia de tu servicio de API externa.
+    	//¡IMPORTANTE! Reemplaza "TU_API_KEY_AQUI" con tu clave real.
+    	ExternalApiService apiService = new ExternalApiService("a47ba0b127499b0e1b28ceb0a183ec57");
 
         // 2. Instancia de tu controlador de películas.
         //    (La forma de obtenerlo puede variar según tu framework,
@@ -184,7 +158,6 @@ public class DiscoverReflectionMain {
                     .collect(Collectors.toList());
             System.out.println("Mapeo completado.");
            
-         // --- AÑADE ESTO PARA DEPURAR ---
             System.out.println("\n--- Inspeccionando los datos de las " + localMovies.size() + " películas antes de guardar ---");
             int i = 0;
             for (Movie movie : localMovies) {
@@ -215,12 +188,12 @@ public class DiscoverReflectionMain {
         }
 
         System.out.println("\n--- PROCESO DE IMPORTACIÓN FINALIZADO ---");
-        
-    	//------------------------------------------------------------------------------------------------------
-    	*/
+    }
+    //------------------------------------------------------------------------------------------------------
     	
     	
     	
+    public static void loadActorsDirectorsAndRuntime() {
     	//------------------------------------------------------------------------------------------------------
     	// CARGA DE LAS TABLAS actores_peliculas, directores_peliculas, generos_peliculas y personas.
     	// Se necesitan tener cargadas las peliculas y los generos.
@@ -342,10 +315,103 @@ public class DiscoverReflectionMain {
         System.out.println("------------------------------------");
         System.out.println("Películas actualizadas con éxito: " + successCount);
         System.out.println("Películas con error: " + errorCount);
-      
+    }
       //------------------------------------------------------------------------------------------------------
     	
+    
+public static void loadPersons() {
     	
+        final String YOUR_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDdiYTBiMTI3NDk5YjBlMWIyOGNlYjBhMTgzZWM1NyIsIm5iZiI6MTc1NTYwOTMwOC44NzIsInN1YiI6IjY4YTQ3OGRjNWJkMTI3ZjcyY2RhNThjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mkAgrQSPf-YCaYm1TFxuNDEgAtESQEaBOPI5t-8i8Q"; // ⚠️ Reemplaza con tu API key real
+
+    	PersonRepository personRepository = new PersonRepository();
+    	PersonService personService = new PersonService(personRepository);
+    	PersonController personController = new PersonController(personService);
+    	
+    	ExternalApiService externalApiService = new ExternalApiService(YOUR_API_KEY);
+    	
+    	List<Person> listaPersonas = personController.getPersons();
+
+        // --- CORRECCIÓN CRÍTICA ---
+    	// Inicializa la lista, de lo contrario tendrás NullPointerException
+    	List<Person> personas = new ArrayList<>(); 
+    	
+    	if (listaPersonas == null || listaPersonas.isEmpty()) {
+            System.out.println("La lista de personas está vacía. No hay nada que cargar.");
+            return;
+        }
+
+        System.out.println("Iniciando carga de detalles para " + listaPersonas.size() + " personas...");
+        
+        String language = null; 
+
+        // --- AJUSTE DE RATE LIMIT ---
+        // Objetivo: 40 peticiones por segundo (margen de seguridad bajo el límite de 50).
+        // 1000 milisegundos / 40 peticiones = 25ms por petición.
+        final long TIEMPO_OBJETIVO_POR_PETICION_MS = 25; 
+
+        for (int i = 0; i < listaPersonas.size(); i++) {
+            
+        	Person personaOriginal = listaPersonas.get(i);
+            
+            if (personaOriginal.getId_api() == 0) {
+                System.err.println("Saltando persona (índice " + i + ") sin id_api.");
+                continue;
+            }
+
+            try {
+                int idApi = personaOriginal.getId_api();
+                System.out.println("Procesando: " + (i + 1) + "/" + listaPersonas.size() + " - ID: " + idApi);
+
+                // 1. Inicia el cronómetro ANTES de la llamada a la API
+                long startTime = System.currentTimeMillis();
+
+                // 2. Llama a fetchBasicPersonDetails
+                PersonDb tmdbPerson = externalApiService.fetchBasicPersonDetails(idApi, language);
+
+                // 3. Llama a mapTmdbToPersona
+                Person personaMapeada = externalApiService.mapTmdbToPersona(tmdbPerson);
+
+                // 4. "Une" los dos objetos
+                if (personaMapeada != null) {
+                    personaOriginal.setPlace_of_birth(personaMapeada.getPlace_of_birth());
+                    personaOriginal.setBirthDate(personaMapeada.getBirthDate());
+                }
+
+                // 5. Agrega a la lista para el lote (batch)
+                personas.add(personaOriginal);
+
+                // 6. MANEJO DE RATE LIMIT (MODIFICADO)
+                long endTime = System.currentTimeMillis();
+                long duration = endTime - startTime; // Tiempo que tomó la API + Mapeo
+
+                if (duration < TIEMPO_OBJETIVO_POR_PETICION_MS) {
+                    // Si el trabajo fue más rápido que nuestro objetivo (25ms),
+                    // dormimos solo por el tiempo restante.
+                    long sleepTime = TIEMPO_OBJETIVO_POR_PETICION_MS - duration;
+                    Thread.sleep(sleepTime);
+                }
+                // Si la API tardó MÁS de 25ms, no dormimos nada y continuamos.
+
+            } catch (IllegalStateException e) {
+                System.err.println("Error al buscar persona (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+            } catch (TmdbException e) { 
+                System.err.println("Error de TMDB al buscar (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("El hilo fue interrumpido. Deteniendo la carga.");
+                break; // Sale del bucle for
+            } catch (Exception e) {
+                System.err.println("Error inesperado procesando (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        
+        // 7. Guarda TODA la lista en la base de datos EN UNA SOLA TRANSACCIÓN
+        System.out.println("Guardando " + personas.size() + " personas en la base de datos...");
+        personController.updateAllPersonsbyId_api(personas);
+        
+        System.out.println("Carga de detalles de personas finalizada.");
+    }
     	
     	
     	//TESTEO DE OBTENCIÓN DE ACTORES Y DIRECTORES DE UNA PELÍCULA
@@ -408,5 +474,5 @@ public class DiscoverReflectionMain {
         System.out.println("PELIS EN WATCHLIST: " + wl);
         */
     	//--------------------------------------------------------------------------------------------------
-    }
+    
 }

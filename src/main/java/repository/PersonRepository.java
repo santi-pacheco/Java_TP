@@ -164,7 +164,7 @@ import exception.ErrorFactory;
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error saving genres to database");
+            throw ErrorFactory.internal("Error saving persons to database");
         }
     }
 
@@ -251,5 +251,24 @@ import exception.ErrorFactory;
 			throw ErrorFactory.internal("Error fetching directors by movie ID from database");
 		}
 		return directors;
-	}	
+	}
+	
+	public void updateAllPersonsbyId_api (List<Person> persons) {
+		String sql = "UPDATE personas SET birthdate = ?, also_known_as = ?, place_of_birth = ? WHERE id_api = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	   	     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			for (Person person : persons) {
+				stmt.setDate(1, person.getBirthDate());
+				stmt.setString(2, person.getAlso_known_as());
+				stmt.setString(3, person.getPlace_of_birth());
+				stmt.setInt(4, person.getId_api());
+				
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating persons in database");
+		}
+	}
 }

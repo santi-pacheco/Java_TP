@@ -101,4 +101,8 @@ public class PersonService {
 		public List<Person> getDirectorsByMovieId(int movieId) {
 			return personRepository.findDirectorsByMovieId(movieId);
 		}
+		
+		public void updateAllPersonsbyId_api(List<Person> persons) {
+			personRepository.updateAllPersonsbyId_api(persons);
+		}
 }
