@@ -5,9 +5,54 @@
          version="5.0">
     <display-name>FatMovies</display-name>
     
+    <!-- UTF-8 Encoding Filter -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ignore</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>MovieDetailServlet</servlet-name>
+        <servlet-class>servlet.MovieDetailServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MovieDetailServlet</servlet-name>
+        <url-pattern>/movie/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>SearchApiServlet</servlet-name>
+        <servlet-class>servlet.SearchApiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchApiServlet</servlet-name>
+        <url-pattern>/search-api</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>MoviesPageServlet</servlet-name>
+        <servlet-class>servlet.MoviesPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoviesPageServlet</servlet-name>
+        <url-pattern>/peliculas</url-pattern>
+    </servlet-mapping>
+    
     <!-- Páginas de bienvenida -->
     <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 </web-app>

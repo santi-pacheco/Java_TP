@@ -3,6 +3,7 @@ package repository;
 import java.sql.Connection;
 
 import entity.Person;
+import entity.ActorWithCharacter;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.ResultSet;
@@ -98,7 +99,7 @@ import exception.ErrorFactory;
 				}
 			}
 		} catch (SQLException e) {
-			if (e.getSQLState().equals("23505")) { // Código de error para clave duplicada en MySQL
+			if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
 				throw ErrorFactory.duplicate("A person with the same API ID already exists.");
 			} else {
 				throw ErrorFactory.internal("Error adding person to database");
@@ -122,7 +123,11 @@ import exception.ErrorFactory;
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error preparing update statement for person");
+			if (e.getErrorCode() == 1062) { // Código de error para clave duplicada en MySQL
+				throw ErrorFactory.duplicate("A person with the same API ID already exists.");
+			} else {
+				throw ErrorFactory.internal("Error updating person in database");
+			}
 		}
 		return per;
 	}
@@ -159,7 +164,7 @@ import exception.ErrorFactory;
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving genres to database", e);
+            throw ErrorFactory.internal("Error saving persons to database");
         }
     }
 
@@ -186,5 +191,84 @@ import exception.ErrorFactory;
 			throw ErrorFactory.internal("Error fetching person by API ID from database");
 		}
 		return per;
-	}	
+	}
+	
+	public List<ActorWithCharacter> findActorsByMovieId(int movieId) {
+		List<ActorWithCharacter> actors = new ArrayList<>();
+		String sql = "SELECT p.id_persona, p.id_api, p.name, p.birthdate, p.also_known_as, p.place_of_birth, ap.character_name " +
+					 "FROM personas p " +
+					 "JOIN actores_peliculas ap ON p.id_persona = ap.id_persona " +
+					 "WHERE ap.id_pelicula = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, movieId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Person actor = new Person();
+					actor.setId(rs.getInt("id_persona"));
+					actor.setId_api(rs.getInt("id_api"));
+					actor.setName(rs.getString("name"));
+					actor.setAlso_known_as(rs.getString("also_known_as"));
+					actor.setPlace_of_birth(rs.getString("place_of_birth"));
+					actor.setBirthDate(rs.getDate("birthdate"));
+					
+					String characterName = rs.getString("character_name");
+					actors.add(new ActorWithCharacter(actor, characterName));
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching actors by movie ID from database");
+		}
+		return actors;
+	}
+	
+	public List<Person> findDirectorsByMovieId(int movieId) {
+		List<Person> directors = new ArrayList<>();
+		String sql = "SELECT p.id_persona, p.id_api, p.name, p.birthdate, p.also_known_as, p.place_of_birth " +
+					 "FROM personas p " +
+					 "JOIN directores_peliculas dp ON p.id_persona = dp.id_persona " +
+					 "WHERE dp.id_pelicula = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, movieId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Person director = new Person();
+					director.setId(rs.getInt("id_persona"));
+					director.setId_api(rs.getInt("id_api"));
+					director.setName(rs.getString("name"));
+					director.setAlso_known_as(rs.getString("also_known_as"));
+					director.setPlace_of_birth(rs.getString("place_of_birth"));
+					director.setBirthDate(rs.getDate("birthdate"));
+					directors.add(director);
+				}
+			}
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching directors by movie ID from database");
+		}
+		return directors;
+	}
+	
+	public void updateAllPersonsbyId_api (List<Person> persons) {
+		String sql = "UPDATE personas SET birthdate = ?, also_known_as = ?, place_of_birth = ? WHERE id_api = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	   	     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			for (Person person : persons) {
+				stmt.setDate(1, person.getBirthDate());
+				stmt.setString(2, person.getAlso_known_as());
+				stmt.setString(3, person.getPlace_of_birth());
+				stmt.setInt(4, person.getId_api());
+				
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating persons in database");
+		}
+	}
 }

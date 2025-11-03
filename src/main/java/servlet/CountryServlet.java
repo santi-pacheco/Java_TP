@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
+import service.CountryService;
+import repository.CountryRepository;
 import controller.GenreController;
 import entity.Country;
 import info.movito.themoviedbapi.tools.TmdbException;
@@ -29,10 +31,9 @@ public class CountryServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		this.countryController = new CountryController();
-		
-		this.countryController = new CountryController();
-		
+		CountryRepository countryRepository = new CountryRepository();
+		CountryService countryService = new CountryService(countryRepository);
+		this.countryController = new CountryController(countryService);	
 	}
 	
 	

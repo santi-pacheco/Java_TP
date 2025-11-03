@@ -3,6 +3,7 @@ package entity;
 import java.sql.Date;
 import jakarta.validation.constraints.*;
 import java.util.LinkedList;
+import validations.OnCreate;
 
 public class User {
     private int id; // El ID no se valida porque lo genera la base de datos.
@@ -11,9 +12,9 @@ public class User {
     @Size(min = 3, max = 50, message = "El nombre de usuario debe tener entre 3 y 50 caracteres.")
     private String username;
     
-    @NotBlank(message = "La contraseña no puede estar vacía.")
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$", message = "La contraseña debe contener mayúscula, minúscula, número y un carácter especial.")
+    @NotBlank(message = "La contraseña no puede estar vacía.", groups = OnCreate.class)
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.", groups = OnCreate.class)
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$", message = "La contraseña debe contener mayúscula, minúscula, número y un carácter especial.", groups = OnCreate.class)
     private String password;
     
     @NotBlank(message = "El rol no puede estar vacío.")
@@ -29,7 +30,6 @@ public class User {
     private Date birthDate;
     
     private LinkedList<String> watchList;
-    
     
 	public LinkedList<String> getWatchList() {
 		return watchList;

@@ -33,6 +33,14 @@ import controller.MovieController;
 import entity.Movie;
 import entity.Genre;
 
+import info.movito.themoviedbapi.TmdbPeople;
+import info.movito.themoviedbapi.model.people.PersonDb;
+
+import java.util.Date;
+
+import java.time.ZoneId;
+import entity.Person;
+
 public class ExternalApiService {
     
     private TmdbApi tmdbApi;
@@ -394,5 +402,57 @@ public class ExternalApiService {
                 .collect(Collectors.toList());
     }
     
-    //----------------------------------------------------------------------    
+    //----------------------------------------------------------------------
+    public PersonDb fetchBasicPersonDetails(int tmdbPersonId, String language) throws TmdbException {
+
+        // 1. Obtiene el servicio de personas.
+        TmdbPeople peopleApi = tmdbApi.getPeople();
+
+        // 2. Llama al método getPersonInfo (¡este es el correcto!).
+        // Este método trae la información base sin necesidad de "Appends".
+        PersonDb personDb = peopleApi.getDetails(tmdbPersonId, language);
+
+        // 3. Verifica el resultado.
+        if (personDb == null) {
+            throw new IllegalStateException("El resultado de PersonDb es nulo para el id=" + tmdbPersonId);
+        }
+
+        // 4. Devuelve el objeto PersonDb base.
+        return personDb;
+    }
+  
+    public Person mapTmdbToPersona(PersonDb tmdbPerson) {
+        if (tmdbPerson == null) {
+            return null;
+        }
+
+        Person personaDB = new Person();
+
+        // 1. ID de la API (mapeo directo)
+        personaDB.setId_api(tmdbPerson.getId());
+
+        // 2. Lugar de nacimiento (mapeo directo)
+        personaDB.setPlace_of_birth(tmdbPerson.getPlaceOfBirth());
+
+        // 3. Fecha de Nacimiento (String -> java.sql.Date)
+        java.sql.Date sqlBirthDate = null; // <--- Cambiamos el tipo
+        String birthdayString = tmdbPerson.getBirthday();
+        
+        if (birthdayString != null && !birthdayString.isEmpty()) {
+            try {
+                // 1. Usamos java.time (LocalDate) para parsear el "YYYY-MM-DD"
+                LocalDate localDate = LocalDate.parse(birthdayString);
+                
+                // 2. Convertimos LocalDate a java.sql.Date (método directo)
+                sqlBirthDate = java.sql.Date.valueOf(localDate); 
+                
+            } catch (DateTimeParseException e) {
+                System.err.println("Error al parsear fecha de nacimiento: " + birthdayString);
+            }
+        }
+        personaDB.setBirthDate(sqlBirthDate); // <--- Seteamos el tipo correcto
+
+        return personaDB;
+    }  
+    
 }

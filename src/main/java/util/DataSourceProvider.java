@@ -20,7 +20,11 @@ public class DataSourceProvider {
 
                         HikariConfig config = new HikariConfig();
                         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+<<<<<<< HEAD
                         config.setJdbcUrl("jdbc:mysql://localhost:3306/fatmovies");
+=======
+                        config.setJdbcUrl("jdbc:mysql://localhost:3307/fatmovies?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+>>>>>>> origin/main
                         config.setUsername("java_user");
                         config.setPassword("java_pass");
 
@@ -34,6 +38,8 @@ public class DataSourceProvider {
                         config.addDataSourceProperty("cachePrepStmts", "true");
                         config.addDataSourceProperty("prepStmtCacheSize", "250");
                         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+                        config.addDataSourceProperty("useUnicode", "true");
+                        config.addDataSourceProperty("characterEncoding", "utf8");
 
                         ds = new HikariDataSource(config);
                     } catch (Exception e) {

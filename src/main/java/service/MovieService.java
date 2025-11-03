@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.List;
 import entity.Movie;
 import repository.MovieRepository;
@@ -47,17 +47,34 @@ public class MovieService {
 	    if (existingMovie == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Película con ID " + movie.getId() + " no encontrada.");
 	    }
+	    existingMovie.setEstrenoYear(movie.getEstrenoYear());
+	    existingMovie.setDuracion(movie.getDuracion());
+	    existingMovie.setAdulto(movie.getAdulto());
+	    existingMovie.setTitulo(movie.getTitulo());
+	    existingMovie.setPopularidad(movie.getPopularidad());
+	    existingMovie.setTituloOriginal(movie.getTituloOriginal());
+	    existingMovie.setSinopsis(movie.getSinopsis());
+	    existingMovie.setPuntuacionApi(movie.getPuntuacionApi());
+	    existingMovie.setIdiomaOriginal(movie.getIdiomaOriginal());
+	    existingMovie.setPosterPath(movie.getPosterPath());
+	    
 	    // 2. Si existe, ahora sí actualiza
-	    return movieRepository.update(movie);	
+	    return movieRepository.update(existingMovie);	
 	}
 	
-	public Movie deleteMovie(Movie movie) {
-		Movie movieToDelete = movieRepository.delete(movie);
-		return movieToDelete;
+	public void deleteMovie(Movie movie) {
+		movieRepository.delete(movie);
 	}
 	
 	public void saveAllMovies(List<Movie> movies) {
 		movieRepository.saveAll(movies);
+	}
+	
+	public List<Movie> searchMoviesByName(String searchTerm) {
+		if (searchTerm == null || searchTerm.trim().isEmpty()) {
+			return new ArrayList<>();
+		}
+		return movieRepository.findByName(searchTerm.trim());
 	}
 	
 
@@ -120,5 +137,17 @@ public class MovieService {
 	
 	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
 		movieRepository.updateMovieDirectors(movieId, directors);
+	}
+	
+	public List<Movie> getMostPopularMovies(int limit) {
+		return movieRepository.findMostPopular(limit);
+	}
+	
+	public List<Movie> getTopRatedMovies(int limit) {
+		return movieRepository.findTopRated(limit);
+	}
+	
+	public List<Movie> getRecentMovies(int limit) {
+		return movieRepository.findRecentMovies(limit);
 	}
 }

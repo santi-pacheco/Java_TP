@@ -198,7 +198,11 @@ $(document).ready(function(){
     boolean dbConnectionError = false;
     
     try {
+<<<<<<< HEAD
         GenreController genreController = new GenreController();
+=======
+        GenreController genreController = new GenreController(genreService);
+>>>>>>> origin/main
         genres = genreController.getGenres();
     } catch (RuntimeException e) {
         if (e.getMessage().contains("database connection") || e.getCause() instanceof java.sql.SQLException) {
