@@ -79,14 +79,11 @@ public class MovieService {
 	
 
     public float getMovieRating(int movieId) throws IOException, InterruptedException {
-    	System.out.println("📡 Obteniendo rating para movieId: " + movieId);
-    	
     	try {
     		// Primero obtenemos la pelicula para sacar su id_imdb
     		Movie movie = movieRepository.findOne(movieId);
     		if (movie == null) {
     			// Comprobamos si la pelicula existe
-				System.out.println("❌ Movie with ID " + movie.getId_imdb() + " not found in the database.");
 				return 0.0f;
 			}
 			// Hacemos la llamada a la API externa
@@ -100,15 +97,11 @@ public class MovieService {
 			reader.close();
 			conn.disconnect();
             if (json.has("rating") && !json.get("rating").isJsonNull()) {
-            	System.out.println("Rating encontrado: " + json.get("metacritic").toString());
                 JsonObject ratingObj = json.getAsJsonObject("metacritic");
-                
-                System.out.println("Rating: " + ratingObj.get("score").getAsFloat());
                 return ratingObj.get("score").getAsFloat();
             }
     		
     	} catch (IOException e) {
-			System.err.println("❌ Error al obtener rating: " + e.getMessage());
 			throw e;
 		}
     	return 0.0f; // Valor por defecto si hay errores
@@ -125,8 +118,6 @@ public class MovieService {
                  .filter(Objects::nonNull)                               // 3. Filtra y descarta cualquier resultado que sea null.
                  .distinct()                                             // 4. Elimina todos los duplicados.
                  .collect(Collectors.toList());
-		System.out.println("Genres to update: " + genresId);
-		System.out.println("Id of movie to update genres: " + movieId);
 		//genresId puede tener algún null? No, porque se filtran en el stream
 		movieRepository.updateMovieGenres(movieId, genresId);
 	}

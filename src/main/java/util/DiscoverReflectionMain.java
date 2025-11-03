@@ -499,7 +499,8 @@ public static void loadPersons() {
     	System.out.println("RATING DE LA PELICULA CON ID " + idMovie + ": " + rating);
     	
     	*/
-    	
+//    /*
+    	/*
     	ReviewRepository rr = new ReviewRepository();
     	
     	Review rv = new Review();
@@ -512,7 +513,7 @@ public static void loadPersons() {
     	
     	System.out.println("REVIEW GUARDADA: " + rs);
     	
-    	
+    	*/
     }
 =======
     
