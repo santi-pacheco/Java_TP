@@ -20,6 +20,15 @@
     .error { background: #f8d7da; color: #721c24; }
     .success { background: #d4edda; color: #155724; }
     .user-info { background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+    .star-rating { display: inline-flex; cursor: pointer; gap: 8px; }
+    .star-container { position: relative; display: inline-block; width: 60px; height: 60px; }
+    .popcorn-full { width: 60px; height: 60px; opacity: 0.3; transition: opacity 0.2s; display: block; object-fit: contain; }
+    .popcorn-full.active { opacity: 1; }
+    .popcorn-half { position: absolute; left: 0; top: 0; width: 60px; height: 60px; clip-path: inset(0 50% 0 0); opacity: 0.3; transition: opacity 0.2s; display: none; object-fit: contain; }
+    .popcorn-half.active { opacity: 1; display: block; }
+    .popcorn-full.half-hidden { display: none; }
+    .popcorn-full[src*="great_movie"], .popcorn-half[src*="great_movie"] { transform: scale(1.25); }
+    #ratingDisplay { margin-left: 15px; font-weight: bold; color: #2b7cff; font-size: 1.2rem; }
   </style>
 </head>
 <body>
@@ -51,8 +60,31 @@
           <label>Texto de la reseña:</label><br>
           <textarea id="reviewText" placeholder="Escribe tu reseña aquí..." required>Esta película es increíble! La recomiendo mucho. Los efectos especiales son espectaculares.</textarea><br><br>
           
-          <label>Rating (1-5):</label>
-          <input type="number" id="rating" value="4.5" min="1" max="5" step="0.1" required>
+          <label>Rating (0-5):</label>
+          <div class="star-rating" id="starRating">
+            <div class="star-container" data-index="1">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+            </div>
+            <div class="star-container" data-index="2">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+            </div>
+            <div class="star-container" data-index="3">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+            </div>
+            <div class="star-container" data-index="4">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+            </div>
+            <div class="star-container" data-index="5">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+              <img src="<%= request.getContextPath() %>/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+            </div>
+          </div>
+          <input type="hidden" id="rating" value="0" required>
+          <span id="ratingDisplay">0 estrellas</span>
           
           <label>Fecha que viste la película:</label>
           <input type="date" id="watchedOn" value="2024-01-15" required><br><br>
@@ -103,6 +135,105 @@
   <script>
     const contextPath = '<%= request.getContextPath() %>';
     
+    // Star rating system
+    document.addEventListener('DOMContentLoaded', function() {
+      const starContainers = document.querySelectorAll('.star-container');
+      const ratingInput = document.getElementById('rating');
+      const ratingDisplay = document.getElementById('ratingDisplay');
+      
+      starContainers.forEach(container => {
+        const index = parseInt(container.getAttribute('data-index'));
+        const starFull = container.querySelector('.popcorn-full');
+        const starHalf = container.querySelector('.popcorn-half');
+        
+        container.addEventListener('click', function(e) {
+          const rect = container.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const isHalf = clickX < rect.width / 2;
+          const value = isHalf ? index - 0.5 : index;
+          ratingInput.value = value;
+          ratingDisplay.textContent = value + ' estrellas';
+          updateStars(value);
+        });
+        
+        container.addEventListener('mousemove', function(e) {
+          const rect = container.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const isHalf = mouseX < rect.width / 2;
+          const value = isHalf ? index - 0.5 : index;
+          updateIconType(value);
+          highlightStars(value);
+        });
+      });
+      
+      document.getElementById('starRating').addEventListener('mouseleave', function() {
+        const currentValue = parseFloat(ratingInput.value);
+        updateStars(currentValue);
+      });
+      
+      function highlightStars(value) {
+        starContainers.forEach(container => {
+          const index = parseInt(container.getAttribute('data-index'));
+          const starFull = container.querySelector('.popcorn-full');
+          const starHalf = container.querySelector('.popcorn-half');
+          
+          if (index <= Math.floor(value)) {
+            starFull.classList.add('active');
+            starFull.classList.remove('half-hidden');
+            starHalf.classList.remove('active');
+          } else if (index - 0.5 === value) {
+            starFull.classList.add('half-hidden');
+            starHalf.classList.add('active');
+          } else {
+            starFull.classList.remove('active');
+            starFull.classList.remove('half-hidden');
+            starHalf.classList.remove('active');
+          }
+        });
+      }
+      
+      function updateStars(value) {
+        updateIconType(value);
+        starContainers.forEach(container => {
+          const index = parseInt(container.getAttribute('data-index'));
+          const starFull = container.querySelector('.popcorn-full');
+          const starHalf = container.querySelector('.popcorn-half');
+          
+          if (index <= Math.floor(value)) {
+            starFull.classList.add('active');
+            starFull.classList.remove('half-hidden');
+            starHalf.classList.remove('active');
+          } else if (index - 0.5 === value) {
+            starFull.classList.add('half-hidden');
+            starHalf.classList.add('active');
+          } else {
+            starFull.classList.remove('active');
+            starFull.classList.remove('half-hidden');
+            starHalf.classList.remove('active');
+          }
+        });
+      }
+      
+      function updateIconType(value) {
+        const contextPath = '<%= request.getContextPath() %>';
+        let iconPath;
+        if (value <= 2) {
+          iconPath = contextPath + '/utils/bad_movie.svg';
+        } else if (value <= 4) {
+          iconPath = contextPath + '/utils/good_movie.svg';
+        } else {
+          iconPath = contextPath + '/utils/great_movie.svg';
+        }
+        
+        starContainers.forEach(container => {
+          const starFull = container.querySelector('.popcorn-full');
+          const starHalf = container.querySelector('.popcorn-half');
+          starFull.src = iconPath;
+          starHalf.src = iconPath;
+        });
+      }
+    });
+    
     function showResult(data, isError = false) {
       const resultDiv = document.getElementById('result');
       resultDiv.className = 'result ' + (isError ? 'error' : 'success');
@@ -143,7 +274,15 @@
         
         const data = await response.json();
         if (response.ok) {
-          showResult('📋 Reseñas de la película ' + movieId + ':\n' + JSON.stringify(data, null, 2));
+          let result = '📋 Reseñas de la película ' + movieId + ':\n\n';
+          data.forEach(review => {
+            const stars = getStarDisplay(review.rating);
+            result += `👤 ${review.username || 'Usuario #' + review.id_user}\n`;
+            result += `${stars} (${review.rating})\n`;
+            result += `💬 ${review.review_text}\n`;
+            result += `📅 Visto: ${review.watched_on}\n\n`;
+          });
+          showResult(result);
         } else {
           showResult('❌ Error: ' + data.message, true);
         }
@@ -193,6 +332,20 @@
       }
     }
 
+    function getStarDisplay(rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        if (rating >= i) {
+          stars += '★';
+        } else if (rating >= i - 0.5) {
+          stars += '½';
+        } else {
+          stars += '☆';
+        }
+      }
+      return stars;
+    }
+    
     async function markAsSpoiler(containsSpoiler) {
       try {
         const reviewId = document.getElementById('spoilerReviewId').value;

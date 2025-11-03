@@ -188,7 +188,7 @@ public class ReviewRepository {
 
     public List<Review> findByMovie(int movieId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT id_review, id_user, id_movie, review_text, rating, watched_on, created_at, contiene_spoiler FROM reviews WHERE id_movie = ? ORDER BY created_at DESC";
+        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler, u.username FROM reviews r JOIN usuarios u ON r.id_user = u.id_user WHERE r.id_movie = ? ORDER BY r.created_at DESC";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -204,6 +204,7 @@ public class ReviewRepository {
                     review.setReview_text(rs.getString("review_text"));
                     review.setRating(rs.getDouble("rating"));
                     review.setWatched_on(rs.getDate("watched_on").toLocalDate());
+                    review.setUsername(rs.getString("username"));
                     
                     java.sql.Date createdDate = rs.getDate("created_at");
                     if (createdDate != null) {

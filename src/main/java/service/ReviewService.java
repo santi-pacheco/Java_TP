@@ -23,21 +23,15 @@ public class ReviewService {
     }
 
     public Review createReview(Review review) {
-        // 1. Verificar que el usuario existe
-        User user = userService.getUserById(review.getId_user());
-        if (user == null) {
-            throw ErrorFactory.notFound("El usuario con ID " + review.getId_user() + " no existe");
-        }
-
-        // 2. Verificar que la película existe
+        // 1. Verificar que la película existe
         Movie movie = movieService.getMovieById(review.getId_movie());
 
-        // 3. Verificar que no existe una reseña previa del mismo usuario para la misma película
+        // 2. Verificar que no existe una reseña previa del mismo usuario para la misma película
         if (reviewRepository.existsByUserAndMovie(review.getId_user(), review.getId_movie())) {
             throw ErrorFactory.duplicate("Ya tienes una reseña para esta película. Puedes editarla en lugar de crear una nueva");
         }
 
-        // 4. Validaciones de negocio adicionales
+        // 3. Validaciones de negocio adicionales
         if (review.getRating() < 0.0 || review.getRating() > 5.0) {
             throw ErrorFactory.validation("El rating debe estar entre 0.0 y 5.0");
         }
@@ -50,10 +44,10 @@ public class ReviewService {
             throw ErrorFactory.validation("La reseña debe tener al menos 10 caracteres");
         }
 
-        // 5. Asegurar que contieneSpoiler sea null al crear (para revisión posterior)
+        // 4. Asegurar que contieneSpoiler sea null al crear (para revisión posterior)
         review.setContieneSpoiler(null);
 
-        // 6. Guardar la reseña
+        // 5. Guardar la reseña
         return reviewRepository.add(review);
     }
 
@@ -66,15 +60,6 @@ public class ReviewService {
     }
 
     public Review getReviewByUserAndMovie(int userId, int movieId) {
-        // Verificar que el usuario existe
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            throw ErrorFactory.notFound("El usuario con ID " + userId + " no existe");
-        }
-
-        // Verificar que la película existe
-        Movie movie = movieService.getMovieById(movieId);
-
         return reviewRepository.findByUserAndMovie(userId, movieId);
     }
 
@@ -117,9 +102,6 @@ public class ReviewService {
     }
 
     public List<Review> getReviewsByMovie(int movieId) {
-        // Verificar que la película existe
-    	Movie movie = movieService.getMovieById(movieId);
-
         return reviewRepository.findByMovie(movieId);
     }
 

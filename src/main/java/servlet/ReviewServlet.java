@@ -140,19 +140,30 @@ public class ReviewServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Verificar que el usuario esté logueado
         User loggedUser = getLoggedUser(request);
+        String contentType = request.getContentType();
         
-        // Leer el JSON del request
-        String jsonBody = request.getReader().lines().collect(Collectors.joining());
+        Review newReview;
         
-        // Crear nueva reseña
-        Review newReview = gson.fromJson(jsonBody, Review.class);
+        if (contentType != null && contentType.contains("application/json")) {
+            String jsonBody = request.getReader().lines().collect(Collectors.joining());
+            newReview = gson.fromJson(jsonBody, Review.class);
+        } else {
+            // Formulario HTML
+            String movieIdStr = request.getParameter("movieId");
+            String reviewText = request.getParameter("reviewText");
+            String ratingStr = request.getParameter("rating");
+            String watchedOnStr = request.getParameter("watchedOn");
+            
+            newReview = new Review();
+            newReview.setId_movie(Integer.parseInt(movieIdStr));
+            newReview.setReview_text(reviewText);
+            newReview.setRating(Double.parseDouble(ratingStr));
+            newReview.setWatched_on(LocalDate.parse(watchedOnStr));
+        }
         
-        // Usar el ID del usuario logueado
         newReview.setId_user(loggedUser.getId());
         
-        // Validar con Jakarta Bean Validation
         Set<ConstraintViolation<Review>> violations = validator.validate(newReview);
         if (!violations.isEmpty()) {
             String errorMessages = violations.stream()
@@ -161,12 +172,15 @@ public class ReviewServlet extends HttpServlet {
             throw ErrorFactory.validation(errorMessages);
         }
         
-        // Crear o actualizar reseña
         Review createdReview = reviewController.createOrUpdateReview(newReview);
         
-        response.setStatus(HttpServletResponse.SC_CREATED);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(gson.toJson(createdReview));
+        if (contentType != null && contentType.contains("application/json")) {
+            response.setStatus(HttpServletResponse.SC_CREATED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(gson.toJson(createdReview));
+        } else {
+            response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getId_movie());
+        }
     }
 
     @Override
