@@ -31,6 +31,8 @@ public class Review {
     
     private Boolean contieneSpoiler; // null = no revisado, true = tiene spoiler, false = no tiene spoiler
     
+    private String username; // Para mostrar el nombre del usuario
+    
     // Constructors
     public Review() {
         this.watched_on = LocalDate.now(); // Por defecto: hoy
@@ -111,6 +113,14 @@ public class Review {
 
     public void setContieneSpoiler(Boolean contieneSpoiler) {
         this.contieneSpoiler = contieneSpoiler;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
     
     @Override

@@ -9,18 +9,22 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import controller.MovieController;
 import controller.WatchlistController;
+import controller.ReviewController;
 import entity.Movie;
 import entity.Person;
 import entity.ActorWithCharacter;
 import entity.User;
+import entity.Review;
 import repository.MovieRepository;
 import repository.PersonRepository;
 import repository.WatchlistRepository;
 import repository.UserRepository;
+import repository.ReviewRepository;
 import service.MovieService;
 import service.PersonService;
 import service.WatchlistService;
 import service.UserService;
+import service.ReviewService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ public class MovieDetailServlet extends HttpServlet {
     private MovieController movieController;
     private PersonService personService;
     private WatchlistController watchlistController;
+    private ReviewController reviewController;
     
     @Override
     public void init() throws ServletException {
@@ -50,6 +55,10 @@ public class MovieDetailServlet extends HttpServlet {
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);
+            
+            ReviewRepository reviewRepository = new ReviewRepository();
+            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService);
+            this.reviewController = new ReviewController(reviewService);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
         }
@@ -87,16 +96,22 @@ public class MovieDetailServlet extends HttpServlet {
             
             HttpSession session = request.getSession(false);
             boolean isInWatchlist = false;
+            Review userReview = null;
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
                 List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
                 isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
+                userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
             }
+            
+            List<Review> reviews = reviewController.getReviewsByMovie(movieId);
             
             request.setAttribute("movie", movie);
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
             request.setAttribute("isInWatchlist", isInWatchlist);
+            request.setAttribute("reviews", reviews);
+            request.setAttribute("userReview", userReview);
             request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
