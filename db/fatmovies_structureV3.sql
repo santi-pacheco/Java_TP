@@ -99,6 +99,7 @@ CREATE TABLE `peliculas` (
   `duracion` time DEFAULT NULL,
   `adulto` tinyint(1) DEFAULT NULL,
   `titulo_original` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rating` double DEFAULT NULL,
   `puntuacion_api` double DEFAULT NULL,
   `votos_api` int DEFAULT NULL,
   `popularidad` double DEFAULT NULL,

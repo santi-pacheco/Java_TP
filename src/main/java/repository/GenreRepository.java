@@ -152,6 +152,7 @@ public class GenreRepository {
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
 					generoId = rs.getInt("id_genero");
+					System.out.println("Género encontrado: ID API = " + idApi + ", ID BD = " + generoId);
 				}
 				//Pasar a Integer
 				generoId = Integer.valueOf(rs.getInt("id_genero"));

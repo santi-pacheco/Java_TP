@@ -58,6 +58,12 @@ public class Movie {
     @NotBlank(message = "La ruta del póster (poster_path) es obligatoria")
     private String posterPath; //
     
+    
+    private Float rating;
+    
+	public void setRating(Float rating) {
+		this.rating = rating;
+	}
 	public int getId() {
 		return id;
 	}
@@ -142,6 +148,13 @@ public class Movie {
 	public void setId_imdb(String id_imdb) {
 		this.id_imdb = id_imdb;
 	}
+	
+	public float getRating() {
+		return rating;
+	}
+	
+	
+	
 	
 	@Override
 	public String toString() {

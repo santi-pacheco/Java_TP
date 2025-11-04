@@ -1,8 +1,17 @@
 package repository;
 
 import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import entity.Movie;
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,7 +75,7 @@ public class MovieRepository {
 	}
 	public Movie findOne(int id) {
 		Movie movie = null;
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE id_pelicula = ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb,rating FROM peliculas WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -97,7 +106,7 @@ public class MovieRepository {
 		return movie;
 	}
 	public Movie add(Movie m) {
-		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, rating) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -115,6 +124,8 @@ public class MovieRepository {
 			stmt.setObject(11, m.getVotosApi());
 			stmt.setObject(12, m.getEstrenoYear());
 			stmt.setString(13, m.getId_imdb());
+			float rate = this.getMovieRating(m.getId_imdb());
+			stmt.setFloat(14, rate);
 			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows > 0) {
@@ -135,11 +146,16 @@ public class MovieRepository {
 	}
 	
 	public Movie update(Movie m) {
-		String sql = "UPDATE peliculas SET id_api = ?, name = ?, sinopsis = ?, duracion = ?, adulto = ?, titulo_original = ?, puntuacion_api = ?, idioma_original = ?, poster_path = ?, popularidad = ?, votos_api = ?, anioEstreno = ?, id_imdb = ? WHERE id_pelicula = ?";
+		String sql = "UPDATE peliculas SET id_api = ?, name = ?, sinopsis = ?, duracion = ?, adulto = ?, titulo_original = ?, puntuacion_api = ?, idioma_original = ?, poster_path = ?, popularidad = ?, votos_api = ?, anioEstreno = ?, id_imdb = ?, rating = ? WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
 			
+			
+			
+			float rate = this.getMovieRating(m.getId_imdb());
+			System.out.println("Rating obtenido para la pelicula en el update " + m.getTitulo() + ": " + rate);
+
 			stmt.setObject(1, m.getId_api());
 			stmt.setString(2, m.getTitulo());
 			stmt.setString(3, m.getSinopsis());
@@ -154,6 +170,7 @@ public class MovieRepository {
 			stmt.setObject(12, m.getEstrenoYear());
 			stmt.setString(13, m.getId_imdb());
 			stmt.setInt(14, m.getId());
+			stmt.setFloat(15, rate);
 			
 			stmt.executeUpdate();
 			
@@ -183,14 +200,20 @@ public class MovieRepository {
 	}
 	
 	public void saveAll(List<Movie> movies) {
-		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), sinopsis = VALUES(sinopsis), duracion = VALUES(duracion), adulto = VALUES(adulto), titulo_original = VALUES(titulo_original), puntuacion_api = VALUES(puntuacion_api), idioma_original = VALUES(idioma_original), poster_path = VALUES(poster_path), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), anioEstreno = VALUES(anioEstreno), id_imdb = VALUES(id_imdb)";
+		System.out.println("Guardando en el save all " + movies.size() + " películas en la base de datos...");
+		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), sinopsis = VALUES(sinopsis), duracion = VALUES(duracion), adulto = VALUES(adulto), titulo_original = VALUES(titulo_original), puntuacion_api = VALUES(puntuacion_api), idioma_original = VALUES(idioma_original), poster_path = VALUES(poster_path), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), anioEstreno = VALUES(anioEstreno), id_imdb = VALUES(id_imdb), rating = VALUES(rating)";
 		
 		 // Usamos try-with-resources para asegurar que la conexión y el statement se cierren automáticamente
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
+			System.out.println("Preparando batch insert/update para " + movies.size() + " películas...");
 			for (Movie m : movies) {
+				
+				float rate;
+				System.out.println("Obteniendo rating para la pelicula en el SaveAll: " + m.getTitulo() + " con id_imdb: " + m.getId_imdb());
+				rate = this.getMovieRating(m.getId_imdb());
+				System.out.println("Rating obtenido para la pelicula en el SaveAll" + m.getTitulo() + ": " + rate);
 				stmt.setObject(1, m.getId_api());
 				stmt.setString(2, m.getTitulo());
 				stmt.setString(3, m.getSinopsis());
@@ -204,6 +227,8 @@ public class MovieRepository {
 				stmt.setObject(11, m.getVotosApi());
 				stmt.setObject(12, m.getEstrenoYear());
 				stmt.setString(13, m.getId_imdb());
+				System.out.println("Puntuacion API antes de setear en el SaveAll para la pelicula " + m.getTitulo() + ": " + m.getPuntuacionApi());
+				stmt.setFloat(14, rate);
 				
 				stmt.addBatch();
 			}
@@ -232,6 +257,32 @@ public class MovieRepository {
 		}
 		
 	}
+	
+	public float getMovieRating(String movieId){
+		try {
+    		// Primero obtenemos la pelicula para sacar su id_imdb
+    					// Hacemos la llamada a la API externa
+			System.out.println("Rating para la pelicula con  en el getMovieRating id: " + movieId );
+    		URL url = new URL("https://api.imdbapi.dev/titles/" + movieId );
+    		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+    		conn.setRequestMethod("GET");
+    		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    		StringBuilder response = new StringBuilder();
+    		Gson gson = new Gson();
+    		JsonObject json = gson.fromJson(reader.readLine(), JsonObject.class);
+			reader.close();
+			conn.disconnect();
+            if (json.has("rating") && !json.get("rating").isJsonNull()) {
+                JsonObject ratingObj = json.getAsJsonObject("rating");
+                return ratingObj.get("aggregateRating").getAsFloat();
+            }
+    		
+    	} catch (IOException e) {
+    		throw new RuntimeException("Error al obtener rating de película " + movieId, e);
+		}
+		return 0.0f;
+	}
+	
 	
 	//Antes hay tener esto en cuenta:
 	//TABLE actor_pelicula
@@ -409,6 +460,83 @@ public class MovieRepository {
 		movie.setVotosApi(rs.getInt("votos_api"));
 		movie.setEstrenoYear(rs.getInt("anioEstreno"));
 		movie.setId_imdb(rs.getString("id_imdb"));
+		movie.setRating(rs.getFloat("rating"));
 		return movie;
 	}
+	
+	
+	// Filtro de películas según varios criterios
+	// 1ro Genero
+	// 2do Año de estreno (desde-hasta)
+	// 3ro Año salida
+
+		
+	public List<Movie> movieFilter(String genero, int desde, int hasta, Float rating) {
+	    System.out.println("Filtrando películas - Género: " + genero + ", Años: " + desde + "-" + hasta + ", Rating: " + rating);
+	    
+	    List<Movie> movies = new ArrayList<>();
+	    StringBuilder sql = new StringBuilder();
+	    
+	    sql.append("SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, ")
+	       .append("p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, ")
+	       .append("p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb, p.rating ")
+	       .append("FROM peliculas p ");
+	    
+	
+	    if (genero != null && !genero.isBlank()) {
+	        sql.append("INNER JOIN generos_peliculas gp ON gp.id_pelicula = p.id_pelicula ")
+	           .append("INNER JOIN generos g ON g.id_genero = gp.id_genero ");
+	    }
+	    
+	    
+	    List<String> conditions = new ArrayList<>();
+	    if (genero != null && !genero.isBlank()) {
+	        conditions.add("g.name = ?");
+	    }
+	    if (desde != 0 && hasta != 0) {
+	        conditions.add("p.anioEstreno BETWEEN ? AND ?");
+	    }
+	    if (rating != null) {
+	        conditions.add("p.puntuacion_api >= ?");
+	    }
+	    
+	    if (!conditions.isEmpty()) {
+	        sql.append("where ").append(String.join(" and ", conditions));
+	    }
+	    
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+	        
+	        int paramIndex = 1;
+	        if (genero != null && !genero.isBlank()) {
+	            stmt.setString(paramIndex++, genero);
+	        }
+	        if (desde != 0 && hasta != 0) {
+	            stmt.setInt(paramIndex++, desde);
+	            stmt.setInt(paramIndex++, hasta);
+	        }
+	        if (rating != null) {
+	            stmt.setFloat(paramIndex++, rating);
+	        }
+	        
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                movies.add(mapResultSetToMovie(rs));
+	                
+	            }
+	        }
+	        for (Movie m : movies) {
+	        	m.setRating(this.getMovieRating(m.getId_imdb()));
+	            System.out.println("Película encontrada: " + m.getTitulo() + " (ID: " + m.getId() + ")" + " con rating: " + m.getRating());
+	        }
+	        System.out.println("Se encontraron " + movies.size() + " películas");
+	        return movies;
+	        
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error fetching movies with filters");
+	    }
+	}
+	
+
+	
 }

@@ -198,15 +198,10 @@ $(document).ready(function(){
     boolean dbConnectionError = false;
     
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        GenreController genreController = new GenreController();
-=======
+
         GenreController genreController = new GenreController(genreService);
 >>>>>>> origin/main
-=======
-        GenreController genreController = new GenreController(genreService);
->>>>>>> 476454e79e29f2f5f0e237eaa86d6f17ae42e706
+
         genres = genreController.getGenres();
     } catch (RuntimeException e) {
         if (e.getMessage().contains("database connection") || e.getCause() instanceof java.sql.SQLException) {

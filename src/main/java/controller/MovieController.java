@@ -68,4 +68,10 @@ public class MovieController {
 	public List<Movie> getRecentMovies(int limit) {
 		return movieService.getRecentMovies(limit);
 	}
+	
+	
+	public List<Movie> getMovieByFilter(String genre, int year1, int year2, Float rating) {
+		return movieService.getMovieByFilter(genre, year1, year2, rating);
+	}
+	
 }
