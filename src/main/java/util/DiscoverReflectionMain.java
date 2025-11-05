@@ -9,6 +9,8 @@ import java.util.Comparator;
 
 import controller.GenreController;
 import java.util.List;
+
+import service.CountryService;
 import service.ExternalApiService;
 import service.GenreService;
 import repository.CountryRepository;
@@ -62,6 +64,10 @@ public class DiscoverReflectionMain {
     }
 	
     public static void main(String[] args) throws Exception {
+    	CountryRepository countryRepository = new CountryRepository();
+     	CountryService countryService = new CountryService(countryRepository);
+     	List<Country> countries = ExternalApiService.getMovieCountries();
+     	countryRepository.saveAll(countries);
     //CARGA DE GENEROS
 		//loadGenres();
 	//CARGA DE PELICULAS
@@ -563,29 +569,22 @@ public static void loadPersons() {
     	
     	
     	
-<<<<<<< HEAD
-//    	MovieRepository movieRepository = new MovieRepository();
-//    	MovieService movieService = new MovieService(movieRepository);
-//     	MovieController movieController = new MovieController(movieService);
-//     	System.out.println("Buscando películas de género 'Accion' estrenadas en 2020...");
-//     	List<Movie> mv = movieService.getMovieByFilter("", "", 2019, 0);
 
     	
      	// Testing country Repository
-=======
-    	MovieRepository movieRepository = new MovieRepository();
-     	MovieService movieService = new MovieService(movieRepository);
-     	MovieController movieController = new MovieController(movieService);
-     	//List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
->>>>>>> f41d9872a1c6865a1bded2487daf3abc6ec426c3
-     	
-     	
-//
+
+//    	MovieRepository movieRepository = new MovieRepository();
+//     	MovieService movieService = new MovieService(movieRepository);
+//     	MovieController movieController = new MovieController(movieService);
+//     	//List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
+//	
+//     	
+////
 //    	CountryRepository countryRepository = new CountryRepository();
 //     	CountryService countryService = new CountryService(countryRepository);
 //     	List<Country> countries = ExternalApiService.getMovieCountries();
 //     	countryRepository.saveAll(countries);
-     	
+//     	
      	
      	// Cargar peliculas con paises
      	
