@@ -127,13 +127,12 @@ public class WatchlistRepository {
 				}
 			}
 			
-			String sql = "INSERT INTO watchlists_peliculas (id_list, id_pelicula, id_usuario) VALUES (?,?,?)";
+			String sql = "INSERT INTO watchlists_peliculas (id_list, id_pelicula) VALUES (?,?)";
 			try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 					PreparedStatement stmt = conn.prepareStatement(sql)) {
 					
 				stmt.setInt(1, idList);
 				stmt.setInt(2, id_movie);
-				stmt.setInt(3, id_user);
 				int rowsAffected = stmt.executeUpdate();
 				System.out.println(
 						"Movie with ID " + id_movie + " added to watchlist for user ID " + id_user + "." + rowsAffected); 

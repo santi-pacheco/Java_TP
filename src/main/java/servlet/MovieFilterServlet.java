@@ -36,23 +36,34 @@ public class MovieFilterServlet extends HttpServlet{
 		
 		if (pathInfo == null || pathInfo.equals("/")) {
 			
-			// Logica para manejar el filtrado de películas
+			String genre = request.getParameter("genre");
+			String sinceStr = request.getParameter("since");
+			String untilStr = request.getParameter("until");
+			String name = request.getParameter("name");
 			
-//			
-//			String genre = request.getParameter("genre");
-//			System.out.println("Peticion recibida" + request);
-//			System.out.println("Género recibido: " + request.getAttribute("genre") 
-//					+ "Desde recibido: " + request.getParameter("since")
-//					+ "Hasta recibido: " + request.getParameter("until") 
-//					+ "Rating recibido: " + request.getParameter("rating"));
-//			List<Movie> filteredMovies = movieController.getMovieByFilter(request.getParameter("genre"),
-//																		  Integer.parseInt(request.getParameter("since")),
-//																		  Integer.parseInt(request.getParameter("until")),
-//																		  Float.parseFloat(request.getParameter("rating")));
-//			request.setAttribute("movies", filteredMovies);
-//			request.getRequestDispatcher("/WEB-INF/movie-list.jsp").forward(request, response);
+			int since = 0;
+			int until = 0;
 			
-			List<Movie> filteredMovies = movieController.getMovieByFilter("Accion", 0, 0, null);
+			try {
+				if (sinceStr != null && !sinceStr.isEmpty()) {
+					since = Integer.parseInt(sinceStr);
+				}
+				if (untilStr != null && !untilStr.isEmpty()) {
+					until = Integer.parseInt(untilStr);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Error parsing year parameters: " + e.getMessage());
+			}
+			
+			List<Movie> filteredMovies;
+			if (name != null && !name.trim().isEmpty()) {
+				filteredMovies = movieController.searchMoviesByName(name.trim());
+			} else {
+				filteredMovies = movieController.getMovieByFilter(genre, since, until);
+			}
+			
+			request.setAttribute("movies", filteredMovies);
+			request.getRequestDispatcher("/WEB-INF/movie-list.jsp").forward(request, response);
 			
 		} else {
 			// Manejar otros casos si es necesario

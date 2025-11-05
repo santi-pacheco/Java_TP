@@ -143,8 +143,12 @@ public class MovieService {
 	}
 	
 	
-	public List<Movie> getMovieByFilter(String genre, int year1, int year2, Float rating) {
-		return movieRepository.movieFilter(genre, year1, year2, rating);
+	public List<Movie> getMovieByFilter(String genre, int year1, int year2) {
+		return movieRepository.movieFilter(genre, year1, year2);
+	}
+	
+	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
+		return movieRepository.movieFilter(name, genre, year1, year2);
 	}
 	
 }
