@@ -84,4 +84,32 @@ public class UserService {
 		user.setPassword(null);	
 		return user;
 	}
+	
+	public void checkAndUpdateActiveStatus(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && !user.isEsUsuarioActivo()) {
+			// Solo verificar si no es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount >= umbralResenas) {
+				userRepository.updateActiveStatus(userId, true);
+			}
+		}
+	}
+	
+	public void validateActiveStatusOnDelete(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && user.isEsUsuarioActivo()) {
+			// Solo verificar si es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount < umbralResenas) {
+				userRepository.updateActiveStatus(userId, false);
+			}
+		}
+	}
+	
+	private int getReviewCountForUser(int userId) {
+		// Este método necesita acceso al ReviewRepository
+		// Se implementará en ReviewService
+		return 0;
+	}
 }

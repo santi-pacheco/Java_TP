@@ -151,4 +151,8 @@ public class MovieService {
 		return movieRepository.movieFilter(name, genre, year1, year2);
 	}
 	
+	public void updateReviewStats(int movieId) {
+		movieRepository.updateReviewStats(movieId);
+	}
+	
 }

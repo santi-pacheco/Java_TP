@@ -43,7 +43,7 @@ public class MovieRepository {
 	 */
 	public List<Movie> findAll() {
 	    List<Movie> movies = new ArrayList<>();
-	    String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY id_pelicula";
+	    String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas ORDER BY id_pelicula";
 	    
 	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql);
@@ -75,7 +75,7 @@ public class MovieRepository {
 	}
 	public Movie findOne(int id) {
 		Movie movie = null;
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE id_pelicula = ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas WHERE id_pelicula = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -307,7 +307,7 @@ public class MovieRepository {
 	
 	public List<Movie> findByName(String searchTerm) {
 		List<Movie> movies = new ArrayList<>();
-		String sql = "SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb " +
+		String sql = "SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb, p.promedio_resenas_local, p.cantidad_resenas_local " +
 					 "FROM peliculas p " +
 					 "LEFT JOIN actores_peliculas ap ON p.id_pelicula = ap.id_pelicula " +
 					 "LEFT JOIN directores_peliculas dp ON p.id_pelicula = dp.id_pelicula " +
@@ -338,7 +338,7 @@ public class MovieRepository {
 	
 	public List<Movie> findMostPopular(int limit) {
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		     PreparedStatement stmt = conn.prepareStatement("SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY popularidad DESC LIMIT ?")) {
+		     PreparedStatement stmt = conn.prepareStatement("SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas ORDER BY popularidad DESC LIMIT ?")) {
 			
 			stmt.setInt(1, limit);
 			List<Movie> movies = new ArrayList<>();
@@ -355,7 +355,7 @@ public class MovieRepository {
 	
 	public List<Movie> findTopRated(int limit) {
 		List<Movie> movies = new ArrayList<>();
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE puntuacion_api > 7.0 ORDER BY puntuacion_api DESC LIMIT ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas WHERE puntuacion_api > 7.0 ORDER BY puntuacion_api DESC LIMIT ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -374,7 +374,7 @@ public class MovieRepository {
 	
 	public List<Movie> findRecentMovies(int limit) {
 		List<Movie> movies = new ArrayList<>();
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas WHERE anioEstreno >= 2020 ORDER BY anioEstreno DESC, popularidad DESC LIMIT ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas WHERE anioEstreno >= 2020 ORDER BY anioEstreno DESC, popularidad DESC LIMIT ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -418,7 +418,7 @@ public class MovieRepository {
 	
 	private List<Movie> findRandomWithRand(int limit) throws SQLException {
 		List<Movie> movies = new ArrayList<>();
-		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb FROM peliculas ORDER BY RAND() LIMIT ?";
+		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas ORDER BY RAND() LIMIT ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -455,6 +455,8 @@ public class MovieRepository {
 		movie.setVotosApi(rs.getInt("votos_api"));
 		movie.setEstrenoYear(rs.getInt("anioEstreno"));
 		movie.setId_imdb(rs.getString("id_imdb"));
+		movie.setPromedioResenasLocal(rs.getDouble("promedio_resenas_local"));
+		movie.setCantidadResenasLocal(rs.getInt("cantidad_resenas_local"));
 		return movie;
 	}
 	
@@ -478,7 +480,8 @@ public class MovieRepository {
 	        
 	        sql.append("SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, ")
 	           .append("p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, ")
-	           .append("p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb ")
+	           .append("p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb, ")
+	           .append("p.promedio_resenas_local, p.cantidad_resenas_local ")
 	           .append("FROM peliculas p ");
 	        
 	        if (genero != null && !genero.isBlank()) {
@@ -534,6 +537,21 @@ public class MovieRepository {
 	    }
 	}
 	
+	public void updateReviewStats(int movieId) {
+		String sql = "UPDATE peliculas SET promedio_resenas_local = (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE id_movie = ?), cantidad_resenas_local = (SELECT COUNT(*) FROM reviews WHERE id_movie = ?) WHERE id_pelicula = ?";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, movieId);
+			stmt.setInt(2, movieId);
+			stmt.setInt(3, movieId);
+			stmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error updating movie review stats");
+		}
+	}
 
 	
 }

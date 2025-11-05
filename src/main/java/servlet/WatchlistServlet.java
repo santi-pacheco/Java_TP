@@ -13,6 +13,7 @@ import entity.User;
 import entity.Movie;
 import controller.WatchlistController;
 import controller.MovieController;
+import controller.UserController;
 import service.WatchlistService;
 import service.MovieService;
 import service.UserService;
@@ -30,6 +31,7 @@ public class WatchlistServlet extends HttpServlet {
     private WatchlistController watchlistController;
     private MovieController movieController;
     private ConfiguracionReglasController configController;
+    private UserController userController;
     
     @Override
     public void init() throws ServletException {
@@ -49,6 +51,8 @@ public class WatchlistServlet extends HttpServlet {
         ConfiguracionReglasRepository configRepo = new ConfiguracionReglasRepository();
         ConfiguracionReglasService configService = new ConfiguracionReglasService(configRepo);
         this.configController = new ConfiguracionReglasController(configService);
+        
+        this.userController = new UserController(userService);
         
     }
 
@@ -90,12 +94,13 @@ public class WatchlistServlet extends HttpServlet {
         User user = (User) session.getAttribute("usuarioLogueado");
         String action = request.getParameter("action");
         String movieId = request.getParameter("movieId");
+        User userAct = userController.getUserById(user.getId());
 
         if ("add".equals(action)) {
         	List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
         	int cantidadPeliculas = movieIds.size();
         	
-        	if (user.isEsUsuarioActivo() == true) {
+        	if (userAct.isEsUsuarioActivo() == true) {
         		//Usuario Activo
 				//Traer configuración de reglas
 				int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
@@ -109,7 +114,7 @@ public class WatchlistServlet extends HttpServlet {
 			} else {
 				//Usuario Normal
 				//Traer configuración de reglas
-				int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+				int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistNormal();
 				
 				if (cantidadPeliculas >= limiteNormal) {
 					//No puede agregar más películas

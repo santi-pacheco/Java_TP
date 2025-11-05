@@ -57,7 +57,9 @@ public class MovieDetailServlet extends HttpServlet {
             this.watchlistController = new WatchlistController(watchlistService);
             
             ReviewRepository reviewRepository = new ReviewRepository();
-            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService);
+            repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
+            service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
+            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
             this.reviewController = new ReviewController(reviewService);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);

@@ -450,7 +450,7 @@ public class DiscoverReflectionMain {
     	MovieRepository movieRepository = new MovieRepository();
      	MovieService movieService = new MovieService(movieRepository);
      	MovieController movieController = new MovieController(movieService);
-     	List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
+     	//List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
      	
     	
     	

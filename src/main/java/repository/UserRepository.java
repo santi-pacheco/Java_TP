@@ -170,4 +170,19 @@ public User findByUsername(String username) {
 	
 	return user;
 }
+
+public void updateActiveStatus(int userId, boolean isActive) {
+	String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
+	
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	     PreparedStatement stmt = conn.prepareStatement(sql)) {
+		
+		stmt.setBoolean(1, isActive);
+		stmt.setInt(2, userId);
+		stmt.executeUpdate();
+		
+	} catch (SQLException e) {
+		throw ErrorFactory.internal("Error updating user active status");
+	}
+}
 }
