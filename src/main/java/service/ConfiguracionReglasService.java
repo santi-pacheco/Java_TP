@@ -2,7 +2,7 @@ package service;
 
 import repository.ConfiguracionReglasRepository;
 import entity.ConfiguracionReglas;
-
+import java.util.List;
 public class ConfiguracionReglasService {
 
 	private ConfiguracionReglasRepository configuracionReglasRepository;
@@ -18,5 +18,9 @@ public class ConfiguracionReglasService {
 	public ConfiguracionReglas addConfiguracionReglas(ConfiguracionReglas config) {
 		return configuracionReglasRepository.add(config);
 	}
+	
+	public List<ConfiguracionReglas> getAllConfiguraciones() {
+	    return configuracionReglasRepository.getAll();
+	} 
 	
 }

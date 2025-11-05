@@ -20,12 +20,17 @@ import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import controller.ConfiguracionReglasController;
+import service.ConfiguracionReglasService;
+import repository.ConfiguracionReglasRepository;
+
 
 @WebServlet("/watchlist")
 public class WatchlistServlet extends HttpServlet {
     private WatchlistController watchlistController;
     private MovieController movieController;
-
+    private ConfiguracionReglasController configController;
+    
     @Override
     public void init() throws ServletException {
         super.init();
@@ -40,6 +45,11 @@ public class WatchlistServlet extends HttpServlet {
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         this.watchlistController = new WatchlistController(watchlistService);
+        
+        ConfiguracionReglasRepository configRepo = new ConfiguracionReglasRepository();
+        ConfiguracionReglasService configService = new ConfiguracionReglasService(configRepo);
+        this.configController = new ConfiguracionReglasController(configService);
+        
     }
 
     @Override
@@ -82,6 +92,31 @@ public class WatchlistServlet extends HttpServlet {
         String movieId = request.getParameter("movieId");
 
         if ("add".equals(action)) {
+        	List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+        	int cantidadPeliculas = movieIds.size();
+        	
+        	if (user.isEsUsuarioActivo() == true) {
+        		//Usuario Activo
+				//Traer configuración de reglas
+				int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+				
+				if (cantidadPeliculas >= limiteActivo) {
+					//No puede agregar más películas
+					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Has alcanzado el límite de películas en tu watchlist");
+					return;
+				}
+				
+			} else {
+				//Usuario Normal
+				//Traer configuración de reglas
+				int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+				
+				if (cantidadPeliculas >= limiteNormal) {
+					//No puede agregar más películas
+					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Has alcanzado el límite de películas en tu watchlist");
+					return;
+				}
+			}	
             watchlistController.addMovie(user.getId(), movieId);
         } else if ("remove".equals(action)) {
             watchlistController.removeMovie(user.getId(), movieId);

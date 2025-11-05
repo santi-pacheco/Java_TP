@@ -1,5 +1,5 @@
 package repository;
-
+import java.util.List;
 import entity.ConfiguracionReglas;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import util.DataSourceProvider;
 import exception.ErrorFactory;
 import java.sql.SQLException;
-
+import java.util.ArrayList;
 public class ConfiguracionReglasRepository {
 
 	public ConfiguracionReglas getLast() {
@@ -52,4 +52,29 @@ public class ConfiguracionReglasRepository {
 	    return config;
 	}
 	
+	public List<ConfiguracionReglas> getAll() {
+	    List<ConfiguracionReglas> configs = new ArrayList<>();
+	    String sql = "SELECT configID, umbralResenasActivo, limiteWatchlistNormal, limiteWatchlistActivo, fechaVigencia, usuarioAdminID FROM ConfiguracionReglas";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+	        
+	        while (rs.next()) {
+	            ConfiguracionReglas config = new ConfiguracionReglas();
+	            config.setConfigID(rs.getInt("configID"));
+	            config.setUmbralResenasActivo(rs.getInt("UmbralResenasActivo"));
+	            config.setLimiteWatchlistNormal(rs.getInt("limiteWatchlistNormal"));
+	            config.setLimiteWatchlistActivo(rs.getInt("limiteWatchlistActivo"));
+	            config.setFechaVigencia(rs.getString("fechaVigencia"));
+	            config.setUsuarioAdminID(rs.getInt("usuarioAdminID"));
+	            
+	            configs.add(config);
+	        }
+	        
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error fetching configurations from database");
+	    }
+	    return configs;
+	}
 }

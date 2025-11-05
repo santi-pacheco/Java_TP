@@ -46,6 +46,7 @@ public class UserService {
 	    existingUser.setEmail(user.getEmail());
 	    existingUser.setRole(user.getRole());
 	    existingUser.setBirthDate(user.getBirthDate());
+	    existingUser.setEsUsuarioActivo(user.isEsUsuarioActivo());
 
 	    // 2. Si existe, ahora sí actualiza
 	    return userRepository.update(existingUser);
