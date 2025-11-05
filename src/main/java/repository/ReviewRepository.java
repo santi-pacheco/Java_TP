@@ -272,4 +272,25 @@ public class ReviewRepository {
             throw ErrorFactory.internal("Error updating spoiler status");
         }
     }
+    
+    public int countReviewsByUser(int userId) {
+        String sql = "SELECT COUNT(*) FROM reviews WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error counting user reviews");
+        }
+        
+        return 0;
+    }
 }

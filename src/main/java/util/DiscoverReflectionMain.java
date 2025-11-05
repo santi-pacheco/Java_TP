@@ -563,6 +563,7 @@ public static void loadPersons() {
     	
     	
     	
+<<<<<<< HEAD
 //    	MovieRepository movieRepository = new MovieRepository();
 //    	MovieService movieService = new MovieService(movieRepository);
 //     	MovieController movieController = new MovieController(movieService);
@@ -571,6 +572,12 @@ public static void loadPersons() {
 
     	
      	// Testing country Repository
+=======
+    	MovieRepository movieRepository = new MovieRepository();
+     	MovieService movieService = new MovieService(movieRepository);
+     	MovieController movieController = new MovieController(movieService);
+     	//List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
+>>>>>>> f41d9872a1c6865a1bded2487daf3abc6ec426c3
      	
      	
 //

@@ -5,9 +5,11 @@ import java.util.List;
 import entity.Review;
 import entity.User;
 import entity.Movie;
+import entity.ConfiguracionReglas;
 import repository.ReviewRepository;
 import service.UserService;
 import service.MovieService;
+import service.ConfiguracionReglasService;
 import exception.ErrorFactory;
 
 public class ReviewService {
@@ -15,11 +17,13 @@ public class ReviewService {
     private ReviewRepository reviewRepository;
     private UserService userService;
     private MovieService movieService;
+    private ConfiguracionReglasService configuracionService;
 
-    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService) {
+    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, ConfiguracionReglasService configuracionService) {
         this.reviewRepository = reviewRepository;
         this.userService = userService;
         this.movieService = movieService;
+        this.configuracionService = configuracionService;
     }
 
     public Review createReview(Review review) {
@@ -48,7 +52,15 @@ public class ReviewService {
         review.setContieneSpoiler(null);
 
         // 5. Guardar la reseña
-        return reviewRepository.add(review);
+        Review savedReview = reviewRepository.add(review);
+        
+        // 6. Actualizar estadísticas de la película
+        movieService.updateReviewStats(review.getId_movie());
+        
+        // 7. Verificar y actualizar estado activo del usuario
+        checkUserActiveStatus(review.getId_user());
+        
+        return savedReview;
     }
 
     public Review getReviewById(int id) {
@@ -87,7 +99,12 @@ public class ReviewService {
         review.setContieneSpoiler(null);
 
         // 4. Actualizar
-        return reviewRepository.update(review);
+        Review updatedReview = reviewRepository.update(review);
+        
+        // 5. Actualizar estadísticas de la película
+        movieService.updateReviewStats(review.getId_movie());
+        
+        return updatedReview;
     }
 
     public void deleteReview(int reviewId) {
@@ -99,6 +116,12 @@ public class ReviewService {
 
         // 2. Eliminar
         reviewRepository.delete(existingReview);
+        
+        // 3. Actualizar estadísticas de la película
+        movieService.updateReviewStats(existingReview.getId_movie());
+        
+        // 4. Verificar y actualizar estado activo del usuario
+        validateUserActiveStatusOnDelete(existingReview.getId_user());
     }
 
     public List<Review> getReviewsByMovie(int movieId) {
@@ -137,5 +160,41 @@ public class ReviewService {
             // Si no existe, crear nueva reseña
             return createReview(review);
         }
+    }
+    
+    private void checkUserActiveStatus(int userId) {
+        ConfiguracionReglas config = configuracionService.getConfiguracionReglas();
+        if (config != null) {
+            User user = userService.getUserById(userId);
+            if (!user.isEsUsuarioActivo()) {
+                int reviewCount = reviewRepository.countReviewsByUser(userId);
+                if (reviewCount >= config.getUmbralResenasActivo()) {
+                    userService.updateUser(createActiveUser(user));
+                }
+            }
+        }
+    }
+    
+    private void validateUserActiveStatusOnDelete(int userId) {
+        ConfiguracionReglas config = configuracionService.getConfiguracionReglas();
+        if (config != null) {
+            User user = userService.getUserById(userId);
+            if (user.isEsUsuarioActivo()) {
+                int reviewCount = reviewRepository.countReviewsByUser(userId);
+                if (reviewCount < config.getUmbralResenasActivo()) {
+                    userService.updateUser(createInactiveUser(user));
+                }
+            }
+        }
+    }
+    
+    private User createActiveUser(User user) {
+        user.setEsUsuarioActivo(true);
+        return user;
+    }
+    
+    private User createInactiveUser(User user) {
+        user.setEsUsuarioActivo(false);
+        return user;
     }
 }

@@ -12,7 +12,7 @@ public class ConfiguracionReglasRepository {
 
 	public ConfiguracionReglas getLast() {
 		ConfiguracionReglas config = null;
-		String sql = "SELECT configID, umbralResenasActivo, limiteWatchlistNormal, limiteWatchlistActivo, max(fechaVigencia), usuarioAdminID FROM ConfiguracionReglas";
+		String sql = "SELECT configID, umbralResenasActivos, limiteWatchlistNormal, limiteWatchlistActivo, fechaEfectiva, usuarioAdminID FROM ConfiguracionReglas ORDER BY configID DESC LIMIT 1";
 
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql);
@@ -21,10 +21,10 @@ public class ConfiguracionReglasRepository {
 			if (rs.next()) {
 				config = new ConfiguracionReglas();
 				config.setConfigID(rs.getInt("configID"));
-				config.setUmbralResenasActivo(rs.getInt("UmbralResenasActivo"));
+				config.setUmbralResenasActivo(rs.getInt("umbralResenasActivos"));
 				config.setLimiteWatchlistNormal(rs.getInt("limiteWatchlistNormal"));
 				config.setLimiteWatchlistActivo(rs.getInt("limiteWatchlistActivo"));
-				config.setFechaVigencia(rs.getString("max(fechaVigencia)"));
+				config.setFechaVigencia(rs.getString("fechaEfectiva"));
 				config.setUsuarioAdminID(rs.getInt("usuarioAdminID"));
 			}
 			
@@ -35,7 +35,7 @@ public class ConfiguracionReglasRepository {
 	}
 	
 	public ConfiguracionReglas add(ConfiguracionReglas config) {
-	    String sql = "INSERT INTO ConfiguracionReglas (umbralResenasActivo, limiteWatchlistNormal, limiteWatchlistActivo, usuarioAdminID) VALUES (?, ?, ?, ?)";
+	    String sql = "INSERT INTO ConfiguracionReglas (umbralResenasActivos, limiteWatchlistNormal, limiteWatchlistActivo, usuarioAdminID) VALUES (?, ?, ?, ?)";
 	    
 	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -54,7 +54,7 @@ public class ConfiguracionReglasRepository {
 	
 	public List<ConfiguracionReglas> getAll() {
 	    List<ConfiguracionReglas> configs = new ArrayList<>();
-	    String sql = "SELECT configID, umbralResenasActivo, limiteWatchlistNormal, limiteWatchlistActivo, fechaVigencia, usuarioAdminID FROM ConfiguracionReglas";
+	    String sql = "SELECT configID, umbralResenasActivos, limiteWatchlistNormal, limiteWatchlistActivo, fechaEfectiva, usuarioAdminID FROM ConfiguracionReglas";
 
 	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql);
@@ -63,10 +63,10 @@ public class ConfiguracionReglasRepository {
 	        while (rs.next()) {
 	            ConfiguracionReglas config = new ConfiguracionReglas();
 	            config.setConfigID(rs.getInt("configID"));
-	            config.setUmbralResenasActivo(rs.getInt("UmbralResenasActivo"));
+	            config.setUmbralResenasActivo(rs.getInt("umbralResenasActivos"));
 	            config.setLimiteWatchlistNormal(rs.getInt("limiteWatchlistNormal"));
 	            config.setLimiteWatchlistActivo(rs.getInt("limiteWatchlistActivo"));
-	            config.setFechaVigencia(rs.getString("fechaVigencia"));
+	            config.setFechaVigencia(rs.getString("fechaEfectiva"));
 	            config.setUsuarioAdminID(rs.getInt("usuarioAdminID"));
 	            
 	            configs.add(config);

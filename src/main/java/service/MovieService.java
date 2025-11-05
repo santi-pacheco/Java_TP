@@ -152,4 +152,8 @@ public class MovieService {
 	
 	
 	
+	public void updateReviewStats(int movieId) {
+		movieRepository.updateReviewStats(movieId);
+	}
+	
 }

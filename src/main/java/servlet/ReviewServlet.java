@@ -31,6 +31,7 @@ import repository.MovieRepository;
 import service.ReviewService;
 import service.UserService;
 import service.MovieService;
+import service.ConfiguracionReglasService;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -53,12 +54,14 @@ public class ReviewServlet extends HttpServlet {
         ReviewRepository reviewRepository = new ReviewRepository();
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
+        repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
         
         // Inicializar servicios
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         UserService userService = new UserService(userRepository, passwordEncoder);
         MovieService movieService = new MovieService(movieRepository);
-        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService);
+        ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
+        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
         
         // Inicializar controller
         this.reviewController = new ReviewController(reviewService);

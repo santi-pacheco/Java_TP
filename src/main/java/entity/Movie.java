@@ -61,6 +61,9 @@ public class Movie {
     
     private Float rating;
     
+    private Double promedioResenasLocal = 0.0;
+    private Integer cantidadResenasLocal = 0;
+    
 	public void setRating(Float rating) {
 		this.rating = rating;
 	}
@@ -153,8 +156,21 @@ public class Movie {
 		return rating;
 	}
 	
+	public Double getPromedioResenasLocal() {
+		return promedioResenasLocal;
+	}
 	
+	public void setPromedioResenasLocal(Double promedioResenasLocal) {
+		this.promedioResenasLocal = promedioResenasLocal;
+	}
 	
+	public Integer getCantidadResenasLocal() {
+		return cantidadResenasLocal;
+	}
+	
+	public void setCantidadResenasLocal(Integer cantidadResenasLocal) {
+		this.cantidadResenasLocal = cantidadResenasLocal;
+	}
 	
 	@Override
 	public String toString() {
