@@ -20,7 +20,7 @@ public class DataSourceProvider {
 
                         HikariConfig config = new HikariConfig();
                         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-                        config.setJdbcUrl("jdbc:mysql://localhost:3307/fatmovies?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+                        config.setJdbcUrl("jdbc:mysql://localhost:3306/fatmovies?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
                         config.setUsername("java_user");
                         config.setPassword("java_pass");
 

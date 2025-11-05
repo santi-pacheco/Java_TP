@@ -465,27 +465,25 @@ public class MovieRepository {
 	// 3ro Año salida
 
 		
-	public List<Movie> movieFilter(String genero, int desde, int hasta) {
-	    return movieFilter(null, genero, desde, hasta);
-	}
+
 	
 	public List<Movie> movieFilter(String nombre, String genero, int desde, int hasta) {
 	    System.out.println("Filtrando películas - Nombre: " + nombre + ", Género: " + genero + ", Años: " + desde + "-" + hasta);
-	    
+
 	    try {
 	        List<Movie> movies = new ArrayList<>();
 	        StringBuilder sql = new StringBuilder();
-	        
+
 	        sql.append("SELECT DISTINCT p.id_pelicula, p.id_api, p.name, p.sinopsis, p.duracion, ")
 	           .append("p.adulto, p.titulo_original, p.puntuacion_api, p.idioma_original, ")
 	           .append("p.poster_path, p.popularidad, p.votos_api, p.anioEstreno, p.id_imdb ")
 	           .append("FROM peliculas p ");
-	        
+
 	        if (genero != null && !genero.isBlank()) {
 	            sql.append("INNER JOIN generos_peliculas gp ON gp.id_pelicula = p.id_pelicula ")
 	               .append("INNER JOIN generos g ON g.id_genero = gp.id_genero ");
 	        }
-	        
+
 	        List<String> conditions = new ArrayList<>();
 	        if (nombre != null && !nombre.trim().isEmpty()) {
 	            conditions.add("(p.name LIKE ? OR p.titulo_original LIKE ?)");
@@ -495,15 +493,19 @@ public class MovieRepository {
 	        }
 	        if (desde != 0 && hasta != 0) {
 	            conditions.add("p.anioEstreno BETWEEN ? AND ?");
+	        } else if (desde == 0 && hasta != 0) {
+	            conditions.add("p.anioEstreno <= ?");
+	        } else if (desde != 0 && hasta == 0) {
+	            conditions.add("p.anioEstreno >= ?");
 	        }
-	        
+
 	        if (!conditions.isEmpty()) {
 	            sql.append("WHERE ").append(String.join(" AND ", conditions));
 	        }
-	        
+
 	        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-	            
+
 	            int paramIndex = 1;
 	            if (nombre != null && !nombre.trim().isEmpty()) {
 	                String searchPattern = "%" + nombre.trim() + "%";
@@ -516,20 +518,27 @@ public class MovieRepository {
 	            if (desde != 0 && hasta != 0) {
 	                stmt.setInt(paramIndex++, desde);
 	                stmt.setInt(paramIndex++, hasta);
+	            } else if (desde == 0 && hasta != 0) {
+	                stmt.setInt(paramIndex++, hasta);
+	            } else if (desde != 0 && hasta == 0) {
+	                stmt.setInt(paramIndex++, desde);
 	            }
-	            
+
 	            try (ResultSet rs = stmt.executeQuery()) {
 	                while (rs.next()) {
+	                    System.out.println("Película encontrada: " + rs.getString("name") + " Año: " + rs.getInt("anioEstreno"));
 	                    movies.add(mapResultSetToMovie(rs));
 	                }
 	            }
 	        }
-	        
+
 	        System.out.println("Se encontraron " + movies.size() + " películas");
 	        return movies;
-	        
+
 	    } catch (Exception e) {
+	        System.out.println("Error during movie filtering: " + nombre + genero + desde + hasta);
 	        System.err.println("Error filtering movies, returning mock data: " + e.getMessage());
+	        e.printStackTrace(); // Añadido para ver el stack trace completo
 	        return createMockMovies(10);
 	    }
 	}

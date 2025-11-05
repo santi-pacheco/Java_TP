@@ -70,12 +70,10 @@ public class MovieController {
 	}
 	
 	
-	public List<Movie> getMovieByFilter(String genre, int year1, int year2) {
-		return movieService.getMovieByFilter(genre, year1, year2);
-	}
-	
 	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
 		return movieService.getMovieByFilter(name, genre, year1, year2);
 	}
+	
+
 	
 }

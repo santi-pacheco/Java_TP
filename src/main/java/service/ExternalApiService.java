@@ -9,7 +9,7 @@ import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.movies.Credits;
 import info.movito.themoviedbapi.model.people.credits.*;
 import info.movito.themoviedbapi.model.movies.MovieDb;
-
+import info.movito.themoviedbapi.model.core.ProductionCountry;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
@@ -209,6 +209,32 @@ public class ExternalApiService {
         }
     }
     
+    
+    public List<entity.Country> mapCountries(List<info.movito.themoviedbapi.model.core.ProductionCountry> tmdbCountries) {
+        if (tmdbCountries == null) {
+            return new ArrayList<>();
+        }
+
+        return tmdbCountries.stream()
+                // No necesitamos .filter() aquí, queremos todos los países
+
+                .map(tmdbCountry -> {
+                    entity.Country localCountry = new entity.Country();
+
+                    // Mapeamos el código ISO
+                    localCountry.setIso_3166_1(tmdbCountry.getIsoCode());
+
+                    // Mapeamos el nombre
+                    localCountry.setEnglish_name(tmdbCountry.getName());
+
+                    // Los otros campos (id, native_name) quedan
+                    // con sus valores por defecto (0 o null)
+
+                    return localCountry;
+                })
+                .collect(Collectors.toList());
+    }
+    
     public static List<entity.Country> getMovieCountries() throws TmdbException, IOException {
         System.out.println("📡 Obteniendo países desde TMDB API...");
         
@@ -295,20 +321,23 @@ public class ExternalApiService {
     public static class MovieDetailsDTO {
         private final Integer runtime;
         private final String id_imdb;
+        private final List<ProductionCountry> productionCountries;
         private final List<info.movito.themoviedbapi.model.core.Genre> genres;
         private final info.movito.themoviedbapi.model.movies.Credits credits;
 
-        public MovieDetailsDTO(Integer runtime,String id_imdb , List<info.movito.themoviedbapi.model.core.Genre> genres, Credits credits) {
+        public MovieDetailsDTO(Integer runtime,String id_imdb , List<info.movito.themoviedbapi.model.core.Genre> genres, Credits credits, List<ProductionCountry> productionCountries) {
             this.runtime = runtime;
             this.id_imdb = id_imdb;
             this.genres = genres;
             this.credits = credits;
+            this.productionCountries = productionCountries;
         }
 
         public Integer getRuntime() { return runtime; }
         public String getId_imdb() { return id_imdb; }
         public List<info.movito.themoviedbapi.model.core.Genre> getGenres() { return genres; }
         public info.movito.themoviedbapi.model.movies.Credits getCredits() { return credits; }
+        public List<ProductionCountry> getProductionCountries() { return productionCountries; }
     }
 
     public MovieDetailsDTO fetchMovieDetailsWithCredits(int tmdbMovieId, String language) throws TmdbException {
@@ -335,9 +364,11 @@ public class ExternalApiService {
         if (movieDb.getExternalIds() != null) {
             imdbId = movieDb.getExternalIds().getImdbId();
         }
-
+        
+        List<ProductionCountry> countries = movieDb.getProductionCountries();
+        
         // 4. Devuelve el DTO con toda la información.
-        return new MovieDetailsDTO(runtime, imdbId, genres, credits);
+        return new MovieDetailsDTO(runtime, imdbId, genres, credits, countries);
     }
 
     //---------------------------------------------------------------------------------------------------
@@ -378,6 +409,29 @@ public class ExternalApiService {
     }
     
     //------------------------------------------------------------------------------------------------------
+    
+    public List<entity.Genre> mapGenres(List<info.movito.themoviedbapi.model.core.Genre> tmdbGenres) {
+        if (tmdbGenres == null) {
+            return new ArrayList<>();
+        }
+
+        return tmdbGenres.stream()
+                // NOTA: No necesitamos .filter() aquí, queremos todos los géneros.
+                
+                .map(tmdbGenre -> {
+                    entity.Genre localGenre = new entity.Genre();
+                    
+                    // Mapeamos el ID de la API
+                    localGenre.setId_api(tmdbGenre.getId());
+                    
+                    // Mapeamos el nombre
+                    localGenre.setName(tmdbGenre.getName());
+
+                    return localGenre;
+                })
+                .collect(Collectors.toList());
+    }
+    
     public List<entity.Person> mapCrew(List<info.movito.themoviedbapi.model.movies.Crew> tmdbCrew) {
         if (tmdbCrew == null) {
             return new ArrayList<>();

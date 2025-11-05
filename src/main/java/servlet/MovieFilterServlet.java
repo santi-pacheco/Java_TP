@@ -59,7 +59,7 @@ public class MovieFilterServlet extends HttpServlet{
 			if (name != null && !name.trim().isEmpty()) {
 				filteredMovies = movieController.searchMoviesByName(name.trim());
 			} else {
-				filteredMovies = movieController.getMovieByFilter(genre, since, until);
+				filteredMovies = movieController.getMovieByFilter(name, genre, since, until);
 			}
 			
 			request.setAttribute("movies", filteredMovies);

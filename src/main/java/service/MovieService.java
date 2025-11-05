@@ -142,13 +142,14 @@ public class MovieService {
 		return movieRepository.findRecentMovies(limit);
 	}
 	
-	
-	public List<Movie> getMovieByFilter(String genre, int year1, int year2) {
-		return movieRepository.movieFilter(genre, year1, year2);
-	}
-	
+		
 	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
+		System.out.println("Service - Filtro: " + name + ", " + genre + ", " + year1 + ", " + year2);
 		return movieRepository.movieFilter(name, genre, year1, year2);
 	}
+
+	
+	
+	
 	
 }

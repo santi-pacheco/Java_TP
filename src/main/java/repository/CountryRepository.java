@@ -56,6 +56,33 @@ public class CountryRepository {
 		return country;
 	}
 	
+	public int findOneByISO(String iso) {
+		System.out.println("Buscando país por código ISO: " + iso);
+		int idCountry = -1;
+		String sql = "SELECT id_country FROM paises WHERE iso_country = ?";
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			
+			stmt.setString(1, iso);
+			
+
+			
+		
+			try (ResultSet rs = stmt.executeQuery()) {
+				if(rs.next()) {
+					idCountry = rs.getInt("id_country");
+					System.out.println("ID del país encontrado: " + idCountry);
+				}
+			}
+	
+		}
+		catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching country by name");
+		}
+		return idCountry;
+	}
+	
 	public Country add(Country c) {
 		String sql = "INSERT INTO paises (iso_country, name) VALUES (?, ?)";
 		
@@ -128,7 +155,7 @@ public class CountryRepository {
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
+			System.out.println("Preparando batch de países...");
 			for (Country g : countries) {
 				stmt.setString(1, g.getIso_3166_1());
 				stmt.setString(2, g.getEnglish_name());
@@ -141,5 +168,27 @@ public class CountryRepository {
 		} catch (SQLException e) {
 			throw ErrorFactory.internal("Error saving countries in batch");
 		}
-	}	
+	}
+	
+	
+	public void saveCountryMovie(int countryId, int MovieId) {
+		System.out.println("Guardando asociación país-película: " + countryId + " - " + MovieId);
+		String sql = "INSERT INTO peliculas_paises (id_country, id_pelicula) VALUES (?, ?)";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, countryId);
+			stmt.setInt(2, MovieId);
+			stmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error saving country-movie association" + e.getMessage());
+		}
+		
+		
+	}
+	
+	
+	
 }
