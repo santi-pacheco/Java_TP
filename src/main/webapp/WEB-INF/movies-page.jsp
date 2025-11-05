@@ -143,13 +143,166 @@
         .scroll-right {
             right: 50px;
         }
+        
+        .filter-section {
+            background: white;
+            margin: 0 40px 40px 40px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .filter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        .filter-btn {
+            background: #333;
+            color: #FAF8F3;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: #555;
+        }
+        
+        .clear-btn {
+            background: #999;
+            color: #FAF8F3;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #777;
+        }
+        
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 </head>
 <body>
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="page-container">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h2 class="section-title">Buscar y Filtrar Películas</h2>
+            <form action="${pageContext.request.contextPath}/movies" method="get" class="filter-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" name="name" placeholder="Buscar por nombre..." value="${currentName != null ? currentName : ''}" onchange="this.form.submit()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="genre">Género:</label>
+                        <select id="genre" name="genre" onchange="this.form.submit()">
+                            <option value="" ${currentGenre == null || currentGenre == '' ? 'selected' : ''}>Todos los géneros</option>
+                            <option value="Acción" ${currentGenre == 'Acción' ? 'selected' : ''}>Acción</option>
+                            <option value="Aventura" ${currentGenre == 'Aventura' ? 'selected' : ''}>Aventura</option>
+                            <option value="Animación" ${currentGenre == 'Animación' ? 'selected' : ''}>Animación</option>
+                            <option value="Comedia" ${currentGenre == 'Comedia' ? 'selected' : ''}>Comedia</option>
+                            <option value="Crimen" ${currentGenre == 'Crimen' ? 'selected' : ''}>Crimen</option>
+                            <option value="Documental" ${currentGenre == 'Documental' ? 'selected' : ''}>Documental</option>
+                            <option value="Drama" ${currentGenre == 'Drama' ? 'selected' : ''}>Drama</option>
+                            <option value="Familia" ${currentGenre == 'Familia' ? 'selected' : ''}>Familia</option>
+                            <option value="Fantasía" ${currentGenre == 'Fantasía' ? 'selected' : ''}>Fantasía</option>
+                            <option value="Historia" ${currentGenre == 'Historia' ? 'selected' : ''}>Historia</option>
+                            <option value="Terror" ${currentGenre == 'Terror' ? 'selected' : ''}>Terror</option>
+                            <option value="Música" ${currentGenre == 'Música' ? 'selected' : ''}>Música</option>
+                            <option value="Misterio" ${currentGenre == 'Misterio' ? 'selected' : ''}>Misterio</option>
+                            <option value="Romance" ${currentGenre == 'Romance' ? 'selected' : ''}>Romance</option>
+                            <option value="Ciencia ficción" ${currentGenre == 'Ciencia ficción' ? 'selected' : ''}>Ciencia ficción</option>
+                            <option value="Película de TV" ${currentGenre == 'Película de TV' ? 'selected' : ''}>Película de TV</option>
+                            <option value="Suspense" ${currentGenre == 'Suspense' ? 'selected' : ''}>Suspense</option>
+                            <option value="Bélica" ${currentGenre == 'Bélica' ? 'selected' : ''}>Bélica</option>
+                            <option value="Western" ${currentGenre == 'Western' ? 'selected' : ''}>Western</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="since">Desde año:</label>
+                        <input type="number" id="since" name="since" min="1900" max="2024" placeholder="1990" value="${currentSince != null ? currentSince : ''}" onchange="this.form.submit()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="until">Hasta año:</label>
+                        <input type="number" id="until" name="until" min="1900" max="2024" placeholder="2024" value="${currentUntil != null ? currentUntil : ''}" onchange="this.form.submit()">
+                    </div>
+                    <div class="filter-group">
+                        <button type="submit" class="filter-btn">Buscar</button>
+                    </div>
+                    <% if (request.getAttribute("filteredMovies") != null) { %>
+                    <div class="filter-group">
+                        <a href="${pageContext.request.contextPath}/movies" class="clear-btn">Limpiar</a>
+                    </div>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+        
         <%
+            @SuppressWarnings("unchecked")
+            List<Movie> filteredMovies = (List<Movie>) request.getAttribute("filteredMovies");
             @SuppressWarnings("unchecked")
             List<Movie> popularMovies = (List<Movie>) request.getAttribute("popularMovies");
             @SuppressWarnings("unchecked")
@@ -157,6 +310,34 @@
             @SuppressWarnings("unchecked")
             List<Movie> recentMovies = (List<Movie>) request.getAttribute("recentMovies");
         %>
+        
+        <% if (filteredMovies != null) { %>
+        <!-- Resultados Filtrados -->
+        <div class="section">
+            <h2 class="section-title">Resultados de Búsqueda (<%= filteredMovies.size() %> películas)</h2>
+            <div class="movies-grid">
+                <%
+                    for (Movie movie : filteredMovies) {
+                %>
+                <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'">
+                    <img src="https://image.tmdb.org/t/p/w300<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
+                         alt="<%= movie.getTitulo() %>" 
+                         class="movie-poster"
+                         onerror="this.src='https://via.placeholder.com/200x300?text=Sin+Imagen'">
+                    <div class="movie-info">
+                        <div class="movie-title"><%= movie.getTitulo() %></div>
+                        <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                        <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
+                            <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
+                        <% } %>
+                    </div>
+                </div>
+                <%
+                    }
+                %>
+            </div>
+        </div>
+        <% } else { %>
         
         <!-- Películas Más Populares -->
         <div class="section">
@@ -253,6 +434,7 @@
                 <button class="scroll-button scroll-right" onclick="scrollCarousel('recent', 220)">›</button>
             </div>
         </div>
+        <% } %>
     </div>
     
     <script>
