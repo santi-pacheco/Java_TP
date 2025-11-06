@@ -9,7 +9,8 @@ Ribotta, Tomás \- 52309
  El sistema va a consistir en una aplicación web en la cual los usuarios podrán llevar un registro de las películas y/o series que hayan visto brindándole la posibilidad de darle una puntuación y una reseña. De cada película los usuarios tendrán la opción de visualizar las diferentes reseñas teniendo la oportunidad de darle me gusta. También podrán ver la calificación de un medio especializado.   
  Los usuarios podrán agregar películas a una lista llamada “Watchlist” a modo de recordatorio para su posterior visualización.  
  En la principal se ubicará un dashboard que en el cual usuario podrá ver las películas mejor puntuadas, sus últimas reseñas y recomendaciones específicas para cada usuario.
-
+ 
+![Diagrama Entidad Relacion del proyecto](./assets/JavaTp.drawio.png)
 
 **Regularidad:**
 
