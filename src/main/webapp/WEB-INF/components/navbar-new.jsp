@@ -192,7 +192,7 @@
     function displaySearchResults(movies) {
         if (movies.length === 0) {
             <%-- CORREGIDO: "películas" -> "pel�culas" --%>
-            searchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No se encontraron pel�culas</div>';
+            searchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No se encontraron peliculas</div>';
         } else {
             var html = '';
             for (var i = 0; i < Math.min(movies.length, 8); i++) {

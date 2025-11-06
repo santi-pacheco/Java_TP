@@ -6,6 +6,8 @@
 <%@ page import="entity.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="entity.Country" %>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -579,6 +581,23 @@
                         <span class="meta-value"><%= movie.getIdiomaOriginal().toUpperCase() %></span>
                     </div>
                     <% } %>
+					<% 
+					    @SuppressWarnings("unchecked")
+					    List<entity.Country> countries = (List<entity.Country>) request.getAttribute("countries");
+					    if (countries != null && !countries.isEmpty()) { 
+					%>
+					<div class="meta-item">
+					    <span class="meta-label">Países</span>
+					    <span class="meta-value">
+					        <% 
+					            for (int i = 0; i < countries.size(); i++) {
+					                if (i > 0) out.print(", ");
+					                out.print(countries.get(i).getIso_3166_1());
+					            }
+					        %>
+					    </span>
+					</div>
+					<% } %>
                 </div>
                 
                 <% if (movie.getSinopsis() != null && !movie.getSinopsis().trim().isEmpty()) { %>

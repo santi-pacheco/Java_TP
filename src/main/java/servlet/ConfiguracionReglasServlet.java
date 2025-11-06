@@ -39,8 +39,8 @@ public class ConfiguracionReglasServlet extends HttpServlet {
 		config.setLimiteWatchlistActivo(Integer.parseInt(request.getParameter("limiteWatchlistActivo")));
 		
 		HttpSession session = request.getSession(false);
-		if (session != null && session.getAttribute("user") != null) {
-			entity.User user = (entity.User) session.getAttribute("user");
+		if (session != null && session.getAttribute("usuarioLogueado") != null) {
+			entity.User user = (entity.User) session.getAttribute("usuarioLogueado");
 			config.setUsuarioAdminID(user.getId());
 		}
 		

@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import entity.Country;
 import entity.Movie;
 import java.util.ArrayList;
 import java.io.BufferedReader;
@@ -561,6 +562,33 @@ public class MovieRepository {
 			throw ErrorFactory.internal("Error updating movie review stats");
 		}
 	}
+	
+	public List<Country> getCountriesByMovieId(int movieId) {
+	    List<Country> countries = new ArrayList<>();
+	    String sql = "SELECT c.id_country, c.iso_country, c.name " +
+	                 "FROM paises c " +
+	                 "INNER JOIN peliculas_paises pp ON c.id_country = pp.id_country " +
+	                 "WHERE pp.id_pelicula = ?";
+	    
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        
+	        stmt.setInt(1, movieId);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                Country country = new Country();
+	                country.setId(rs.getInt("id_country"));
+	                country.setIso_3166_1(rs.getString("iso_country"));
+	                country.setEnglish_name(rs.getString("name"));
+	                countries.add(country);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error fetching countries for movie");
+	    }
+	    return countries;
+	}
+
 
 	
 }

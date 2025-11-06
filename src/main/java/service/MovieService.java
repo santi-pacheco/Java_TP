@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import entity.Country;
 import entity.Movie;
 import repository.MovieRepository;
 import exception.ErrorFactory;
@@ -146,6 +148,9 @@ public class MovieService {
 	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
 		System.out.println("Service - Filtro: " + name + ", " + genre + ", " + year1 + ", " + year2);
 		return movieRepository.movieFilter(name, genre, year1, year2);
+	}
+	public List<Country> getCountriesByMovieId(int movieId) {
+	    return movieRepository.getCountriesByMovieId(movieId);
 	}
 
 	
