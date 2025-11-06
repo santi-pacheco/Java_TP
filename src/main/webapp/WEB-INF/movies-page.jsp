@@ -247,7 +247,7 @@
         <!-- Filter Section -->
         <div class="filter-section">
             <h2 class="section-title">Buscar y Filtrar Películas</h2>
-            <form action="${pageContext.request.contextPath}/movies" method="get" class="filter-form">
+            <form action="${pageContext.request.contextPath}/movies-page" method="get" class="filter-form">
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="name">Nombre:</label>
@@ -282,18 +282,18 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="since">Desde año:</label>
-                        <input type="number" id="since" name="since" min="1900" max="2024" placeholder="1990" value="${currentSince != null ? currentSince : ''}" onchange="this.form.submit()">
+                        <input type="number" id="since" name="since" min="1900" max="<%= java.time.Year.now().getValue() %>" placeholder="1990" value="${currentSince != null ? currentSince : ''}" onchange="validateYears(); this.form.submit();">
                     </div>
                     <div class="filter-group">
                         <label for="until">Hasta año:</label>
-                        <input type="number" id="until" name="until" min="1900" max="2024" placeholder="2024" value="${currentUntil != null ? currentUntil : ''}" onchange="this.form.submit()">
+                        <input type="number" id="until" name="until" min="1900" max="<%= java.time.Year.now().getValue() %>" placeholder="<%= java.time.Year.now().getValue() %>" value="${currentUntil != null ? currentUntil : ''}" onchange="validateYears(); this.form.submit();">
                     </div>
                     <div class="filter-group">
                         <button type="submit" class="filter-btn">Buscar</button>
                     </div>
                     <% if (request.getAttribute("filteredMovies") != null) { %>
                     <div class="filter-group">
-                        <a href="${pageContext.request.contextPath}/movies" class="clear-btn">Limpiar</a>
+                        <a href="${pageContext.request.contextPath}/movies-page" class="clear-btn">Limpiar</a>
                     </div>
                     <% } %>
                 </div>
@@ -327,9 +327,14 @@
                     <div class="movie-info">
                         <div class="movie-title"><%= movie.getTitulo() %></div>
                         <div class="movie-year"><%= movie.getEstrenoYear() %></div>
-                        <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                            <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
-                        <% } %>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
+                                <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
+                            <% } %>
+                            <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
+                                <div class="movie-rating" style="background: #8B7355;">🍿 <%= String.format("%.1f", movie.getPromedioResenasLocal()) %></div>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
                 <%
@@ -444,6 +449,29 @@
                 left: scrollAmount,
                 behavior: 'smooth'
             });
+        }
+        
+        function validateYears() {
+            const sinceInput = document.getElementById('since');
+            const untilInput = document.getElementById('until');
+            const currentYear = new Date().getFullYear();
+            
+            const since = parseInt(sinceInput.value) || 0;
+            const until = parseInt(untilInput.value) || 0;
+            
+            if (until > 0 && until > currentYear) {
+                alert('El año hasta no puede ser mayor al año actual (' + currentYear + ')');
+                untilInput.value = currentYear;
+                return false;
+            }
+            
+            if (since > 0 && until > 0 && since > until) {
+                alert('El año desde no puede ser mayor al año hasta');
+                sinceInput.value = until;
+                return false;
+            }
+            
+            return true;
         }
     </script>
 </body>

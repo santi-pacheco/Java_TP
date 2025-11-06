@@ -107,7 +107,8 @@ public class WatchlistServlet extends HttpServlet {
 				
 				if (cantidadPeliculas >= limiteActivo) {
 					//No puede agregar más películas
-					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Has alcanzado el límite de películas en tu watchlist");
+					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+					response.sendRedirect(request.getHeader("Referer"));
 					return;
 				}
 				
@@ -118,7 +119,8 @@ public class WatchlistServlet extends HttpServlet {
 				
 				if (cantidadPeliculas >= limiteNormal) {
 					//No puede agregar más películas
-					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Has alcanzado el límite de películas en tu watchlist");
+					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+					response.sendRedirect(request.getHeader("Referer"));
 					return;
 				}
 			}	

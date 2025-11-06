@@ -38,7 +38,7 @@
 <body>
 
 <div class="container">
-    <a href="<%= request.getContextPath() %>/" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="glyphicon glyphicon-home"></i> Volver al Inicio</a>
+    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="glyphicon glyphicon-home"></i> Volver al Inicio</a>
     <div class="table-wrapper">
         <div class="table-title">
             <div class="row">

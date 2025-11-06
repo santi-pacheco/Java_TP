@@ -80,7 +80,7 @@
 </head>
 <body>
 <div class="container">
-    <a href="<%= request.getContextPath() %>/" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="fa fa-home"></i> Volver al Inicio</a>
+    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="fa fa-home"></i> Volver al Inicio</a>
     <div class="table-responsive">
         <div class="table-wrapper">
             <div class="table-title">
@@ -88,15 +88,23 @@
                     <div class="col-sm-6">
                         <h2>Gestión de <b>Países</b></h2>
                     </div>
+                    <div class="col-sm-6">
+                        <a href="<%= request.getContextPath() %>/countries?accion=mostrarFormCrear" class="btn btn-success" style="float: right;">
+                            <span class="glyphicon glyphicon-plus"></span> Añadir País
+                        </a>
+                    </div>
                 </div>
             </div>
+            <% if ("true".equals(request.getParameter("exito"))) { %>
+            <div class="alert alert-success">¡Operación realizada con éxito!</div>
+            <% } %>
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Código ISO</th>
-                        <th>Nombre en Inglés</th>
-                        <th>Nombre Nativo</th>
+                        <th>Nombre</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,7 +117,14 @@
                         <td><%= country.getId() %></td>
                         <td><%= country.getIso_3166_1() != null ? country.getIso_3166_1() : "-" %></td>
                         <td><%= country.getEnglish_name() != null ? country.getEnglish_name() : "-" %></td>
-                        <td><%= country.getNative_name() != null ? country.getNative_name() : "-" %></td>
+                        <td>
+                            <a href="<%= request.getContextPath() %>/countries?accion=mostrarFormEditar&id=<%= country.getId() %>" class="btn btn-warning btn-xs">Editar</a>
+                            <form action="<%= request.getContextPath() %>/countries" method="POST" style="display:inline;">
+                                <input type="hidden" name="accion" value="eliminar">
+                                <input type="hidden" name="id" value="<%= country.getId() %>">
+                                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Eliminar este país?')">Eliminar</button>
+                            </form>
+                        </td>
                     </tr>
                     <%      
                             }

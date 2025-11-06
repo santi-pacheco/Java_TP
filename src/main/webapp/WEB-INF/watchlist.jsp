@@ -108,7 +108,20 @@
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="container">
-        <h1>Mi Watchlist</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="margin: 0;">Mi Watchlist</h1>
+            <%
+                @SuppressWarnings("unchecked")
+                List<Movie> moviesCheck = (List<Movie>) request.getAttribute("movies");
+                if (moviesCheck != null && !moviesCheck.isEmpty()) {
+            %>
+            <form method="get" action="${pageContext.request.contextPath}/roulette" style="margin: 0;">
+                <button type="submit" style="padding: 12px 30px; background-color: #8B7355; color: white; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">🎰 Ruleta de Películas</button>
+            </form>
+            <%
+                }
+            %>
+        </div>
         
         <%
             @SuppressWarnings("unchecked")

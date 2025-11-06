@@ -15,7 +15,7 @@ import repository.MovieRepository;
 import service.MovieService;
 
 
-@WebServlet("/movies")
+@WebServlet("/movies-page")
 public class MoviesPageServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -96,7 +96,8 @@ public class MoviesPageServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("Error in MoviesPageServlet: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/");
+            request.setAttribute("errorMessage", "Error al cargar las películas: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/movies-page.jsp").forward(request, response);
         }
     }
 }

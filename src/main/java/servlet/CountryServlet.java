@@ -2,83 +2,76 @@ package servlet;
 
 import java.io.IOException;
 import java.util.List;
-import service.ExternalApiService;
-import repository.CountryRepository;
-import controller.CountryController;
-import jakarta.servlet.ServletException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.google.gson.Gson;
-
 import service.CountryService;
 import repository.CountryRepository;
-import controller.GenreController;
+import controller.CountryController;
 import entity.Country;
-import info.movito.themoviedbapi.tools.TmdbException;
 
 @WebServlet("/countries")
 public class CountryServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
 	private CountryController countryController;
-	private Gson gson;
 	
 	@Override
 	public void init() throws ServletException {
 		super.init();
 		CountryRepository countryRepository = new CountryRepository();
 		CountryService countryService = new CountryService(countryRepository);
-		this.countryController = new CountryController(countryService);	
+		this.countryController = new CountryController(countryService);
 	}
-	
 	
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String accion = request.getParameter("accion");
+		if (accion == null) accion = "listar";
 		
-		// Determinar si es una solicitud AJAX o una solicitud normal
-		String acceptHeader = request.getHeader("Accept");
-		String xRequestedWith = request.getHeader("X-Requested-With");
-		boolean isAjaxRequest = (xRequestedWith != null && xRequestedWith.equals("XMLHttpRequest")) || 
-							(acceptHeader != null && acceptHeader.contains("application/json"));
-		
-		
-		try {
-
-			
-		
-			CountryRepository countryRepository = new CountryRepository();
-			List<Country> countries = countryRepository.findAll();
-			// Si es una solicitud AJAX, devuelve JSON
-			if (isAjaxRequest) {
-				response.setContentType("application/json;charset=UTF-8");
-				String json = gson.toJson(countries);
-				response.getWriter().write(json);
-			} 
-			// Si es una solicitud normal, redirige a JSP
-			else {
-				// Establecer atributos para la vista JSP
+		switch (accion) {
+			case "listar":
+				List<Country> countries = countryController.getCountries();
 				request.setAttribute("countries", countries);
-				
-				// Establecer el tipo de contenido para HTML
-				response.setContentType("text/html;charset=UTF-8");
-				
-				// Reenviar al JSP desde el context root
 				request.getRequestDispatcher("/countryCrud.jsp").forward(request, response);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				break;
+			case "mostrarFormEditar":
+				int idEditar = Integer.parseInt(request.getParameter("id"));
+				Country country = countryController.getCountryById(idEditar);
+				request.setAttribute("country", country);
+				request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
+				break;
+			case "mostrarFormCrear":
+				request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
+				break;
 		}
-		// Obtener la lista de países
-
-		
-		
-		
 	}
-}	
+	
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String accion = request.getParameter("accion");
+		
+		switch (accion) {
+			case "crear":
+				Country newCountry = new Country();
+				newCountry.setIso_3166_1(request.getParameter("iso"));
+				newCountry.setEnglish_name(request.getParameter("name"));
+				countryController.addCountry(newCountry);
+				break;
+			case "actualizar":
+				Country updateCountry = new Country();
+				updateCountry.setId(Integer.parseInt(request.getParameter("id")));
+				updateCountry.setEnglish_name(request.getParameter("name"));
+				countryController.updateCountry(updateCountry);
+				break;
+			case "eliminar":
+				int idEliminar = Integer.parseInt(request.getParameter("id"));
+				Country deleteCountry = new Country();
+				deleteCountry.setId(idEliminar);
+				countryController.deleteCountry(deleteCountry);
+				break;
+		}
+		response.sendRedirect(request.getContextPath() + "/countries?accion=listar&exito=true");
+	}
+}

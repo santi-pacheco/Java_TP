@@ -32,6 +32,7 @@ public class Review {
     private Boolean contieneSpoiler; // null = no revisado, true = tiene spoiler, false = no tiene spoiler
     
     private String username; // Para mostrar el nombre del usuario
+    private String movieTitle; // Para mostrar el título de la película
     
     // Constructors
     public Review() {
@@ -121,6 +122,14 @@ public class Review {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    public String getMovieTitle() {
+        return movieTitle;
+    }
+
+    public void setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
     }
     
     @Override

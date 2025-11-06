@@ -128,6 +128,14 @@ public class ReviewService {
         return reviewRepository.findByMovie(movieId);
     }
 
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
+    }
+
+    public List<Review> getReviewsByUser(int userId) {
+        return reviewRepository.findByUser(userId);
+    }
+
     public boolean hasUserReviewedMovie(int userId, int movieId) {
         return reviewRepository.existsByUserAndMovie(userId, movieId);
     }

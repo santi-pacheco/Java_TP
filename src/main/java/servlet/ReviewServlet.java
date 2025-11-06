@@ -147,42 +147,55 @@ public class ReviewServlet extends HttpServlet {
         String contentType = request.getContentType();
         
         Review newReview;
+        int movieId = 0;
         
-        if (contentType != null && contentType.contains("application/json")) {
-            String jsonBody = request.getReader().lines().collect(Collectors.joining());
-            newReview = gson.fromJson(jsonBody, Review.class);
-        } else {
-            // Formulario HTML
-            String movieIdStr = request.getParameter("movieId");
-            String reviewText = request.getParameter("reviewText");
-            String ratingStr = request.getParameter("rating");
-            String watchedOnStr = request.getParameter("watchedOn");
+        try {
+            if (contentType != null && contentType.contains("application/json")) {
+                String jsonBody = request.getReader().lines().collect(Collectors.joining());
+                newReview = gson.fromJson(jsonBody, Review.class);
+            } else {
+                // Formulario HTML
+                String movieIdStr = request.getParameter("movieId");
+                String reviewText = request.getParameter("reviewText");
+                String ratingStr = request.getParameter("rating");
+                String watchedOnStr = request.getParameter("watchedOn");
+                
+                movieId = Integer.parseInt(movieIdStr);
+                newReview = new Review();
+                newReview.setId_movie(movieId);
+                newReview.setReview_text(reviewText);
+                newReview.setRating(Double.parseDouble(ratingStr));
+                newReview.setWatched_on(LocalDate.parse(watchedOnStr));
+            }
             
-            newReview = new Review();
-            newReview.setId_movie(Integer.parseInt(movieIdStr));
-            newReview.setReview_text(reviewText);
-            newReview.setRating(Double.parseDouble(ratingStr));
-            newReview.setWatched_on(LocalDate.parse(watchedOnStr));
-        }
-        
-        newReview.setId_user(loggedUser.getId());
-        
-        Set<ConstraintViolation<Review>> violations = validator.validate(newReview);
-        if (!violations.isEmpty()) {
-            String errorMessages = violations.stream()
-                    .map(ConstraintViolation::getMessage)
-                    .collect(Collectors.joining(" "));
-            throw ErrorFactory.validation(errorMessages);
-        }
-        
-        Review createdReview = reviewController.createOrUpdateReview(newReview);
-        
-        if (contentType != null && contentType.contains("application/json")) {
-            response.setStatus(HttpServletResponse.SC_CREATED);
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(gson.toJson(createdReview));
-        } else {
-            response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getId_movie());
+            newReview.setId_user(loggedUser.getId());
+            
+            Set<ConstraintViolation<Review>> violations = validator.validate(newReview);
+            if (!violations.isEmpty()) {
+                String errorMessages = violations.stream()
+                        .map(ConstraintViolation::getMessage)
+                        .collect(Collectors.joining(" "));
+                throw ErrorFactory.validation(errorMessages);
+            }
+            
+            Review createdReview = reviewController.createOrUpdateReview(newReview);
+            
+            if (contentType != null && contentType.contains("application/json")) {
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write(gson.toJson(createdReview));
+            } else {
+                response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getId_movie());
+            }
+        } catch (Exception e) {
+            if (contentType != null && contentType.contains("application/json")) {
+                throw e;
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("reviewError", e.getMessage());
+                session.setAttribute("reviewData", request.getParameterMap());
+                response.sendRedirect(request.getContextPath() + "/movie/" + movieId + "#review-form");
+            }
         }
     }
 

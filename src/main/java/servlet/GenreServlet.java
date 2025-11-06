@@ -1,68 +1,78 @@
 package servlet;
 
-	import java.io.IOException;
-	import java.util.List;
-
+import java.io.IOException;
+import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.google.gson.Gson;
-
 import controller.GenreController;
 import entity.Genre;
+import repository.GenreRepository;
+import service.GenreService;
 
 @WebServlet("/genres")
 public class GenreServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    
     private GenreController genreController;
-    private Gson gson;
     
     @Override
     public void init() throws ServletException {
         super.init();
-        // Inicializar el controlador con la API key
-        //String apiKey = "a47ba0b127499b0e1b28ceb0a183ec57";
-        this.genreController = new GenreController(null);
+        GenreRepository genreRepository = new GenreRepository();
+        GenreService genreService = new GenreService(genreRepository);
+        this.genreController = new GenreController(genreService);
     }
     
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String accion = request.getParameter("accion");
+        if (accion == null) accion = "listar";
         
-        // Determinar si es una solicitud AJAX o una solicitud normal
-        String acceptHeader = request.getHeader("Accept");
-        String xRequestedWith = request.getHeader("X-Requested-With");
-        boolean isAjaxRequest = (xRequestedWith != null && xRequestedWith.equals("XMLHttpRequest")) || 
-                            (acceptHeader != null && acceptHeader.contains("application/json"));
-        
-        // Obtener la lista de géneros
-        List<Genre> genres = genreController.getGenres();
-        
-        // Si es una solicitud AJAX, devuelve JSON
-        if (isAjaxRequest) {
-            response.setContentType("application/json;charset=UTF-8");
-            String json = gson.toJson(genres);
-            response.getWriter().write(json);
-        } 
-        // Si es una solicitud normal, redirige a JSP
-        else {
-            // Establecer atributos para la vista JSP
-            request.setAttribute("genres", genres);
-            
-            // Establecer el tipo de contenido para HTML
-            response.setContentType("text/html;charset=UTF-8");
-            
-            // Reenviar al JSP desde el context root
-            request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
+        switch (accion) {
+            case "listar":
+                List<Genre> genres = genreController.getGenres();
+                request.setAttribute("genres", genres);
+                request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
+                break;
+            case "mostrarFormEditar":
+                int idEditar = Integer.parseInt(request.getParameter("id"));
+                Genre genre = genreController.getGenreById(idEditar);
+                request.setAttribute("genre", genre);
+                request.getRequestDispatcher("/genreForm.jsp").forward(request, response);
+                break;
+            case "mostrarFormCrear":
+                request.getRequestDispatcher("/genreForm.jsp").forward(request, response);
+                break;
         }
     }
     
-    
-    
-    
-    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String accion = request.getParameter("accion");
+        
+        switch (accion) {
+            case "crear":
+                Genre newGenre = new Genre();
+                newGenre.setName(request.getParameter("name"));
+                newGenre.setId_api(Integer.parseInt(request.getParameter("id_api")));
+                genreController.addGenre(newGenre);
+                break;
+            case "actualizar":
+                Genre updateGenre = new Genre();
+                updateGenre.setId(Integer.parseInt(request.getParameter("id")));
+                updateGenre.setName(request.getParameter("name"));
+                updateGenre.setId_api(Integer.parseInt(request.getParameter("id_api")));
+                genreController.updateGenre(updateGenre);
+                break;
+            case "eliminar":
+                int idEliminar = Integer.parseInt(request.getParameter("id"));
+                Genre deleteGenre = new Genre();
+                deleteGenre.setId(idEliminar);
+                genreController.deleteGenre(deleteGenre);
+                break;
+        }
+        response.sendRedirect(request.getContextPath() + "/genres?accion=listar&exito=true");
+    }
 }

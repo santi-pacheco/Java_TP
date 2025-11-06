@@ -154,9 +154,14 @@
                     <div class="movie-info">
                         <div class="movie-title"><%= movie.getTitulo() %></div>
                         <div class="movie-year"><%= movie.getEstrenoYear() %></div>
-                        <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                            <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
-                        <% } %>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
+                                <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
+                            <% } %>
+                            <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
+                                <div class="movie-rating" style="background: #8B7355;">🍿 <%= String.format("%.1f", movie.getPromedioResenasLocal()) %></div>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
                 <%

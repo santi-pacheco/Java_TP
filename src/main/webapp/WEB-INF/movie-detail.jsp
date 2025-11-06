@@ -68,6 +68,9 @@
         .movie-info {
             flex: 1;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            max-height: 450px;
         }
         
         .movie-title {
@@ -113,7 +116,10 @@
             font-size: 1.1rem;
             line-height: 1.6;
             color: #444;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            max-height: 120px;
+            overflow-y: auto;
+            flex-shrink: 1;
         }
         
         .rating-badge {
@@ -365,6 +371,68 @@
             color: #888;
         }
         
+        .review-spoiler {
+            position: relative;
+        }
+        
+        .spoiler-checkbox {
+            display: none;
+        }
+        
+        .review-spoiler .review-text {
+            filter: blur(8px);
+            user-select: none;
+            transition: filter 0.3s;
+        }
+        
+        .spoiler-checkbox:checked ~ .review-text {
+            filter: none;
+            user-select: text;
+        }
+        
+        .spoiler-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .spoiler-checkbox:checked ~ .spoiler-overlay {
+            display: none;
+        }
+        
+        .spoiler-overlay:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        
+        .spoiler-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .spoiler-text {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .spoiler-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
         .star-rating {
             display: inline-flex;
             cursor: pointer;
@@ -430,6 +498,42 @@
             color: #FFD700;
             font-size: 1.2rem;
         }
+        
+        .btn-write-review {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 1000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-write-review:hover {
+            background: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+        
+        .review-form-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
@@ -483,31 +587,131 @@
                     </div>
                 <% } %>
                 
-                <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                    <div class="rating-badge">
-                        ⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %>/10
-                    </div>
-                <% } %>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
+                        <div class="rating-badge">
+                            ⭐ TMDB: <%= String.format("%.1f", movie.getPuntuacionApi()) %>/10
+                        </div>
+                    <% } %>
+                    <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
+                        <div class="rating-badge" style="background: #8B7355;">
+                            🍿 FatMovies: <%= String.format("%.1f", movie.getPromedioResenasLocal()) %>/5.0 (<%= movie.getCantidadResenasLocal() %> reseñas)
+                        </div>
+                    <% } %>
+                </div>
                 
-                <% 
-                    if (session.getAttribute("usuarioLogueado") != null) {
-                        Boolean isInWatchlist = (Boolean) request.getAttribute("isInWatchlist");
-                        if (isInWatchlist != null && isInWatchlist) {
-                %>
-                    <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;">✓ En Watchlist</button>
-                <% } else { %>
-                    <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
-                        <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="movieId" value="<%= movie.getId() %>">
-                        <button type="submit" class="btn-watchlist">+ Agregar a Watchlist</button>
-                    </form>
-                <% 
-                        }
-                    } 
-                %>
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <% 
+                        if (session.getAttribute("usuarioLogueado") != null) {
+                            Boolean isInWatchlist = (Boolean) request.getAttribute("isInWatchlist");
+                            Boolean canAddToWatchlist = (Boolean) request.getAttribute("canAddToWatchlist");
+                            if (isInWatchlist != null && isInWatchlist) {
+                    %>
+                        <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;">✓ En Watchlist</button>
+                    <% } else if (canAddToWatchlist != null && !canAddToWatchlist) { %>
+                        <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;" onclick="alert('Has alcanzado el límite de películas en tu watchlist')">⚠️ Límite Alcanzado</button>
+                    <% } else { %>
+                        <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
+                            <input type="hidden" name="action" value="add">
+                            <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                            <button type="submit" class="btn-watchlist">+ Agregar a Watchlist</button>
+                        </form>
+                    <% 
+                            }
+                        } 
+                    %>
+                </div>
+
             </div>
         </div>
     </div>
+    
+    <% if (session.getAttribute("usuarioLogueado") != null) { %>
+        <a href="#review-form" class="btn-write-review">
+            ✍️ Escribir Reseña
+        </a>
+    <% } %>
+    
+    <!-- Formulario de Reseña -->
+    <% if (session.getAttribute("usuarioLogueado") != null) {
+        Review userReview = (Review) request.getAttribute("userReview");
+    %>
+    <div class="review-form-container" id="review-form">
+        <div class="review-form">
+            <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
+            <% 
+                String reviewError = (String) session.getAttribute("reviewError");
+                if (reviewError != null) {
+                    session.removeAttribute("reviewError");
+            %>
+                <div style="background:#FFE5E5; color:#D32F2F; padding:12px 20px; border-radius:8px; margin-bottom:15px; font-weight:600; border-left:4px solid #D32F2F;">
+                    ⚠️ <%= reviewError %>
+                </div>
+            <% } %>
+            <form method="post" action="${pageContext.request.contextPath}/reviews">
+                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                
+                <% 
+                    java.util.Map<String, String[]> reviewData = (java.util.Map<String, String[]>) session.getAttribute("reviewData");
+                    String savedReviewText = "";
+                    String savedRating = "0";
+                    String savedWatchedOn = "";
+                    if (reviewData != null) {
+                        savedReviewText = reviewData.get("reviewText") != null ? reviewData.get("reviewText")[0] : "";
+                        savedRating = reviewData.get("rating") != null ? reviewData.get("rating")[0] : "0";
+                        savedWatchedOn = reviewData.get("watchedOn") != null ? reviewData.get("watchedOn")[0] : "";
+                        session.removeAttribute("reviewData");
+                    }
+                    if (userReview != null && savedReviewText.isEmpty()) {
+                        savedReviewText = userReview.getReview_text();
+                        savedRating = String.valueOf(userReview.getRating());
+                        savedWatchedOn = userReview.getWatched_on().toString();
+                    }
+                %>
+                
+                <textarea name="reviewText" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
+                
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label>Rating:</label>
+                        <div class="star-rating" id="starRating">
+                            <div class="star-container" data-index="1">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+                            </div>
+                            <div class="star-container" data-index="2">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+                            </div>
+                            <div class="star-container" data-index="3">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+                            </div>
+                            <div class="star-container" data-index="4">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+                            </div>
+                            <div class="star-container" data-index="5">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
+                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
+                            </div>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="<%= savedRating %>" required>
+                        <span class="rating-display" id="ratingDisplay"><%= Double.parseDouble(savedRating) > 0 ? savedRating + " estrellas" : "0 estrellas" %></span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label>Visto el:</label>
+                        <input type="date" name="watchedOn" value="<%= savedWatchedOn %>" max="<%= java.time.LocalDate.now() %>" required>
+                    </div>
+                    
+                    <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <% } %>
     
     <div class="details-section">
         <h2 class="section-title">Información Adicional</h2>
@@ -593,62 +797,7 @@
     
     <!-- Sección de Reseñas -->
     <div class="reviews-section">
-        <h2 class="section-title">Reseñas</h2>
-        
-        <% if (session.getAttribute("usuarioLogueado") != null) {
-            Review userReview = (Review) request.getAttribute("userReview");
-        %>
-        <div class="review-form">
-            <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
-            <form method="post" action="${pageContext.request.contextPath}/reviews">
-                <input type="hidden" name="action" value="create">
-                <input type="hidden" name="movieId" value="<%= movie.getId() %>">
-                
-                <textarea name="reviewText" placeholder="Escribe tu reseña aquí..." required><%= userReview != null ? userReview.getReview_text() : "" %></textarea>
-                
-                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label>Rating:</label>
-                        <div class="star-rating" id="starRating">
-                            <div class="star-container" data-index="1">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
-                            </div>
-                            <div class="star-container" data-index="2">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
-                            </div>
-                            <div class="star-container" data-index="3">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
-                            </div>
-                            <div class="star-container" data-index="4">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
-                            </div>
-                            <div class="star-container" data-index="5">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-full" alt="popcorn">
-                                <img src="${pageContext.request.contextPath}/utils/good_movie.svg" class="popcorn-half" alt="popcorn">
-                            </div>
-                        </div>
-                        <input type="hidden" name="rating" id="ratingInput" value="<%= userReview != null ? userReview.getRating() : "0" %>" required>
-                        <span class="rating-display" id="ratingDisplay"><%= userReview != null ? userReview.getRating() + " estrellas" : "0 estrellas" %></span>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label>Visto el:</label>
-                        <input type="date" name="watchedOn" value="<%= userReview != null ? userReview.getWatched_on() : "" %>" required>
-                    </div>
-                    
-                    <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
-                </div>
-            </form>
-        </div>
-        <% } else { %>
-        <div class="review-form" style="text-align: center; padding: 40px;">
-            <p style="color: #666; font-size: 1.1rem;">Debes <a href="${pageContext.request.contextPath}/login" style="color: #333; font-weight: 600;">iniciar sesión</a> para escribir una reseña</p>
-        </div>
-        <% } %>
+        <h2 class="section-title">Reseñas de la Comunidad</h2>
         
         <div class="reviews-list">
             <%
@@ -658,11 +807,17 @@
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
             %>
-            <div class="review-card">
+            <div class="review-card <%= review.getContieneSpoiler() != null && review.getContieneSpoiler() ? "review-spoiler" : "" %>">
+                <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
+                    <input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>">
+                <% } %>
                 <div class="review-header">
                     <div>
                         <strong><%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %></strong>
                         <span class="review-meta"> • Visto el <%= review.getWatched_on().format(formatter) %></span>
+                        <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
+                            <span class="spoiler-badge">SPOILER</span>
+                        <% } %>
                     </div>
                     <div class="review-stars" style="display: inline-flex; gap: 5px;">
                         <% 
@@ -698,6 +853,12 @@
                 </div>
                 <div class="review-text"><%= review.getReview_text() %></div>
                 <div class="review-meta">Publicado el <%= review.getCreated_at() != null ? review.getCreated_at().format(formatter) : "N/A" %></div>
+                <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
+                    <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
+                        <div class="spoiler-icon">👁️</div>
+                        <div class="spoiler-text">Click para ver spoiler</div>
+                    </label>
+                <% } %>
             </div>
             <%
                     }

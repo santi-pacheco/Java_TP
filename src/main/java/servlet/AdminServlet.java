@@ -9,21 +9,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import entity.User;
 
-@WebServlet("/index")
-public class IndexServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    
+@WebServlet("/admin")
+public class AdminServlet extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        User user = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
         
-        if (user == null || !"admin".equals(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/home");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("usuarioLogueado") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        
+
+        User user = (User) session.getAttribute("usuarioLogueado");
+        if (!"admin".equals(user.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso denegado");
+            return;
+        }
+
         response.sendRedirect(request.getContextPath() + "/index.html");
     }
 }

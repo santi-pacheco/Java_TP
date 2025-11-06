@@ -52,7 +52,11 @@ public class LoginServlet extends HttpServlet {
          HttpSession session = request.getSession(true); 
          session.setAttribute("usuarioLogueado", usuarioValidado);
          
-         response.sendRedirect(request.getContextPath() + "/home");
+         if ("admin".equals(usuarioValidado.getRole())) {
+             response.sendRedirect(request.getContextPath() + "/admin");
+         } else {
+             response.sendRedirect(request.getContextPath() + "/home");
+         }
 
      } catch (AppException e) {
          if (e.getStatusCode() >= 400 && e.getStatusCode() < 500) {

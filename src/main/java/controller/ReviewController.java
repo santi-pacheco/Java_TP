@@ -37,6 +37,10 @@ public class ReviewController {
         return reviewService.getReviewsByMovie(movieId);
     }
 
+    public List<Review> getAllReviews() {
+        return reviewService.getAllReviews();
+    }
+
     public boolean hasUserReviewedMovie(int userId, int movieId) {
         return reviewService.hasUserReviewedMovie(userId, movieId);
     }

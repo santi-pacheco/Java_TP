@@ -225,6 +225,42 @@ public class ReviewRepository {
         return reviews;
     }
 
+    public List<Review> findAll() {
+        List<Review> reviews = new ArrayList<>();
+        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler, u.username FROM reviews r JOIN usuarios u ON r.id_user = u.id_user ORDER BY r.created_at DESC";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                Review review = new Review();
+                review.setId(rs.getInt("id_review"));
+                review.setId_user(rs.getInt("id_user"));
+                review.setId_movie(rs.getInt("id_movie"));
+                review.setReview_text(rs.getString("review_text"));
+                review.setRating(rs.getDouble("rating"));
+                review.setWatched_on(rs.getDate("watched_on").toLocalDate());
+                review.setUsername(rs.getString("username"));
+                
+                java.sql.Date createdDate = rs.getDate("created_at");
+                if (createdDate != null) {
+                    review.setCreated_at(createdDate.toLocalDate());
+                }
+                
+                Boolean spoiler = rs.getObject("contiene_spoiler", Boolean.class);
+                review.setContieneSpoiler(spoiler);
+                
+                reviews.add(review);
+            }
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching all reviews");
+        }
+        
+        return reviews;
+    }
+
     public List<Review> findPendingSpoilerReviews() {
         List<Review> reviews = new ArrayList<>();
         String sql = "SELECT id_review, id_user, id_movie, review_text, rating, watched_on, created_at, contiene_spoiler FROM reviews WHERE contiene_spoiler IS NULL ORDER BY created_at ASC";
@@ -292,5 +328,43 @@ public class ReviewRepository {
         }
         
         return 0;
+    }
+
+    public List<Review> findByUser(int userId) {
+        List<Review> reviews = new ArrayList<>();
+        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler FROM reviews r WHERE r.id_user = ? ORDER BY r.created_at DESC";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Review review = new Review();
+                    review.setId(rs.getInt("id_review"));
+                    review.setId_user(rs.getInt("id_user"));
+                    review.setId_movie(rs.getInt("id_movie"));
+                    review.setReview_text(rs.getString("review_text"));
+                    review.setRating(rs.getDouble("rating"));
+                    review.setWatched_on(rs.getDate("watched_on").toLocalDate());
+                    
+                    java.sql.Date createdDate = rs.getDate("created_at");
+                    if (createdDate != null) {
+                        review.setCreated_at(createdDate.toLocalDate());
+                    }
+                    
+                    Boolean spoiler = rs.getObject("contiene_spoiler", Boolean.class);
+                    review.setContieneSpoiler(spoiler);
+                    
+                    reviews.add(review);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching reviews by user");
+        }
+        
+        return reviews;
     }
 }

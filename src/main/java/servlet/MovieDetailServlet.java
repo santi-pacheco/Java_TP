@@ -37,6 +37,7 @@ public class MovieDetailServlet extends HttpServlet {
     private PersonService personService;
     private WatchlistController watchlistController;
     private ReviewController reviewController;
+    private controller.ConfiguracionReglasController configController;
     
     @Override
     public void init() throws ServletException {
@@ -61,6 +62,7 @@ public class MovieDetailServlet extends HttpServlet {
             service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
             ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
             this.reviewController = new ReviewController(reviewService);
+            this.configController = new controller.ConfiguracionReglasController(configuracionService);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
         }
@@ -98,12 +100,19 @@ public class MovieDetailServlet extends HttpServlet {
             
             HttpSession session = request.getSession(false);
             boolean isInWatchlist = false;
+            boolean canAddToWatchlist = true;
             Review userReview = null;
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
                 List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
                 isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
                 userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
+                
+                int cantidadPeliculas = watchlistMovies.size();
+                int limite = user.isEsUsuarioActivo() 
+                    ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
+                    : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+                canAddToWatchlist = cantidadPeliculas < limite;
             }
             
             List<Review> reviews = reviewController.getReviewsByMovie(movieId);
@@ -112,6 +121,7 @@ public class MovieDetailServlet extends HttpServlet {
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
             request.setAttribute("isInWatchlist", isInWatchlist);
+            request.setAttribute("canAddToWatchlist", canAddToWatchlist);
             request.setAttribute("reviews", reviews);
             request.setAttribute("userReview", userReview);
             request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
