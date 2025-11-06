@@ -57,19 +57,19 @@ public class CountryServlet extends HttpServlet {
 				Country newCountry = new Country();
 				newCountry.setIso_3166_1(request.getParameter("iso"));
 				newCountry.setEnglish_name(request.getParameter("name"));
-				countryController.addCountry(newCountry);
+				countryController.createCountry(newCountry);
 				break;
 			case "actualizar":
 				Country updateCountry = new Country();
 				updateCountry.setId(Integer.parseInt(request.getParameter("id")));
 				updateCountry.setEnglish_name(request.getParameter("name"));
-				countryController.updateCountry(updateCountry);
+				countryController.modifyCountry(updateCountry);
 				break;
 			case "eliminar":
 				int idEliminar = Integer.parseInt(request.getParameter("id"));
 				Country deleteCountry = new Country();
 				deleteCountry.setId(idEliminar);
-				countryController.deleteCountry(deleteCountry);
+				countryController.removeCountry(deleteCountry);
 				break;
 		}
 		response.sendRedirect(request.getContextPath() + "/countries?accion=listar&exito=true");

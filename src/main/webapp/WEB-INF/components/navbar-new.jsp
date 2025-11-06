@@ -138,7 +138,7 @@
                 String inicial = user.getUsername().substring(0, 1).toUpperCase();
         %>
             <% if ("admin".equals(user.getRole())) { %>
-                <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/admin'" style="background:#8B7355;">⚙️ Admin</button>
+                <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/admin'" style="background:#8B7355;">Admin</button>
             <% } %>
             <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/profile'" title="<%= user.getUsername() %>"><%= inicial %></button>
             

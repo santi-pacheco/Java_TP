@@ -59,7 +59,7 @@ public class ReviewRepository {
 
     public Review findOne(int id) {
         Review review = null;
-        String sql = "SELECT id_review, id_user, id_movie, review_text, rating, watched_on, created_at, contiene_spoiler FROM reviews WHERE id_review = ?";
+        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler, p.name as movie_title FROM reviews r JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_review = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -85,6 +85,7 @@ public class ReviewRepository {
                     // Manejar contiene_spoiler nullable
                     Boolean spoiler = rs.getObject("contiene_spoiler", Boolean.class);
                     review.setContieneSpoiler(spoiler);
+                    review.setMovieTitle(rs.getString("movie_title"));
                 }
             }
             
@@ -227,7 +228,7 @@ public class ReviewRepository {
 
     public List<Review> findAll() {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler, u.username FROM reviews r JOIN usuarios u ON r.id_user = u.id_user ORDER BY r.created_at DESC";
+        String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, r.watched_on, r.created_at, r.contiene_spoiler, u.username, p.name as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula ORDER BY r.created_at DESC";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -242,6 +243,7 @@ public class ReviewRepository {
                 review.setRating(rs.getDouble("rating"));
                 review.setWatched_on(rs.getDate("watched_on").toLocalDate());
                 review.setUsername(rs.getString("username"));
+                review.setMovieTitle(rs.getString("movie_title"));
                 
                 java.sql.Date createdDate = rs.getDate("created_at");
                 if (createdDate != null) {

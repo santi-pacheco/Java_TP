@@ -147,7 +147,7 @@ public User delete(User u) {
 
 public User findByUsername(String username) {
 	User user = null;
-	String sql = "SELECT id_user, password, username, role, email, birthdate FROM usuarios WHERE username = ?";
+	String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo FROM usuarios WHERE username = ?";
 	
 	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -162,6 +162,7 @@ public User findByUsername(String username) {
 				user.setRole(rs.getString("role"));
 				user.setEmail(rs.getString("email"));
 				user.setBirthDate(rs.getDate("birthdate"));
+				user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
 			}
 		}
 	} catch (SQLException e) {

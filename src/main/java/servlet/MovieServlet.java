@@ -71,7 +71,7 @@ public class MovieServlet extends HttpServlet {
 				newMovie.setPopularidad(Double.parseDouble(request.getParameter("popularidad")));
 				newMovie.setVotosApi(Integer.parseInt(request.getParameter("votosApi")));
 				newMovie.setId_imdb(request.getParameter("id_imdb"));
-				movieController.addMovie(newMovie);
+				movieController.createMovie(newMovie);
 				break;
 			case "actualizar":
 				Movie updateMovie = new Movie();
@@ -89,13 +89,13 @@ public class MovieServlet extends HttpServlet {
 				updateMovie.setPopularidad(Double.parseDouble(request.getParameter("popularidad")));
 				updateMovie.setVotosApi(Integer.parseInt(request.getParameter("votosApi")));
 				updateMovie.setId_imdb(request.getParameter("id_imdb"));
-				movieController.updateMovie(updateMovie);
+				movieController.modifyMovie(updateMovie);
 				break;
 			case "eliminar":
 				int idEliminar = Integer.parseInt(request.getParameter("id"));
 				Movie deleteMovie = new Movie();
 				deleteMovie.setId(idEliminar);
-				movieController.deleteMovie(deleteMovie);
+				movieController.removeMovie(deleteMovie);
 				break;
 		}
 		response.sendRedirect(request.getContextPath() + "/movies?accion=listar&exito=true");

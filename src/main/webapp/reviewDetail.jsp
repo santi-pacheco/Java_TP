@@ -31,8 +31,8 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
             <span><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getId_user() %></span>
         </div>
         <div class="info-row">
-            <span class="info-label">Película ID:</span>
-            <span><%= review.getId_movie() %></span>
+            <span class="info-label">Película:</span>
+            <span><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getId_movie() %></span>
         </div>
         <div class="info-row">
             <span class="info-label">Rating:</span>

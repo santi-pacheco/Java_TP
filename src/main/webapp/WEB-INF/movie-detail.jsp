@@ -600,7 +600,7 @@
                     <% } %>
                 </div>
                 
-                <div style="margin-top: auto; padding-top: 20px;">
+                <div style="margin-top: auto; padding-top: auto;">
                     <% 
                         if (session.getAttribute("usuarioLogueado") != null) {
                             Boolean isInWatchlist = (Boolean) request.getAttribute("isInWatchlist");
@@ -609,7 +609,7 @@
                     %>
                         <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;">✓ En Watchlist</button>
                     <% } else if (canAddToWatchlist != null && !canAddToWatchlist) { %>
-                        <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed;" onclick="alert('Has alcanzado el límite de películas en tu watchlist')">⚠️ Límite Alcanzado</button>
+                        <button class="btn-watchlist" disabled style="background: #999; cursor: not-allowed; font-size: 0.9rem;" onclick="alert('Has alcanzado el límite de películas en tu watchlist')">⚠️ Límite Alcanzado</button>
                     <% } else { %>
                         <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
                             <input type="hidden" name="action" value="add">
@@ -628,7 +628,7 @@
     
     <% if (session.getAttribute("usuarioLogueado") != null) { %>
         <a href="#review-form" class="btn-write-review">
-            ✍️ Escribir Reseña
+            Escribir Reseña
         </a>
     <% } %>
     
@@ -698,7 +698,7 @@
                             </div>
                         </div>
                         <input type="hidden" name="rating" id="ratingInput" value="<%= savedRating %>" required>
-                        <span class="rating-display" id="ratingDisplay"><%= Double.parseDouble(savedRating) > 0 ? savedRating + " estrellas" : "0 estrellas" %></span>
+                        <span class="rating-display" id="ratingDisplay"><%= Double.parseDouble(savedRating) > 0 ? savedRating + " kCal" : "0 kCal" %></span>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -907,7 +907,7 @@
                         const isHalf = clickX < rect.width / 2;
                         const value = isHalf ? index - 0.5 : index;
                         ratingInput.value = value;
-                        ratingDisplay.textContent = value + ' estrellas';
+                        ratingDisplay.textContent = value + ' kCal';
                         updateStars(value);
                     });
                     

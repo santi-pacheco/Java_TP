@@ -116,7 +116,7 @@
                 if (moviesCheck != null && !moviesCheck.isEmpty()) {
             %>
             <form method="get" action="${pageContext.request.contextPath}/roulette" style="margin: 0;">
-                <button type="submit" style="padding: 12px 30px; background-color: #8B7355; color: white; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">🎰 Ruleta de Películas</button>
+                <button type="submit" style="padding: 12px 30px; background-color: #8B7355; color: white; border: none; border-radius: 25px; font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 16px; cursor: pointer; transition: background-color 0.3s;"> Ruleta de Películas</button>
             </form>
             <%
                 }

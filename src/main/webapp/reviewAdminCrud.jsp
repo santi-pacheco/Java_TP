@@ -33,7 +33,7 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 12px; ver
                 <tr>
                     <th>ID</th>
                     <th>Usuario</th>
-                    <th>Película ID</th>
+                    <th>Película</th>
                     <th>Rating</th>
                     <th>Fecha</th>
                     <th>Estado Spoiler</th>
@@ -57,7 +57,7 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 12px; ver
                 <tr>
                     <td><%= review.getId() %></td>
                     <td><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getId_user() %></td>
-                    <td><%= review.getId_movie() %></td>
+                    <td><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getId_movie() %></td>
                     <td><%= String.format("%.1f", review.getRating()) %></td>
                     <td><%= review.getCreated_at() %></td>
                     <td><%= spoilerBadge %></td>

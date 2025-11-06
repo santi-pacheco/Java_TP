@@ -57,20 +57,20 @@ public class GenreServlet extends HttpServlet {
                 Genre newGenre = new Genre();
                 newGenre.setName(request.getParameter("name"));
                 newGenre.setId_api(Integer.parseInt(request.getParameter("id_api")));
-                genreController.addGenre(newGenre);
+                genreController.createGenre(newGenre);
                 break;
             case "actualizar":
                 Genre updateGenre = new Genre();
                 updateGenre.setId(Integer.parseInt(request.getParameter("id")));
                 updateGenre.setName(request.getParameter("name"));
                 updateGenre.setId_api(Integer.parseInt(request.getParameter("id_api")));
-                genreController.updateGenre(updateGenre);
+                genreController.modifyGenre(updateGenre);
                 break;
             case "eliminar":
                 int idEliminar = Integer.parseInt(request.getParameter("id"));
                 Genre deleteGenre = new Genre();
                 deleteGenre.setId(idEliminar);
-                genreController.deleteGenre(deleteGenre);
+                genreController.removeGenre(deleteGenre);
                 break;
         }
         response.sendRedirect(request.getContextPath() + "/genres?accion=listar&exito=true");
