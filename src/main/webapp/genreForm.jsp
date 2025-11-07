@@ -1,4 +1,5 @@
 <%@ page import="entity.Genre"%>
+<%@ page import="java.util.Set" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="es">
@@ -17,6 +18,21 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
     <div class="form-wrapper">
         <h2><%= request.getAttribute("genre") != null ? "Editar" : "Crear" %> Género</h2>
         <% Genre genre = (Genre) request.getAttribute("genre"); %>
+		<% 
+		    Set<String> errors = (Set<String>) request.getAttribute("errors");
+		    if (errors != null && !errors.isEmpty()) { 
+		%>
+		    <div class="alert alert-danger">
+		        <strong>Error(es) en el formulario:</strong>
+		        <ul>
+		            <% for (String error : errors) { %>
+		                <li><%= error %></li>
+		            <% } %>
+		        </ul>
+		    </div>
+		<% 
+		    } 
+		%>
         <form action="<%= request.getContextPath() %>/genres" method="POST">
             <input type="hidden" name="accion" value="<%= genre != null ? "actualizar" : "crear" %>">
             <% if (genre != null) { %>

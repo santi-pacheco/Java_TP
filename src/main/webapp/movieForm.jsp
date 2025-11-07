@@ -1,5 +1,6 @@
 <%@ page import="entity.Movie"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.Set" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,20 +9,44 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <style>
-body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
-.form-wrapper { background: #fff; padding: 30px; margin: 50px auto; max-width: 800px; border-radius: 5px; box-shadow: 0 1px 1px rgba(0,0,0,.05); }
+body { background: #FAF8F3;
+	font-family: 'Poppins', sans-serif; }
+.form-wrapper { background: #fff; padding: 30px; margin: 50px auto; max-width: 800px; border-radius: 5px; 
+	box-shadow: 0 1px 1px rgba(0,0,0,.05); }
 </style>
 </head>
 <body>
 <div class="container">
     <div class="form-wrapper">
-        <h2><%= request.getAttribute("movie") != null ? "Editar" : "Crear" %> Película</h2>
+
         <% Movie movie = (Movie) request.getAttribute("movie"); %>
+        <h2><%= (movie != null && movie.getId() != 0) ? "Editar" : "Crear" %> Película</h2>
+        
+		<% 
+		    Set<String> errors = (Set<String>) request.getAttribute("errors");
+		    if (errors != null && !errors.isEmpty()) { 
+		%>
+		    <div class="alert alert-danger">
+		        <strong>Error(es) en el formulario:</strong>
+		        <ul>
+		            <% for (String error : errors) { %>
+		                <li><%= error %></li>
+		            <% } %>
+		        </ul>
+		    </div>
+		<% 
+		} 
+		%>
+        
+        
         <form action="<%= request.getContextPath() %>/movies" method="POST">
-            <input type="hidden" name="accion" value="<%= movie != null ? "actualizar" : "crear" %>">
+
+            <input type="hidden" name="accion" value="<%= (movie != null && movie.getId() != 0) ? "actualizar" : "crear" %>">
+
             <% if (movie != null) { %>
                 <input type="hidden" name="id" value="<%= movie.getId() %>">
             <% } %>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -57,33 +82,33 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Puntuación API:</label>
+                         <label>Puntuación API:</label>
                         <input type="number" step="0.1" name="puntuacionApi" class="form-control" value="<%= movie != null ? movie.getPuntuacionApi() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Popularidad:</label>
-                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularidad() : "" %>" required>
+                         <label>Popularidad:</label>
+                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularidad() : "" %>" required> 
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    <div class="form-group">
+                     <div class="form-group">
                         <label>Idioma Original:</label>
                         <input type="text" name="idiomaOriginal" class="form-control" maxlength="2" value="<%= movie != null ? movie.getIdiomaOriginal() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Votos API:</label>
+                         <label>Votos API:</label>
                         <input type="number" name="votosApi" class="form-control" value="<%= movie != null ? movie.getVotosApi() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Adulto:</label>
+                         <label>Adulto:</label>
                         <select name="adulto" class="form-control" required>
                             <option value="false" <%= movie != null && !movie.getAdulto() ? "selected" : "" %>>No</option>
                             <option value="true" <%= movie != null && movie.getAdulto() ? "selected" : "" %>>Sí</option>
@@ -92,7 +117,7 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
                 </div>
             </div>
             <div class="form-group">
-                <label>Poster Path:</label>
+                 <label>Poster Path:</label>
                 <input type="text" name="posterPath" class="form-control" value="<%= movie != null ? movie.getPosterPath() : "" %>" required>
             </div>
             <div class="form-group">

@@ -39,18 +39,33 @@
     
     <div class="form-wrapper">
         <h3>Agregar Nueva Configuración</h3>
+        
+        <c:if test="${not empty errors}">
+            <div class="alert alert-danger">
+                <strong>Error(es) en el formulario:</strong>
+                <ul>
+                    <c:forEach var="error" items="${errors}">
+                        <li>${error}</li>
+                    </c:forEach>
+                </ul>
+            </div>
+        </c:if>
+        
         <form action="<%= request.getContextPath() %>/configuracion-reglas" method="POST">
             <div class="form-group">
                 <label>Umbral Reseñas Activo:</label>
-                <input type="number" name="umbralResenasActivo" class="form-control" required min="0">
+                <input type="number" name="umbralResenasActivo" class="form-control" required min="0" 
+                       value="${(configForm != null) ? configForm.umbralResenasActivo : ''}">
             </div>
             <div class="form-group">
                 <label>Límite Watchlist Normal:</label>
-                <input type="number" name="limiteWatchlistNormal" class="form-control" required min="0">
+                <input type="number" name="limiteWatchlistNormal" class="form-control" required min="0"
+                       value="${(configForm != null) ? configForm.limiteWatchlistNormal : ''}">
             </div>
             <div class="form-group">
                 <label>Límite Watchlist Activo:</label>
-                <input type="number" name="limiteWatchlistActivo" class="form-control" required min="0">
+                <input type="number" name="limiteWatchlistActivo" class="form-control" required min="0"
+                       value="${(configForm != null) ? configForm.limiteWatchlistActivo : ''}">
             </div>
             <button type="submit" class="btn btn-success">Guardar Configuración</button>
         </form>

@@ -99,6 +99,7 @@ public class GenreRepository {
 			
 			stmt.setString(1, g.getName());
 			stmt.setInt(2, g.getId_api());
+			stmt.setInt(3, g.getId());
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {

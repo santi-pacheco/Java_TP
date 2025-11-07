@@ -49,25 +49,19 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // 1. Obtenemos la acción. Si no viene, la acción por defecto es "listar".
         String accion = request.getParameter("accion");
         if (accion == null) {
             accion = "listar";
         }
 
-        // 2. Usamos un switch para decidir qué página JSP mostrar
         switch (accion) {
             case "listar":
-                // Obtenemos la lista
                 List<User> usersList = userController.getUsers();
-                // La "pegamos" en el request
                 request.setAttribute("users", usersList);
-                // Reenviamos al JSP de la lista
                 request.getRequestDispatcher("/WEB-INF/vistaUserCRUD/userCrud.jsp").forward(request, response);
                 break;
                 
             case "mostrarFormEditar":
-                // Obtenemos el ID del usuario a editar
             	int idEditar = 0;
             	try {
             		idEditar = Integer.parseInt(request.getParameter("id"));
@@ -75,14 +69,11 @@ public class UserServlet extends HttpServlet {
 					throw ErrorFactory.badRequest("El ID proporcionado no es un número válido.");
 				}
                 User user = userController.getUserById(idEditar);
-                // Lo "pegamos" en el request
                 request.setAttribute("user", user);
-                // Reenviamos al JSP del formulario de edición
                 request.getRequestDispatcher("/WEB-INF/vistaUserCRUD/editarUsuario.jsp").forward(request, response);
                 break;
                 
             case "mostrarFormCrear":
-                // Solo mostramos el formulario de creación
                 request.getRequestDispatcher("/WEB-INF/vistaUserCRUD/crearUsuario.jsp").forward(request, response);
                 break;    
         }
@@ -92,7 +83,6 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // 1. Obtenemos la acción. Es obligatorio en un POST.
         String accion = request.getParameter("accion");
 
         if (accion == null) {
@@ -100,38 +90,30 @@ public class UserServlet extends HttpServlet {
         }
         
         User userFromForm = null; 
-        String jspTarget = ""; // También para el JSP target
+        String jspTarget = "";
         
         try {
             switch (accion) {
                 case "crear":
                 	jspTarget = "/WEB-INF/vistaUserCRUD/crearUsuario.jsp";
                 	userFromForm = new User(); // Asigna a la variable externa
-                    // 2. VINCULAR: Creamos el objeto User desde los parámetros del formulario
                 	userFromForm.setUsername(request.getParameter("username"));
                 	userFromForm.setEmail(request.getParameter("email"));
                 	userFromForm.setPassword(request.getParameter("password"));
                 	userFromForm.setRole(request.getParameter("role"));
-                    // Las fechas requieren conversión
                     Date birthDate = parseDate(request.getParameter("birthDate"));
                     userFromForm.setBirthDate(birthDate);
-
-                    // 3. VALIDAR: (¡Igual que antes!)
                     Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
                     if (!violations.isEmpty()) {
-                        // Manejar error de validación (quizás reenviar al formulario con mensajes)
                         request.setAttribute("errors", getErrorMessages(violations));
-                        request.setAttribute("user", userFromForm); // Devolver datos para "repoblar" el form
+                        request.setAttribute("user", userFromForm);
                         request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return; // Importante salir para no redirigir
+                        return;
                     }
-
-                    // 4. ACTUAR:
                     userController.createUser(userFromForm);
                     break;
                     
                 case "actualizar":
-                    // 2. VINCULAR:
                 	jspTarget = "/WEB-INF/vistaUserCRUD/editarUsuario.jsp";
                 	userFromForm = new User();
                     try {
@@ -145,7 +127,6 @@ public class UserServlet extends HttpServlet {
                     userFromForm.setRole(request.getParameter("role"));
                     userFromForm.setBirthDate(parseDate(request.getParameter("birthDate")));
 
-                    // 3. VALIDAR:
                     Set<ConstraintViolation<User>> violationsUpdate = validator.validate(userFromForm);
                     if (!violationsUpdate.isEmpty()) {
                         request.setAttribute("errors", getErrorMessages(violationsUpdate));
@@ -153,18 +134,15 @@ public class UserServlet extends HttpServlet {
                         request.getRequestDispatcher(jspTarget).forward(request, response);
                         return; 
                     }
-                    
-                    // 4. ACTUAR:
+
                     userController.modifyUser(userFromForm);
                     break;
                     
                 case "eliminar":
                 	try {
-	                    // 2. VINCULAR (solo el ID):
 	                    int idEliminar = Integer.parseInt(request.getParameter("id"));
 	                    userFromForm = new User();
 	                    userFromForm.setId(idEliminar); 
-	                    // 4. ACTUAR:
 	                    userController.removeUser(userFromForm);
 	                    
                    } catch (NumberFormatException e) {
@@ -173,27 +151,20 @@ public class UserServlet extends HttpServlet {
                    break;
             }
 
-            // 5. REDIRIGIR: Patrón Post-Redirect-Get (PRG)
-            // Después de CUALQUIER acción POST exitosa, redirige al listado.
-            // Esto evita que el formulario se reenvíe si el usuario actualiza la página.
             response.sendRedirect(request.getContextPath() + "/users?accion=listar&exito=true");
 
         } catch (AppException e) {
             if (e.getErrorType().equals("DUPLICATE_ERROR")) {
-                // ✅ Error corregible: Devolver al formulario
                 request.setAttribute("appError", e.getMessage());
                 request.setAttribute("user", userFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
 
             } else {
-				// ❌ Error no corregible: Re-lanzar
+				//Error no corregible: Re-lanzar
             	throw e;
             }
         }
     }
-
-    // --- Métodos `doPut`, `doPatch`, `doDelete` se eliminan ---
-    
 
     // --- Funciones de Ayuda ---
 

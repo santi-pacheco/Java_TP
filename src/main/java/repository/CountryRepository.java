@@ -36,7 +36,7 @@ public class CountryRepository {
 	
 	public Country findOne(int id) {
 		Country country = null;
-		String sql = "SELECT id_country, name FROM paises WHERE id_country = ?";
+		String sql = "SELECT id_country, name, iso_country FROM paises WHERE id_country = ?";
 		
 		try ( Connection conn = DataSourceProvider.getDataSource().getConnection();
 			PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -47,6 +47,7 @@ public class CountryRepository {
 					country = new Country();
 					country.setId(rs.getInt("id_country"));
 					country.setEnglish_name(rs.getString("name"));
+					country.setIso_3166_1(rs.getString("iso_country"));
 				}
 			}
 		} catch (SQLException e) {

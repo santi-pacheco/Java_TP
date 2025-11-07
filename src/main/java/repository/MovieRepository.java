@@ -24,23 +24,7 @@ public class MovieRepository {
 	public MovieRepository() {
 	    //Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
 	}
-	/*
-	 "Esquema de la tabla movies en la BD"
-	 id_pelicula (PK) /getId() setId(int id)
-	 id_api /getId_api() setId_api(int id_api)
-	 name / getTitulo() setTitulo(String titulo)
-	 sinopsis / getSinopsis() setSinopsis(String sinopsis)
-	 duracion / getDuracion() setDuracion(Integer duracion)
-	 adulto / getAdulto() setAdulto(Boolean adulto)
-	 titulo_original / getTituloOriginal() setTituloOriginal(String tituloOriginal)
-	 puntuacion_api / getPuntuacionApi() setPuntuacionApi(Double puntuacionApi)
-	 idioma_original / getIdiomaOriginal() setIdiomaOriginal(String idiomaOriginal)
-	 poster_path / getPosterPath() setPosterPath(String posterPath)
-	 popularidad / getPopularidad() setPopularidad(Double popularidad)
-	 votos_api / getVotosApi() setVotosApi(Integer votosApi)
-	 anioEstreno / getEstrenoYear() setEstrenoYear(int estrenoYear)
-	 id_imdb / getId_imdb() setId_imdb(String id_imdb)
-	 */
+
 	public List<Movie> findAll() {
 	    List<Movie> movies = new ArrayList<>();
 	    String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas ORDER BY id_pelicula";

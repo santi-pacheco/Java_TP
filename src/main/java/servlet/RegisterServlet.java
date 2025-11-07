@@ -54,7 +54,7 @@ public class RegisterServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String jspTarget = "/register.jsp";
-        User userFromForm = new User(); // Para repoblar el form en caso de error
+        User userFromForm = new User();
         
         try {
         	
@@ -63,19 +63,16 @@ public class RegisterServlet extends HttpServlet {
             userFromForm.setPassword(request.getParameter("password"));
             userFromForm.setBirthDate(parseDate(request.getParameter("birthDate")));
             
-            // Asignamos rol por defecto. El admin lo puede cambiar luego.
             userFromForm.setRole("user"); 
 
-            // Validamos la confirmación de contraseña
             String confirmPassword = request.getParameter("confirmPassword");
             if (userFromForm.getPassword() == null || !userFromForm.getPassword().equals(confirmPassword)) {
                 request.setAttribute("appError", "Las contraseñas no coinciden.");
-                request.setAttribute("user", userFromForm); // Devolvemos datos para repoblar
+                request.setAttribute("user", userFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
                 return;
             }
 
-            // 2. VALIDAR: Usamos el validador
             // Usamos OnCreate.class para validar también la contraseña
             Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
             
@@ -86,7 +83,6 @@ public class RegisterServlet extends HttpServlet {
                 return;
             }
 
-            // 3. ACTUAR: Llamamos al servicio (que hashea y guarda)
             User createdUser = userService.CreateUser(userFromForm);
             
             // Crear watchlist automáticamente para el nuevo usuario
@@ -100,7 +96,6 @@ public class RegisterServlet extends HttpServlet {
             // Iniciar sesión automáticamente
             request.getSession().setAttribute("usuarioLogueado", createdUser);
 
-            // 4. REDIRIGIR (PRG): Éxito. Redirigimos a home.
             response.sendRedirect(request.getContextPath() + "/");
 
         } catch (AppException e) {

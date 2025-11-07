@@ -1,13 +1,18 @@
 package entity;
 
+import jakarta.validation.constraints.Min;
+
 public class ConfiguracionReglas {
 
 	private int configID;
 	
+	@Min(value = 1, message = "El umbral de reseñas debe ser al menos 1")
 	private int UmbralResenasActivo;
 	
+	@Min(value = 1, message = "El límite de watchlist debe ser al menos 1")
 	private int limiteWatchlistNormal;
 	
+	@Min(value = 1, message = "El límite de watchlist activo debe ser al menos 1")
 	private int limiteWatchlistActivo;
 	
 	private String fechaVigencia;

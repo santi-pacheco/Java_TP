@@ -57,8 +57,10 @@ public class MovieService {
 	    existingMovie.setPuntuacionApi(movie.getPuntuacionApi());
 	    existingMovie.setIdiomaOriginal(movie.getIdiomaOriginal());
 	    existingMovie.setPosterPath(movie.getPosterPath());
+	    existingMovie.setId_api(movie.getId_api());
+        existingMovie.setVotosApi(movie.getVotosApi());
+        existingMovie.setId_imdb(movie.getId_imdb());
 	    
-	    // 2. Si existe, ahora sí actualiza
 	    return movieRepository.update(existingMovie);	
 	}
 	
