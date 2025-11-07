@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,10 +48,19 @@
     <div class="chart-container">
         <h3>Distribución de Calificaciones</h3>
         <div class="bar-chart">
-            <c:forEach var="rating" items="${['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0']}">
+            <c:set var="ratings" value="0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0" />
+            <c:forEach var="rating" items="${fn:split(ratings, ',')}">
                 <c:set var="count" value="${ratingDistribution[rating]}" />
+                <c:if test="${empty count}"><c:set var="count" value="0" /></c:if>
                 <c:set var="maxHeight" value="220" />
-                <c:set var="height" value="${totalReviews > 0 ? (count * maxHeight / totalReviews) : 5}" />
+                <c:choose>
+                    <c:when test="${totalReviews > 0}">
+                        <c:set var="height" value="${(count * maxHeight) / totalReviews}" />
+                    </c:when>
+                    <c:otherwise>
+                        <c:set var="height" value="5" />
+                    </c:otherwise>
+                </c:choose>
                 <div class="bar" style="height: ${height}px;">
                     <c:if test="${count > 0}">
                         <div class="bar-value">${count}</div>
@@ -73,7 +83,14 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <a href="<%= request.getContextPath() %>/movie/${review.id_movie}" style="text-decoration: none; color: #8B7355; font-weight: 600; font-size: 16px;">
-                                    ${review.movieTitle != null ? review.movieTitle : 'Película ID: '.concat(review.id_movie)}
+                                    <c:choose>
+                                        <c:when test="${not empty review.movieTitle}">
+                                            ${review.movieTitle}
+                                        </c:when>
+                                        <c:otherwise>
+                                            Película ID: ${review.id_movie}
+                                        </c:otherwise>
+                                    </c:choose>
                                 </a>
                                 <div class="rating-stars" style="margin-top: 5px;">
                                     <c:forEach begin="1" end="${review.rating}">★</c:forEach>

@@ -172,7 +172,7 @@
             } else {
         %>
             <div class="no-results">
-                <h3>No se encontraron películas</h3>
+                <h3>No se encontraron peliculas</h3>
                 <p>Intenta ajustar los filtros de búsqueda o busca con otros términos.</p>
                 <a href="${pageContext.request.contextPath}/movies" class="back-btn">Volver a Películas</a>
             </div>

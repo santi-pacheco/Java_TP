@@ -53,7 +53,7 @@ public class LoginServlet extends HttpServlet {
          session.setAttribute("usuarioLogueado", usuarioValidado);
          
          if ("admin".equals(usuarioValidado.getRole())) {
-             response.sendRedirect(request.getContextPath() + "/admin");
+        	 response.sendRedirect(request.getContextPath() + "/home");;
          } else {
              response.sendRedirect(request.getContextPath() + "/home");
          }

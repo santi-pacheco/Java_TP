@@ -3,6 +3,7 @@ package controller;
 import java.util.List;
 
 import service.MovieService;
+import entity.Country;
 import entity.Movie;
 
 public class MovieController {
@@ -74,6 +75,10 @@ public class MovieController {
 		return movieService.getMovieByFilter(name, genre, year1, year2);
 	}
 	
+	public List<Country> getCountriesByMovieId(int movieId) {
+	    return movieService.getCountriesByMovieId(movieId);
+	}
+
 
 	
 }

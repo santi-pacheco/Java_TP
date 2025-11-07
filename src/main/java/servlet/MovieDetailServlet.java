@@ -13,6 +13,7 @@ import controller.ReviewController;
 import entity.Movie;
 import entity.Person;
 import entity.ActorWithCharacter;
+import entity.Country;
 import entity.User;
 import entity.Review;
 import repository.MovieRepository;
@@ -85,7 +86,7 @@ public class MovieDetailServlet extends HttpServlet {
             
             List<ActorWithCharacter> actors = new ArrayList<>();
             List<Person> directors = new ArrayList<>();
-            
+            List<Country> countries = new ArrayList<>();
             try {
                 actors = personService.getActorsByMovieId(movieId);
             } catch (Exception e) {
@@ -96,6 +97,11 @@ public class MovieDetailServlet extends HttpServlet {
                 directors = personService.getDirectorsByMovieId(movieId);
             } catch (Exception e) {
                 System.err.println("Error fetching directors: " + e.getMessage());
+            }
+            try {
+                countries = movieController.getCountriesByMovieId(movieId);
+            } catch (Exception e) {
+                System.err.println("Error fetching countries: " + e.getMessage());
             }
             
             HttpSession session = request.getSession(false);
@@ -120,6 +126,7 @@ public class MovieDetailServlet extends HttpServlet {
             request.setAttribute("movie", movie);
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
+            request.setAttribute("countries", countries);
             request.setAttribute("isInWatchlist", isInWatchlist);
             request.setAttribute("canAddToWatchlist", canAddToWatchlist);
             request.setAttribute("reviews", reviews);

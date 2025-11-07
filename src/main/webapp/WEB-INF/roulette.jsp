@@ -155,7 +155,7 @@
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="container">
-        <h1>🎰 Ruleta de Películas</h1>
+        <h1>Ruleta de Películas</h1>
         
         <%
             @SuppressWarnings("unchecked")

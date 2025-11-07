@@ -15,15 +15,16 @@ public class Country {
     @Size(max = 100, message = "El nombre en inglés no debe exceder los 100 caracteres")
 	private String english_name;
 	
-	private String native_name;
+
+	
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public int getId() {
 		return id;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
 
 	public String getIso_3166_1() {
 		return iso_3166_1;
@@ -39,14 +40,6 @@ public class Country {
 
 	public void setEnglish_name(String english_name) {
 		this.english_name = english_name;
-	}
-
-	public String getNative_name() {
-		return native_name;
-	}
-
-	public void setNative_name(String native_name) {
-		this.native_name = native_name;
 	}
 
 }

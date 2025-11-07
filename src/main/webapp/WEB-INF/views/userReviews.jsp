@@ -220,7 +220,7 @@
                             
                             <div class="rating-date">
                                 <div class="rating">
-                                    🍿 <%= String.format("%.1f", review.getRating()) %>/5.0
+                                    🍿 <%= String.format("%.1f", review.getRating()) %>/5.0 Kcals
                                 </div>
                                 <div class="date">
                                     <%= review.getCreated_at() != null ? review.getCreated_at().toString() : "" %>

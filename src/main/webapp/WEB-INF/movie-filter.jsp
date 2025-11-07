@@ -303,7 +303,7 @@
                 } else {
             %>
             <div class="no-results">
-                <p>No se encontraron películas con los filtros seleccionados.</p>
+                <p>No se encontraron peliculas con los filtros seleccionados.</p>
                 <p>Intenta ajustar los criterios de búsqueda.</p>
             </div>
             <%
