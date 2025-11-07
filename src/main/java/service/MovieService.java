@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import entity.Country;
 import entity.Movie;
 import repository.MovieRepository;
 import exception.ErrorFactory;
@@ -57,8 +59,10 @@ public class MovieService {
 	    existingMovie.setPuntuacionApi(movie.getPuntuacionApi());
 	    existingMovie.setIdiomaOriginal(movie.getIdiomaOriginal());
 	    existingMovie.setPosterPath(movie.getPosterPath());
+	    existingMovie.setId_api(movie.getId_api());
+        existingMovie.setVotosApi(movie.getVotosApi());
+        existingMovie.setId_imdb(movie.getId_imdb());
 	    
-	    // 2. Si existe, ahora sí actualiza
 	    return movieRepository.update(existingMovie);	
 	}
 	
@@ -78,11 +82,16 @@ public class MovieService {
 	}
 	
 
-    public static float getMovieRating(String movieId) throws IOException, InterruptedException {
-    	System.out.println("📡 Obteniendo rating para movieId: " + movieId);
-    	
+    public float getMovieRating(int movieId) throws IOException, InterruptedException {
     	try {
-    		URL url = new URL("https://api.imdbapi.dev/titles/" + movieId );
+    		// Primero obtenemos la pelicula para sacar su id_imdb
+    		Movie movie = movieRepository.findOne(movieId);
+    		if (movie == null) {
+    			// Comprobamos si la pelicula existe
+				return 0.0f;
+			}
+			// Hacemos la llamada a la API externa
+    		URL url = new URL("https://api.imdbapi.dev/titles/" + movie.getId_imdb() );
     		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
     		conn.setRequestMethod("GET");
     		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -90,19 +99,16 @@ public class MovieService {
     		Gson gson = new Gson();
     		JsonObject json = gson.fromJson(reader.readLine(), JsonObject.class);
 			reader.close();
+			conn.disconnect();
             if (json.has("rating") && !json.get("rating").isJsonNull()) {
-            	System.out.println("Rating encontrado: " + json.get("metacritic").toString());
                 JsonObject ratingObj = json.getAsJsonObject("metacritic");
-                
-                System.out.println("Rating: " + ratingObj.get("score").getAsFloat());
                 return ratingObj.get("score").getAsFloat();
             }
     		
     	} catch (IOException e) {
-			System.err.println("❌ Error al obtener rating: " + e.getMessage());
 			throw e;
 		}
-    	return 0.0f; // Valor por defecto si hay errorS
+    	return 0.0f; // Valor por defecto si hay errores
     }
 	
 	
@@ -116,8 +122,6 @@ public class MovieService {
                  .filter(Objects::nonNull)                               // 3. Filtra y descarta cualquier resultado que sea null.
                  .distinct()                                             // 4. Elimina todos los duplicados.
                  .collect(Collectors.toList());
-		System.out.println("Genres to update: " + genresId);
-		System.out.println("Id of movie to update genres: " + movieId);
 		//genresId puede tener algún null? No, porque se filtran en el stream
 		movieRepository.updateMovieGenres(movieId, genresId);
 	}
@@ -141,4 +145,22 @@ public class MovieService {
 	public List<Movie> getRecentMovies(int limit) {
 		return movieRepository.findRecentMovies(limit);
 	}
+	
+		
+	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
+		System.out.println("Service - Filtro: " + name + ", " + genre + ", " + year1 + ", " + year2);
+		return movieRepository.movieFilter(name, genre, year1, year2);
+	}
+	public List<Country> getCountriesByMovieId(int movieId) {
+	    return movieRepository.getCountriesByMovieId(movieId);
+	}
+
+	
+	
+	
+	
+	public void updateReviewStats(int movieId) {
+		movieRepository.updateReviewStats(movieId);
+	}
+	
 }

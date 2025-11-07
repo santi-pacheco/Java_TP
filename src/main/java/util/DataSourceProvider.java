@@ -15,7 +15,7 @@ public class DataSourceProvider {
             synchronized (DataSourceProvider.class) {
                 if (ds == null) {
                     try {
-                        // fuerza la carga del driver en el classloader correcto
+                        
                         Class.forName("com.mysql.cj.jdbc.Driver");
 
                         HikariConfig config = new HikariConfig();
@@ -39,6 +39,8 @@ public class DataSourceProvider {
 
                         ds = new HikariDataSource(config);
                     } catch (Exception e) {
+                        System.err.println("Database connection failed: " + e.getMessage());
+                        e.printStackTrace();
                         throw new RuntimeException("Error inicializando DataSource", e);
                     }
                 }

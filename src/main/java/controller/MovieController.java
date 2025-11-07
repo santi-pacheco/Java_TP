@@ -3,6 +3,7 @@ package controller;
 import java.util.List;
 
 import service.MovieService;
+import entity.Country;
 import entity.Movie;
 
 public class MovieController {
@@ -23,6 +24,7 @@ public class MovieController {
 		Movie movie = movieService.getMovieById(id);
 		return movie;
 	}
+	
 	
 	public Movie createMovie(Movie m) {
 			return movieService.createMovie(m);
@@ -67,4 +69,16 @@ public class MovieController {
 	public List<Movie> getRecentMovies(int limit) {
 		return movieService.getRecentMovies(limit);
 	}
+	
+	
+	public List<Movie> getMovieByFilter(String name, String genre, int year1, int year2) {
+		return movieService.getMovieByFilter(name, genre, year1, year2);
+	}
+	
+	public List<Country> getCountriesByMovieId(int movieId) {
+	    return movieService.getCountriesByMovieId(movieId);
+	}
+
+
+	
 }

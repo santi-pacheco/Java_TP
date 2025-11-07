@@ -1,5 +1,6 @@
 
 <style>
+    
     .navbar {
         background-color: #FAF8F3;
         padding: 15px 40px;
@@ -115,15 +116,16 @@
             <img src="${pageContext.request.contextPath}/utils/export50.svg" alt="Fat Movies" class="navbar-logo">
         </a>
         <div class="navbar-links">
-            <a href="${pageContext.request.contextPath}/peliculas">Películas</a>
+            <a href="${pageContext.request.contextPath}/movies-page">PelÃ­culas</a>
             <a href="${pageContext.request.contextPath}/watchlist">Watchlist</a>
-            <a href="${pageContext.request.contextPath}/resenas">Reseñas</a>
+            <a href="${pageContext.request.contextPath}/resenas">ReseÃ±as</a>
         </div>
     </div>
     
     <div class="navbar-center">
         <form action="${pageContext.request.contextPath}/search" method="get">
-            <input type="text" class="search-bar" placeholder="Buscar películas..." name="q" id="searchInput" autocomplete="off">
+            <%-- CORREGIDO: "pelÃ­culas" -> "pelï¿½culas" --%>
+            <input type="text" class="search-bar" placeholder="Buscar pelÃ­culas..." name="q" id="searchInput" autocomplete="off">
             <div id="searchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 5px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>
         </form>
     </div>
@@ -135,12 +137,18 @@
                 entity.User user = (entity.User) usuarioLogueado;
                 String inicial = user.getUsername().substring(0, 1).toUpperCase();
         %>
-            <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/perfil'" title="<%= user.getUsername() %>"><%= inicial %></button>
-            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/logout'" style="background:#666;">Cerrar Sesión</button>
+            <% if ("admin".equals(user.getRole())) { %>
+                <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/admin'" style="background:#8B7355;">Admin</button>
+            <% } %>
+            <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/profile'" title="<%= user.getUsername() %>"><%= inicial %></button>
+            
+            <%-- CORREGIDO: "SesiÃ³n" -> "Sesiï¿½n" --%>
+            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/logout'" style="background:#666;">Cerrar SesiÃ³n</button>
         <%
             } else {
         %>
-            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar Sesión</button>
+            <%-- CORREGIDO: "SesiÃ³n" -> "Sesiï¿½n" --%>
+            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar SesiÃ³n</button>
         <%
             }
         %>
@@ -183,7 +191,8 @@
     
     function displaySearchResults(movies) {
         if (movies.length === 0) {
-            searchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No se encontraron películas</div>';
+            <%-- CORREGIDO: "pelÃ­culas" -> "pelï¿½culas" --%>
+            searchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No se encontraron peliculas</div>';
         } else {
             var html = '';
             for (var i = 0; i < Math.min(movies.length, 8); i++) {
@@ -193,6 +202,7 @@
                     html += '<img src="https://image.tmdb.org/t/p/w92' + movie.posterPath + '" style="width: 35px; height: 52px; margin-right: 12px; border-radius: 4px;" onerror="this.style.display=\'none\'">';
                 }
                 
+                // Aquï¿½ no hay que corregir nada, 'movie.titulo' viene del JSON
                 html += '<div><div style="font-weight: 500;">' + movie.titulo + '</div>'; 
                 if (movie.estrenoYear) {
                     html += '<div style="font-size: 12px; color: #666;">' + movie.estrenoYear + '</div>';

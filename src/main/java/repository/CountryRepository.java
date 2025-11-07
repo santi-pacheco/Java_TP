@@ -36,7 +36,7 @@ public class CountryRepository {
 	
 	public Country findOne(int id) {
 		Country country = null;
-		String sql = "SELECT id_country, name FROM paises WHERE id_country = ?";
+		String sql = "SELECT id_country, name, iso_country FROM paises WHERE id_country = ?";
 		
 		try ( Connection conn = DataSourceProvider.getDataSource().getConnection();
 			PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -47,6 +47,7 @@ public class CountryRepository {
 					country = new Country();
 					country.setId(rs.getInt("id_country"));
 					country.setEnglish_name(rs.getString("name"));
+					country.setIso_3166_1(rs.getString("iso_country"));
 				}
 			}
 		} catch (SQLException e) {
@@ -54,6 +55,33 @@ public class CountryRepository {
 		}
 		
 		return country;
+	}
+	
+	public int findOneByISO(String iso) {
+		System.out.println("Buscando país por código ISO: " + iso);
+		int idCountry = -1;
+		String sql = "SELECT id_country FROM paises WHERE iso_country = ?";
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			
+			stmt.setString(1, iso);
+			
+
+			
+		
+			try (ResultSet rs = stmt.executeQuery()) {
+				if(rs.next()) {
+					idCountry = rs.getInt("id_country");
+					System.out.println("ID del país encontrado: " + idCountry);
+				}
+			}
+	
+		}
+		catch (SQLException e) {
+			throw ErrorFactory.internal("Error fetching country by name");
+		}
+		return idCountry;
 	}
 	
 	public Country add(Country c) {
@@ -128,7 +156,7 @@ public class CountryRepository {
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
+			System.out.println("Preparando batch de países...");
 			for (Country g : countries) {
 				stmt.setString(1, g.getIso_3166_1());
 				stmt.setString(2, g.getEnglish_name());
@@ -141,5 +169,27 @@ public class CountryRepository {
 		} catch (SQLException e) {
 			throw ErrorFactory.internal("Error saving countries in batch");
 		}
-	}	
+	}
+	
+	
+	public void saveCountryMovie(int countryId, int MovieId) {
+		System.out.println("Guardando asociación país-película: " + countryId + " - " + MovieId);
+		String sql = "INSERT INTO peliculas_paises (id_country, id_pelicula) VALUES (?, ?)";
+		
+		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			
+			stmt.setInt(1, countryId);
+			stmt.setInt(2, MovieId);
+			stmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw ErrorFactory.internal("Error saving country-movie association" + e.getMessage());
+		}
+		
+		
+	}
+	
+	
+	
 }

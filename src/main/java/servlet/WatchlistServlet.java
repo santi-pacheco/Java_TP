@@ -13,6 +13,7 @@ import entity.User;
 import entity.Movie;
 import controller.WatchlistController;
 import controller.MovieController;
+import controller.UserController;
 import service.WatchlistService;
 import service.MovieService;
 import service.UserService;
@@ -20,12 +21,18 @@ import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import controller.ConfiguracionReglasController;
+import service.ConfiguracionReglasService;
+import repository.ConfiguracionReglasRepository;
+
 
 @WebServlet("/watchlist")
 public class WatchlistServlet extends HttpServlet {
     private WatchlistController watchlistController;
     private MovieController movieController;
-
+    private ConfiguracionReglasController configController;
+    private UserController userController;
+    
     @Override
     public void init() throws ServletException {
         super.init();
@@ -40,6 +47,13 @@ public class WatchlistServlet extends HttpServlet {
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         this.watchlistController = new WatchlistController(watchlistService);
+        
+        ConfiguracionReglasRepository configRepo = new ConfiguracionReglasRepository();
+        ConfiguracionReglasService configService = new ConfiguracionReglasService(configRepo);
+        this.configController = new ConfiguracionReglasController(configService);
+        
+        this.userController = new UserController(userService);
+        
     }
 
     @Override
@@ -80,8 +94,36 @@ public class WatchlistServlet extends HttpServlet {
         User user = (User) session.getAttribute("usuarioLogueado");
         String action = request.getParameter("action");
         String movieId = request.getParameter("movieId");
+        User userAct = userController.getUserById(user.getId());
 
         if ("add".equals(action)) {
+        	List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+        	int cantidadPeliculas = movieIds.size();
+        	
+        	if (userAct.isEsUsuarioActivo() == true) {
+        		//Usuario Activo
+				//Traer configuración de reglas
+				int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+				
+				if (cantidadPeliculas >= limiteActivo) {
+					//No puede agregar más películas
+					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+					response.sendRedirect(request.getHeader("Referer"));
+					return;
+				}
+				
+			} else {
+				//Usuario Normal
+				//Traer configuración de reglas
+				int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+				
+				if (cantidadPeliculas >= limiteNormal) {
+					//No puede agregar más películas
+					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+					response.sendRedirect(request.getHeader("Referer"));
+					return;
+				}
+			}	
             watchlistController.addMovie(user.getId(), movieId);
         } else if ("remove".equals(action)) {
             watchlistController.removeMovie(user.getId(), movieId);

@@ -58,6 +58,15 @@ public class Movie {
     @NotBlank(message = "La ruta del póster (poster_path) es obligatoria")
     private String posterPath; //
     
+    
+    private Float rating;
+    
+    private Double promedioResenasLocal = 0.0;
+    private Integer cantidadResenasLocal = 0;
+    
+	public void setRating(Float rating) {
+		this.rating = rating;
+	}
 	public int getId() {
 		return id;
 	}
@@ -141,6 +150,26 @@ public class Movie {
 	}
 	public void setId_imdb(String id_imdb) {
 		this.id_imdb = id_imdb;
+	}
+	
+	public float getRating() {
+		return rating;
+	}
+	
+	public Double getPromedioResenasLocal() {
+		return promedioResenasLocal;
+	}
+	
+	public void setPromedioResenasLocal(Double promedioResenasLocal) {
+		this.promedioResenasLocal = promedioResenasLocal;
+	}
+	
+	public Integer getCantidadResenasLocal() {
+		return cantidadResenasLocal;
+	}
+	
+	public void setCantidadResenasLocal(Integer cantidadResenasLocal) {
+		this.cantidadResenasLocal = cantidadResenasLocal;
 	}
 	
 	@Override

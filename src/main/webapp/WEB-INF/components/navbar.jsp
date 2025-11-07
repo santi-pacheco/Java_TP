@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <style>
     .navbar {
@@ -109,41 +110,30 @@
     }
 </style>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fat Movies</title>
-    <style>
-        ${css} 
-    </style>
-</head>
-<body>
-
-    <nav class="navbar">
-        <div class="navbar-left">
-            <a href="${pageContext.request.contextPath}/">
-                <img src="${pageContext.request.contextPath}/utils/export50.svg" alt="Fat Movies" class="navbar-logo">
-            </a>
-            <div class="navbar-links">
-                <a href="${pageContext.request.contextPath}/peliculas">Películas</a>
-                <a href="${pageContext.request.contextPath}/watchlist">Watchlist</a>
-                <a href="${pageContext.request.contextPath}/reseñas">Reseñas</a>
-            </div>
+<%-- 
+  Este es el Ãºnico HTML que debe estar en este archivo de inclusiÃ³n.
+  (Sin <html>, <head> o <body>)
+--%>
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="${pageContext.request.contextPath}/">
+            <img src="${pageContext.request.contextPath}/utils/export50.svg" alt="Fat Movies" class="navbar-logo">
+        </a>
+        <div class="navbar-links">
+            <a href="${pageContext.request.contextPath}/movies-page">PelÃ­culas</a>
+            <a href="${pageContext.request.contextPath}/watchlist">Watchlist</a>
+            <a href="${pageContext.request.contextPath}/resenas">ReseÃ±as</a>
         </div>
-        
-        <div class="navbar-center">
-            <form action="${pageContext.request.contextPath}/search" method="get">
-                <input type="text" class="search-bar" placeholder="Buscar películas..." name="q">
-            </form>
-        </div>
-        
-        <div class="navbar-right">
-            <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar Sesión</button>
-            <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/perfil'">P</button>
-        </div>
-    </nav>
-
-    </body>
-</html>
+    </div>
+    
+    <div class="navbar-center">
+        <form action="${pageContext.request.contextPath}/search" method="get">
+            <input type="text" class="search-bar" placeholder="Buscar pelÃ­culas..." name="q">
+        </form>
+    </div>
+    
+    <div class="navbar-right">
+        <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/login'">Iniciar SesiÃ³n</button>
+        <button class="btn-profile" onclick="window.location.href='${pageContext.request.contextPath}/profile'">P</button>
+    </div>
+</nav>

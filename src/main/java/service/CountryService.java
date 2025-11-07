@@ -24,6 +24,10 @@ public class CountryService {
 		return country;
 	}
 	
+	public int getOneByName(String name) {
+		return countryRepository.findOneByISO(name);
+	}
+	
 	public Country createCountry(Country c) {
 		return countryRepository.add(c);
 	}

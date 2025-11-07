@@ -23,7 +23,7 @@ public UserRepository() {
 
 public List<User> findAll() {
     List<User> Users = new ArrayList<>();
-    String sql = "SELECT id_user ,password, username, role, email, birthdate FROM usuarios ORDER BY id_user";
+    String sql = "SELECT id_user ,password, username, role, email, birthdate, esUsuarioActivo FROM usuarios ORDER BY id_user";
     
     try (Connection conn = DataSourceProvider.getDataSource().getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql);
@@ -37,6 +37,7 @@ public List<User> findAll() {
             user.setRole(rs.getString("role"));
             user.setEmail(rs.getString("email"));
             user.setBirthDate(rs.getDate("birthdate"));
+            user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
             Users.add(user);
         }
     } catch (SQLException e) {
@@ -48,7 +49,7 @@ public List<User> findAll() {
 
 public User findOne(int id) {
 	User user = null;
-	String sql = "SELECT id_user, password, username, role, email, birthdate FROM usuarios WHERE id_user = ?";
+	String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo FROM usuarios WHERE id_user = ?";
 	
 	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -63,6 +64,7 @@ public User findOne(int id) {
 				user.setRole(rs.getString("role"));
 				user.setEmail(rs.getString("email"));
 				user.setBirthDate(rs.getDate("birthdate"));
+				user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
 			}
 		}
 	} catch (SQLException e) {
@@ -103,7 +105,7 @@ public User add(User u) {
 }
 
 public User update(User u) {
-	String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ? WHERE id_user = ?";
+	String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ?, esUsuarioActivo = ? WHERE id_user = ?";
 	
 	try (Connection connection = DataSourceProvider.getDataSource().getConnection();
 		PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -113,7 +115,8 @@ public User update(User u) {
 		stmt.setString(3, u.getRole());
 		stmt.setString(4, u.getEmail());
 		stmt.setDate(5, u.getBirthDate());
-		stmt.setInt(6, u.getId());
+		stmt.setBoolean(6, u.isEsUsuarioActivo());
+		stmt.setInt(7, u.getId());
 		
 		stmt.executeUpdate();
 		
@@ -144,7 +147,7 @@ public User delete(User u) {
 
 public User findByUsername(String username) {
 	User user = null;
-	String sql = "SELECT id_user, password, username, role, email, birthdate FROM usuarios WHERE username = ?";
+	String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo FROM usuarios WHERE username = ?";
 	
 	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -159,6 +162,7 @@ public User findByUsername(String username) {
 				user.setRole(rs.getString("role"));
 				user.setEmail(rs.getString("email"));
 				user.setBirthDate(rs.getDate("birthdate"));
+				user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
 			}
 		}
 	} catch (SQLException e) {
@@ -166,5 +170,20 @@ public User findByUsername(String username) {
 	}
 	
 	return user;
+}
+
+public void updateActiveStatus(int userId, boolean isActive) {
+	String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
+	
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	     PreparedStatement stmt = conn.prepareStatement(sql)) {
+		
+		stmt.setBoolean(1, isActive);
+		stmt.setInt(2, userId);
+		stmt.executeUpdate();
+		
+	} catch (SQLException e) {
+		throw ErrorFactory.internal("Error updating user active status");
+	}
 }
 }

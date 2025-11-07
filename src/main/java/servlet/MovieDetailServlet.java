@@ -9,18 +9,23 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import controller.MovieController;
 import controller.WatchlistController;
+import controller.ReviewController;
 import entity.Movie;
 import entity.Person;
 import entity.ActorWithCharacter;
+import entity.Country;
 import entity.User;
+import entity.Review;
 import repository.MovieRepository;
 import repository.PersonRepository;
 import repository.WatchlistRepository;
 import repository.UserRepository;
+import repository.ReviewRepository;
 import service.MovieService;
 import service.PersonService;
 import service.WatchlistService;
 import service.UserService;
+import service.ReviewService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -32,6 +37,8 @@ public class MovieDetailServlet extends HttpServlet {
     private MovieController movieController;
     private PersonService personService;
     private WatchlistController watchlistController;
+    private ReviewController reviewController;
+    private controller.ConfiguracionReglasController configController;
     
     @Override
     public void init() throws ServletException {
@@ -50,6 +57,13 @@ public class MovieDetailServlet extends HttpServlet {
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);
+            
+            ReviewRepository reviewRepository = new ReviewRepository();
+            repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
+            service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
+            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
+            this.reviewController = new ReviewController(reviewService);
+            this.configController = new controller.ConfiguracionReglasController(configuracionService);
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
         }
@@ -72,7 +86,7 @@ public class MovieDetailServlet extends HttpServlet {
             
             List<ActorWithCharacter> actors = new ArrayList<>();
             List<Person> directors = new ArrayList<>();
-            
+            List<Country> countries = new ArrayList<>();
             try {
                 actors = personService.getActorsByMovieId(movieId);
             } catch (Exception e) {
@@ -84,19 +98,39 @@ public class MovieDetailServlet extends HttpServlet {
             } catch (Exception e) {
                 System.err.println("Error fetching directors: " + e.getMessage());
             }
+            try {
+                countries = movieController.getCountriesByMovieId(movieId);
+            } catch (Exception e) {
+                System.err.println("Error fetching countries: " + e.getMessage());
+            }
             
             HttpSession session = request.getSession(false);
             boolean isInWatchlist = false;
+            boolean canAddToWatchlist = true;
+            Review userReview = null;
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
                 List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
                 isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
+                userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
+                
+                int cantidadPeliculas = watchlistMovies.size();
+                int limite = user.isEsUsuarioActivo() 
+                    ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
+                    : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+                canAddToWatchlist = cantidadPeliculas < limite;
             }
+            
+            List<Review> reviews = reviewController.getReviewsByMovie(movieId);
             
             request.setAttribute("movie", movie);
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
+            request.setAttribute("countries", countries);
             request.setAttribute("isInWatchlist", isInWatchlist);
+            request.setAttribute("canAddToWatchlist", canAddToWatchlist);
+            request.setAttribute("reviews", reviews);
+            request.setAttribute("userReview", userReview);
             request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {

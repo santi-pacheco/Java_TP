@@ -46,6 +46,7 @@ public class UserService {
 	    existingUser.setEmail(user.getEmail());
 	    existingUser.setRole(user.getRole());
 	    existingUser.setBirthDate(user.getBirthDate());
+	    existingUser.setEsUsuarioActivo(user.isEsUsuarioActivo());
 
 	    // 2. Si existe, ahora sí actualiza
 	    return userRepository.update(existingUser);
@@ -82,5 +83,33 @@ public class UserService {
 	    // antes de devolver el objeto.
 		user.setPassword(null);	
 		return user;
+	}
+	
+	public void checkAndUpdateActiveStatus(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && !user.isEsUsuarioActivo()) {
+			// Solo verificar si no es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount >= umbralResenas) {
+				userRepository.updateActiveStatus(userId, true);
+			}
+		}
+	}
+	
+	public void validateActiveStatusOnDelete(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && user.isEsUsuarioActivo()) {
+			// Solo verificar si es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount < umbralResenas) {
+				userRepository.updateActiveStatus(userId, false);
+			}
+		}
+	}
+	
+	private int getReviewCountForUser(int userId) {
+		// Este método necesita acceso al ReviewRepository
+		// Se implementará en ReviewService
+		return 0;
 	}
 }

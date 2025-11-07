@@ -9,8 +9,11 @@ import java.util.Comparator;
 
 import controller.GenreController;
 import java.util.List;
+
+import service.CountryService;
 import service.ExternalApiService;
 import service.GenreService;
+import repository.CountryRepository;
 import repository.GenreRepository;
 import info.movito.themoviedbapi.tools.TmdbException;
 import entity.Genre;
@@ -61,13 +64,18 @@ public class DiscoverReflectionMain {
     }
 	
     public static void main(String[] args) throws Exception {
+    	CountryRepository countryRepository = new CountryRepository();
+     	CountryService countryService = new CountryService(countryRepository);
+     	List<Country> countries = ExternalApiService.getMovieCountries();
+     	countryRepository.saveAll(countries);
     //CARGA DE GENEROS
 		//loadGenres();
 	//CARGA DE PELICULAS
 		//loadMovies();
 	//CARGA DE ACTORES, DIRECTORES Y DURACION
 		//loadActorsDirectorsAndRuntime();
-    	loadPersons();
+    //loadPersons();
+    	countryPerMovie();
     }   	
     public static void loadGenres() {
     //CARGA DE GENEROS EN LA BASE DE DATOS	
@@ -118,7 +126,88 @@ public class DiscoverReflectionMain {
     }
     //------------------------------------------------------------------------------------------------
 
-    	
+    public static void countryPerMovie() {
+    	final String YOUR_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNDdiYTBiMTI3NDk5YjBlMWIyOGNlYjBhMTgzZWM1NyIsIm5iZiI6MTc1NTYwOTMwOC44NzIsInN1YiI6IjY4YTQ3OGRjNWJkMTI3ZjcyY2RhNThjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mkAgrQSPf-YCaYm1TFxuNDEgAtESQEaBOPI5t-8i8Q"; // ⚠️ Reemplaza con tu API key real
+
+        // Inicializamos las clases necesarias según tus indicaciones
+        MovieRepository movieRepository1 = new MovieRepository(); // Asumo que el controller lo necesita
+        MovieService movieService1 = new MovieService(movieRepository1);
+        MovieController movieController1 = new MovieController(movieService1);
+        ExternalApiService externalApiService = new ExternalApiService(YOUR_API_KEY);
+        
+        GenreRepository genreRepository = new GenreRepository();
+        GenreService genreService = new GenreService(genreRepository);
+        GenreController genreController = new GenreController(genreService);
+        
+        PersonRepository personRepository = new PersonRepository();
+        PersonService personService = new PersonService(personRepository);
+        PersonController personController = new PersonController(personService);
+        
+        // Configuramos el RateLimiter para ser cuidadosos.
+        // TMDB permite ~40-50 peticiones/10s. 4 por segundo (4.0) es un límite muy seguro.
+        RateLimiter rateLimiter = RateLimiter.create(40.0); // 🚦 Permisos por segundo
+
+        // --- 2. OBTENCIÓN DE DATOS DE LA BD ---
+        System.out.println("Obteniendo la lista de películas desde la base de datos...");
+        List<Movie> allMovies = movieController1.getMovies();
+        System.out.println(allMovies.size() + " películas encontradas. Iniciando procesamiento...");
+
+        int successCount = 0;
+        int errorCount = 0;
+        
+     
+        // --- 3. BUCLE DE PROCESAMIENTO ---
+        for (int i = 0; i < allMovies.size(); i++) {
+            Movie movie = allMovies.get(i);
+            
+            // ✅ Esta es la línea clave. El código se pausará aquí el tiempo justo para no superar el límite.
+            rateLimiter.acquire();
+
+            System.out.println("Procesando película " + (i + 1) + "/" + allMovies.size() + ": '" + movie.getTitulo() + "'");
+
+            try {
+                // Obtenemos el id_api de la película actual
+                int apiId = movie.getId_api();
+                
+                // Llamamos a tu método en ExternalApiService
+                MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(apiId, null);
+
+                // ✅ AQUÍ ES DONDE ACTUALIZARÍAS LA PELÍCULA EN LA BD
+                // Asigna los nuevos valores a tu objeto 'movie'
+                Integer runtimeInMinutes = details.getRuntime();
+                // Verificamos que el runtime no sea nulo o inválido
+                List<Country> paisesPeli = externalApiService.mapCountries(details.getProductionCountries());
+                
+                
+                
+              
+
+                for (Country c : paisesPeli) {
+                    CountryRepository cr = new CountryRepository();
+                    int co =  cr.findOneByISO(c.getIso_3166_1());
+                    System.out.println("   -> Guardando país: " + co + " para la película: " + movie.getTitulo());
+                    cr.saveCountryMovie(co, movie.getId());
+                }
+                
+                 
+                 
+            } catch (Exception e) {
+                // ❌ Si falla una película, registramos el error y continuamos con la siguiente.
+                System.err.println("   -> ERROR al procesar '" + movie.getTitulo() + "': " + e.getMessage());
+                errorCount++;
+            }
+        }
+
+        // --- 4. REPORTE FINAL ---
+        System.out.println("\n------------------------------------");
+        System.out.println("PROCESO DE ACTUALIZACIÓN FINALIZADO");
+        System.out.println("------------------------------------");
+        System.out.println("Películas actualizadas con éxito: " + successCount);
+        System.out.println("Películas con error: " + errorCount);
+      
+      //------------------------------------------------------------------------------------------------------
+    }
+    
     public static void loadMovies() {
     //CARGA DE PELICULAS EN LA BASE DE DATOS.
     //SE NECESITAN TENER CARGADOS LOS GENEROS.
@@ -161,6 +250,7 @@ public class DiscoverReflectionMain {
             System.out.println("\n--- Inspeccionando los datos de las " + localMovies.size() + " películas antes de guardar ---");
             int i = 0;
             for (Movie movie : localMovies) {
+           
             	if (i >= 15) break; // Limitar a las primeras 15 películas para no saturar la salida.
                 // Imprimimos los campos más importantes de cada película.
                 // Puedes añadir o quitar los que quieras ver.
@@ -474,5 +564,49 @@ public static void loadPersons() {
         System.out.println("PELIS EN WATCHLIST: " + wl);
         */
     	//--------------------------------------------------------------------------------------------------
+    	
+    	// Testing búsqueda de películas por genero
+    	
+    	
+    	
+
+    	
+     	// Testing country Repository
+
+//    	MovieRepository movieRepository = new MovieRepository();
+//     	MovieService movieService = new MovieService(movieRepository);
+//     	MovieController movieController = new MovieController(movieService);
+//     	//List<Movie> mv = movieRepository.movieFilter("Accion", 2025, 2025, null);
+//	
+//     	
+////
+//    	CountryRepository countryRepository = new CountryRepository();
+//     	CountryService countryService = new CountryService(countryRepository);
+//     	List<Country> countries = ExternalApiService.getMovieCountries();
+//     	countryRepository.saveAll(countries);
+//     	
+     	
+     	// Cargar peliculas con paises
+     	
+//     	
+//     	saveMovieCountries();
+    
+   
+    
+    
+  
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

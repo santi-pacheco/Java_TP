@@ -1,7 +1,7 @@
-<%@ page import="java.util.List" %>
-<%@ page import="entity.Genre" %>
+<%@ page import="java.util.List"%>
+<%@ page import="entity.Genre"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,7 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FatMovies - Gestión de Géneros</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -17,55 +19,30 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <style>
     body {
-        color: #566787;
-        background: #f5f5f5;
-        font-family: 'Varela Round', sans-serif;
-        font-size: 13px;
+        color: #333;
+        background: #FAF8F3;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
     }
     .table-responsive {
         margin: 30px 0;
     }
     .table-wrapper {
-        min-width: 1000px;
         background: #fff;
-        padding: 20px 25px;
-        border-radius: 3px;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 5px;
         box-shadow: 0 1px 1px rgba(0,0,0,.05);
     }
     .table-title {
-        padding-bottom: 15px;
-        background: #435d7d;
-        color: #fff;
-        padding: 16px 30px;
-        margin: -20px -25px 10px;
-        border-radius: 3px 3px 0 0;
+        margin-bottom: 15px;
     }
     .table-title h2 {
-        margin: 5px 0 0;
+        margin: 0;
         font-size: 24px;
     }
-    .table-title .btn-group {
-        float: right;
-    }
     .table-title .btn {
-        color: #fff;
         float: right;
-        font-size: 13px;
-        border: none;
-        min-width: 50px;
-        border-radius: 2px;
-        border: none;
-        outline: none !important;
-        margin-left: 10px;
-    }
-    .table-title .btn i {
-        float: left;
-        font-size: 21px;
-        margin-right: 5px;
-    }
-    .table-title .btn span {
-        float: left;
-        margin-top: 2px;
     }
     table.table tr th, table.table tr td {
         border-color: #e9e9e9;
@@ -94,34 +71,16 @@
         font-size: 22px;
         margin: 0 5px;
     }
-    table.table td a {
-        font-weight: bold;
-        color: #566787;
-        display: inline-block;
-        text-decoration: none;
-        outline: none !important;
-    }
-    table.table td a:hover {
-        color: #2196F3;
-    }
-    table.table td a.edit {
-        color: #FFC107;
-    }
-    table.table td a.delete {
-        color: #F44336;
-    }
+
     table.table td i {
         font-size: 19px;
     }
-    .home-btn {
-        margin-top: 10px;
-        display: inline-block;
-    }
+
 </style>
 </head>
 <body>
 <div class="container">
-    <a href="<%= request.getContextPath() %>/index.html" class="btn btn-primary home-btn"><i class="fa fa-home"></i> Volver al Inicio</a>
+    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="fa fa-home"></i> Volver al Inicio</a>
     <div class="table-responsive">
         <div class="table-wrapper">
             <div class="table-title">
@@ -129,26 +88,52 @@
                     <div class="col-sm-6">
                         <h2>Gestión de <b>Géneros</b></h2>
                     </div>
+                    <div class="col-sm-6">
+                        <a href="<%= request.getContextPath() %>/genres?accion=mostrarFormCrear" class="btn btn-success" style="float: right;">
+                            <span class="glyphicon glyphicon-plus"></span> Añadir Género
+                        </a>
+                    </div>
                 </div>
             </div>
+            <% if ("true".equals(request.getParameter("exito"))) { %>
+            <div class="alert alert-success">¡Operación realizada con éxito!</div>
+            <% } %>
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
+                        <th>ID API</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% 
                         List<Genre> genres = (List<Genre>) request.getAttribute("genres");
-                        if (genres != null) {
+                        if (genres != null && !genres.isEmpty()) {
                             for (Genre genre : genres) {
                     %>
                     <tr>
                         <td><%= genre.getId() %></td>
                         <td><%= genre.getName() %></td>
+                        <td><%= genre.getId_api() %></td>
+                        <td>
+                            <a href="<%= request.getContextPath() %>/genres?accion=mostrarFormEditar&id=<%= genre.getId() %>" class="btn btn-warning btn-xs">Editar</a>
+                            <form action="<%= request.getContextPath() %>/genres" method="POST" style="display:inline;">
+                                <input type="hidden" name="accion" value="eliminar">
+                                <input type="hidden" name="id" value="<%= genre.getId() %>">
+                                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Eliminar este género?')">Eliminar</button>
+                            </form>
+                        </td>
                     </tr>
-                    <%      }
+                    <%      
+                            }
+                        } else {
+                    %>
+                    <tr>
+                        <td colspan="4" class="text-center">No hay géneros registrados</td>
+                    </tr>
+                    <%
                         }
                     %>
                 </tbody>

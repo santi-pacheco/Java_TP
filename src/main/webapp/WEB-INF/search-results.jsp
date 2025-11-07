@@ -98,7 +98,7 @@
             } else {
         %>
             <div class="no-results">
-                No se encontraron películas para tu búsqueda.
+                No se encontraron peliculas para tu búsqueda.
             </div>
         <%
             }

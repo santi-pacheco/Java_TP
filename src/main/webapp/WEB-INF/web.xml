@@ -5,7 +5,7 @@
          version="5.0">
     <display-name>FatMovies</display-name>
     
-    <!-- UTF-8 Encoding Filter -->
+    <!-- UTF-8 Encoding Filter (Esto ya lo tenías, ¡genial!) -->
     <filter>
         <filter-name>encodingFilter</filter-name>
         <filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
@@ -22,6 +22,20 @@
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
+    <!-- ======================================================= -->
+    <!-- ==== AÑADIR ESTE BLOQUE PARA ARREGLAR LOS ACENTOS ==== -->
+    <!--
+      Esto le dice al servidor que LEA tus archivos JSP
+      usando la codificación UTF-8.
+    -->
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>
+    </jsp-config>
+    <!-- ======================================================= -->
     
     <!-- Servlets -->
     <servlet>
@@ -49,6 +63,15 @@
     <servlet-mapping>
         <servlet-name>MoviesPageServlet</servlet-name>
         <url-pattern>/peliculas</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>UserReviewsServlet</servlet-name>
+        <servlet-class>servlet.UserReviewsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserReviewsServlet</servlet-name>
+        <url-pattern>/resenas</url-pattern>
     </servlet-mapping>
     
     <!-- Páginas de bienvenida -->

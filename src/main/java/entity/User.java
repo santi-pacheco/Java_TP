@@ -29,7 +29,17 @@ public class User {
     @Past(message = "La fecha de nacimiento debe ser una fecha en el pasado.")
     private Date birthDate;
     
-    private LinkedList<String> watchList;
+    private boolean esUsuarioActivo;
+    
+    public boolean isEsUsuarioActivo() {
+		return esUsuarioActivo;
+	}
+
+	public void setEsUsuarioActivo(boolean esUsuarioActivo) {
+		this.esUsuarioActivo = esUsuarioActivo;
+	}
+
+	private LinkedList<String> watchList;
     
 	public LinkedList<String> getWatchList() {
 		return watchList;

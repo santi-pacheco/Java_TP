@@ -99,6 +99,7 @@ public class GenreRepository {
 			
 			stmt.setString(1, g.getName());
 			stmt.setInt(2, g.getId_api());
+			stmt.setInt(3, g.getId());
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
@@ -126,7 +127,7 @@ public class GenreRepository {
     
     public void saveAll(List<Genre> genres) {
         String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
-        
+        System.out.println("Guardando géneros en la base de datos... repository");
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Genre genre : genres) {
@@ -152,6 +153,7 @@ public class GenreRepository {
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
 					generoId = rs.getInt("id_genero");
+					System.out.println("Género encontrado: ID API = " + idApi + ", ID BD = " + generoId);
 				}
 				//Pasar a Integer
 				generoId = Integer.valueOf(rs.getInt("id_genero"));
