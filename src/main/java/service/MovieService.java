@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 import controller.GenreController;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import java.util.Map;
 
 public class MovieService {
 	
@@ -43,6 +43,7 @@ public class MovieService {
 	public Movie createMovie(Movie movie) {
 		return movieRepository.add(movie);
 	}
+	
 	public Movie updateMovie(Movie movie) {
 		// 1. Primero, verifica que la película exista
 	    Movie existingMovie = movieRepository.findOne(movie.getId());
@@ -126,12 +127,12 @@ public class MovieService {
 		movieRepository.updateMovieGenres(movieId, genresId);
 	}
 	
-	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
-		movieRepository.updateMovieActors(movieId, ac);
+	public void updateMovieActors(List<Object[]> relations) {
+		movieRepository.updateMovieActors(relations);
 	}
 	
-	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
-		movieRepository.updateMovieDirectors(movieId, directors);
+	public void updateMovieDirectors(List<Object[]> relations) {
+		movieRepository.updateMovieDirectors(relations);
 	}
 	
 	public List<Movie> getMostPopularMovies(int limit) {
@@ -155,12 +156,20 @@ public class MovieService {
 	    return movieRepository.getCountriesByMovieId(movieId);
 	}
 
-	
-	
-	
-	
 	public void updateReviewStats(int movieId) {
 		movieRepository.updateReviewStats(movieId);
+	}
+	
+	public Map<Integer, Integer> getMoviesByApiIds(List<Integer> ids) {
+		return movieRepository.findAllByApiIds(ids);
+	}
+	
+	public void saveAllMovieGenres(List<Object[]> relacionesMovieGenre) {
+		movieRepository.saveAllMovieGenres(relacionesMovieGenre);
+	}
+	
+	public void updateBatchMovies(List<Movie> movies) {
+		movieRepository.updateBatch(movies);
 	}
 	
 }

@@ -10,6 +10,7 @@ public class Person {
 	private String also_known_as;
 	private String place_of_birth;
 	private Date BirthDate;
+	private String profile_path;
 
 	public int getId() {
 		return id;
@@ -58,6 +59,15 @@ public class Person {
 	public void setBirthDate(Date BirthDate) {
 		this.BirthDate = BirthDate;
 	}
+	
+	public String getProfile_path() {
+		return profile_path;
+	}
+
+	public void setProfile_path(String profile_path) {
+		this.profile_path = profile_path;
+	}
+
 	@Override
 	public String toString() {
 		return "Person [id=" + id + ", id_api=" + id_api + ", name=" + name + ", also_known_as=" + also_known_as

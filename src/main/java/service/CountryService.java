@@ -4,6 +4,7 @@ import repository.CountryRepository;
 import java.util.List;
 import entity.Country;
 import exception.ErrorFactory;
+import java.util.Map;
 
 public class CountryService {
 	private CountryRepository countryRepository;
@@ -47,5 +48,17 @@ public class CountryService {
 	
 	public void deleteCountry(Country c) {
 		countryRepository.delete(c);
+	}
+	
+	public void saveAllCountries(List<Country> countries) {
+		countryRepository.saveAll(countries);
+	}
+	
+	public Map<String, Integer> getMapIds(List<String> isoCodes) {
+		return countryRepository.getMapIds(isoCodes);
+	}
+	
+	public void saveBatchRelations(List<Object[]> relations) {
+		countryRepository.saveBatchRelations(relations);
 	}
 }

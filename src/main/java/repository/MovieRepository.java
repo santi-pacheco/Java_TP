@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import util.DataSourceProvider;
 import exception.ErrorFactory;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MovieRepository {
 	
@@ -58,6 +60,7 @@ public class MovieRepository {
 	    }
 	    return movies;
 	}
+	
 	public Movie findOne(int id) {
 		Movie movie = null;
 		String sql = "SELECT id_pelicula, id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb, promedio_resenas_local, cantidad_resenas_local FROM peliculas WHERE id_pelicula = ?";
@@ -76,6 +79,7 @@ public class MovieRepository {
 		}
 		return movie;
 	}
+	
 	public Movie add(Movie m) {
 		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
@@ -163,8 +167,7 @@ public class MovieRepository {
 	}
 	
 	public void saveAll(List<Movie> movies) {
-		System.out.println("Guardando en el save all " + movies.size() + " películas en la base de datos...");
-		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), sinopsis = VALUES(sinopsis), duracion = VALUES(duracion), adulto = VALUES(adulto), titulo_original = VALUES(titulo_original), puntuacion_api = VALUES(puntuacion_api), idioma_original = VALUES(idioma_original), poster_path = VALUES(poster_path), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), anioEstreno = VALUES(anioEstreno), id_imdb = VALUES(id_imdb)";
+		String sql = "INSERT INTO peliculas (id_api, name, sinopsis, duracion, adulto, titulo_original, puntuacion_api, idioma_original, poster_path, popularidad, votos_api, anioEstreno, id_imdb) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id_api = VALUES(id_api), name = VALUES(name), popularidad = VALUES(popularidad), votos_api = VALUES(votos_api), puntuacion_api = VALUES(puntuacion_api),	poster_path = VALUES(poster_path), id_imdb = VALUES(id_imdb), sinopsis = VALUES(sinopsis)";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -236,58 +239,37 @@ public class MovieRepository {
 		return 0.0f;
 	}
 	
-	
-	//Antes hay tener esto en cuenta:
-	//TABLE actor_pelicula
-	//id_persona INT NOT NULL,
-    //id_pelicula INT NOT NULL,
-    //character_name VARCHAR(255) NULL,
-	//Hay que crear tuplas de esta tabla. Me llega un id de una pelicula, y me llega una
-	//lista de actorCharacter, que tiene id_persona y character_name.
-	//Entonces por cada id_persona y character_name creo una tupla actor_pelicula
-	//para ese unico id_pelicula.
-	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
-		String sql = "INSERT INTO actores_peliculas (id_persona, id_pelicula, character_name) VALUES (?, ?, ?)";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		     PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			for (util.DiscoverReflectionMain.actorCharacter actorChar : ac) {
-				stmt.setInt(1, actorChar.getIdActor());
-				stmt.setInt(2, movieId);
-				stmt.setString(3, actorChar.getCharacter());
-				stmt.addBatch();
-			}
-			stmt.executeBatch();
-			
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating movie actors in database");
-		}
+	public void updateMovieActors(List<Object[]> relations) {
+	    String sql = "INSERT IGNORE INTO actores_peliculas (id_pelicula, id_persona, character_name) VALUES (?, ?, ?)";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        for (Object[] row : relations) {
+	            stmt.setInt(1, (Integer) row[0]);
+	            stmt.setInt(2, (Integer) row[1]);
+	            stmt.setString(3, (String) row[2]);
+	            stmt.addBatch();
+	        }
+	        stmt.executeBatch();
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error saving batch movie actors");
+	    }
 	}
-	
-	
-	//Ahora es lo mismo... La tabla es:
-	//TABLE director_pelicula
-    //id_persona INT NOT NULL,
-    //id_pelicula INT NOT NULL,
-	//Hay que hacer lo mismo que en actores, pero sin character_name.
-	
-	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
-		String sql = "INSERT INTO directores_peliculas (id_persona, id_pelicula) VALUES (?, ?)";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		     PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			for (entity.Person director : directors) {
-				stmt.setInt(1, director.getId());
-				stmt.setInt(2, movieId);
-				stmt.addBatch();
-			}
-			stmt.executeBatch();
-			
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating movie directors in database");
-		}
+
+	public void updateMovieDirectors(List<Object[]> relations) {
+	    String sql = "INSERT IGNORE INTO directores_peliculas (id_pelicula, id_persona) VALUES (?, ?)";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        for (Object[] row : relations) {
+	            stmt.setInt(1, (Integer) row[0]);
+	            stmt.setInt(2, (Integer) row[1]);
+	            stmt.addBatch();
+	        }
+	        stmt.executeBatch();
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error saving batch movie directors");
+	    }
 	}
 	
 	public List<Movie> findByName(String searchTerm) {
@@ -445,15 +427,6 @@ public class MovieRepository {
 		return movie;
 	}
 	
-	
-	// Filtro de películas según varios criterios
-	// 1ro Genero
-	// 2do Año de estreno (desde-hasta)
-	// 3ro Año salida
-
-		
-
-	
 	public List<Movie> movieFilter(String nombre, String genero, int desde, int hasta) {
 	    System.out.println("Filtrando películas - Nombre: " + nombre + ", Género: " + genero + ", Años: " + desde + "-" + hasta);
 
@@ -572,7 +545,76 @@ public class MovieRepository {
 	    }
 	    return countries;
 	}
+	
+	public Map<Integer, Integer> findAllByApiIds(List<Integer> apiIds) {
+	    StringBuilder sqlBuilder = new StringBuilder("SELECT id_api, id_pelicula FROM peliculas WHERE id_api IN (");
+	    
+	    for (int i = 0; i < apiIds.size(); i++) {
+	        sqlBuilder.append("?");
+	        if (i < apiIds.size() - 1) {
+	            sqlBuilder.append(", ");
+	        }
+	    }
+	    sqlBuilder.append(")");
+	    Map<Integer, Integer> idMap = new HashMap<>();
 
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sqlBuilder.toString())) {
+	        for (int i = 0; i < apiIds.size(); i++) {
+	            stmt.setInt(i + 1, apiIds.get(i));
+	        }
+	        
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                int apiId = rs.getInt("id_api");
+	                int dbId = rs.getInt("id_pelicula");
+	                idMap.put(apiId, dbId);
+	            }
+	        }
 
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error mapping API IDs to Database IDs");
+	    }
+	    return idMap;
+	}
+	
+	public void saveAllMovieGenres(List<Object[]> relacionesMovieGenre) {
+	    String sql = "INSERT IGNORE INTO generos_peliculas (id_pelicula, id_genero) VALUES (?, ?)";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        for (Object[] fila : relacionesMovieGenre) {
+	            // fila[0] es el ID de la película (ya traducido a ID de DB)
+	            stmt.setObject(1, fila[0]); 
+	            // fila[1] es el ID del género
+	            stmt.setObject(2, fila[1]);
+	            stmt.addBatch();
+	        }
+	        System.out.println("Guardando " + relacionesMovieGenre.size() + " relaciones película-género...");
+	        stmt.executeBatch();
+
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error saving bulk movie genres relations");
+	    }
+	}
+	
+	public void updateBatch(List<Movie> movies) {
+	    String sql = "UPDATE peliculas SET duracion = ?, id_imdb = ? WHERE id_pelicula = ?";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        for (Movie movie : movies) {
+	            stmt.setObject(1, movie.getDuracion()); 
+	            stmt.setString(2, movie.getId_imdb());
+	            stmt.setInt(3, movie.getId());
+
+	            stmt.addBatch();
+	        }
+	        stmt.executeBatch();
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error actualizando lote de películas");
+	    }
+	}
 	
 }

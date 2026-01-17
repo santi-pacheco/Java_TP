@@ -3,6 +3,7 @@ package controller;
 import service.PersonService;
 import entity.Person;
 import java.util.List;
+import java.util.Map;
 
 public class PersonController {
 
@@ -47,4 +48,12 @@ public class PersonController {
 	public void updateAllPersonsbyId_api(List<Person> persons) { 
 		personService.updateAllPersonsbyId_api(persons);
 	}
+	
+	public void saveAllPersons(List<Person> persons) {
+		personService.saveAllPersons(persons);
+	}
+	
+	public Map<Integer, Integer> getMapIds(List<Integer> apiIds) {
+		return personService.getMapIds(apiIds);
+	}	
 }

@@ -10,6 +10,8 @@ import java.util.List;
 import entity.Country;
 import exception.ErrorFactory;
 import util.DataSourceProvider;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CountryRepository {
 	
@@ -150,44 +152,65 @@ public class CountryRepository {
 		return c;
 	}
 	
-	public void saveAll(List<Country> countries) { 
-		System.out.println("Creando tabla countries..." + countries.size());
-		String sql = "INSERT INTO paises (iso_country, name) VALUES (?, ?)";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-			 PreparedStatement stmt = conn.prepareStatement(sql)) {
-			System.out.println("Preparando batch de países...");
-			for (Country g : countries) {
-				stmt.setString(1, g.getIso_3166_1());
-				stmt.setString(2, g.getEnglish_name());
-				stmt.addBatch();
-				System.out.println("Agregado a batch: " + g.getEnglish_name());
-			}
-			
-			stmt.executeBatch();
-			System.out.println("Países guardados en batch correctamente.");
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error saving countries in batch");
-		}
+	public void saveAll(List<Country> countries) {
+	    String sql = "INSERT IGNORE INTO paises (iso_country, name) VALUES (?, ?)";
+	    
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        for (Country g : countries) {
+	            stmt.setString(1, g.getIso_3166_1());
+	            stmt.setString(2, g.getEnglish_name());
+	            stmt.addBatch();
+	        }
+	        stmt.executeBatch();
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error saving countries in batch");
+	    }
 	}
 	
-	
-	public void saveCountryMovie(int countryId, int MovieId) {
-		System.out.println("Guardando asociación país-película: " + countryId + " - " + MovieId);
-		String sql = "INSERT INTO peliculas_paises (id_country, id_pelicula) VALUES (?, ?)";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-			 PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			stmt.setInt(1, countryId);
-			stmt.setInt(2, MovieId);
-			stmt.executeUpdate();
-			
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error saving country-movie association" + e.getMessage());
-		}
-		
-		
+	public Map<String, Integer> getMapIds(List<String> isoCodes) {
+		if (isoCodes == null || isoCodes.isEmpty()) {
+	        return new HashMap<>();
+	    }
+		StringBuilder sql = new StringBuilder("SELECT iso_country, id_country FROM paises WHERE iso_country IN (");
+	    
+	    for (int i = 0; i < isoCodes.size(); i++) {
+	        sql.append(i == 0 ? "?" : ", ?");
+	    }
+	    sql.append(")");
+	    Map<String, Integer> map = new HashMap<>();
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+	        for (int i = 0; i < isoCodes.size(); i++) {
+	            stmt.setString(i + 1, isoCodes.get(i));
+	        }
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                map.put(rs.getString("iso_country"), rs.getInt("id_country")); 
+	            }
+	        }
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error recuperando mapa de IDs de países");
+	    }
+	    return map;
+	}
+
+	public void saveBatchRelations(List<Object[]> relations) {
+	    String sql = "INSERT IGNORE INTO peliculas_paises (id_pelicula, id_country) VALUES (?, ?)";
+
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        for (Object[] row : relations) {
+	            stmt.setInt(1, (Integer) row[0]); 
+	            stmt.setInt(2, (Integer) row[1]); 
+	            stmt.addBatch();
+	        }
+	        stmt.executeBatch(); 
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error guardando batch de relaciones Película-País");
+	    }
 	}
 	
 	
