@@ -5,6 +5,7 @@ import java.util.List;
 import service.MovieService;
 import entity.Country;
 import entity.Movie;
+import java.util.Map;
 
 public class MovieController {
 
@@ -46,12 +47,12 @@ public class MovieController {
 		movieService.updateMovieGenres(movieId, genres, genreController);
 	}
 	
-	public void updateMovieActors(int movieId, List<util.DiscoverReflectionMain.actorCharacter> ac) {
-		movieService.updateMovieActors(movieId, ac);
+	public void updateMovieActors(List<Object[]> relations) {
+		movieService.updateMovieActors(relations);
 	}
 	
-	public void updateMovieDirectors(int movieId, List<entity.Person> directors) {
-		movieService.updateMovieDirectors(movieId, directors);
+	public void updateMovieDirectors(List<Object[]> relations) {
+		movieService.updateMovieDirectors(relations);
 	}
 	
 	public List<Movie> searchMoviesByName(String searchTerm) {
@@ -79,6 +80,16 @@ public class MovieController {
 	    return movieService.getCountriesByMovieId(movieId);
 	}
 
-
+	public Map<Integer, Integer> getMoviesByApiIds(List<Integer> movieApiIds) {
+		return movieService.getMoviesByApiIds(movieApiIds);
+	}
+	
+	public void saveAllMovieGenres(List<Object[]> relacionesMovieGenre) {
+		movieService.saveAllMovieGenres(relacionesMovieGenre);
+	}
+	
+	public void updateBatchMovies(List<Movie> movies) {
+		movieService.updateBatchMovies(movies);
+	}
 	
 }

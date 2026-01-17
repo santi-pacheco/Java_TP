@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.validation.constraints.*;
 import java.sql.Time;
+import java.util.List;
 
 public class Movie {
 
@@ -63,6 +64,9 @@ public class Movie {
     
     private Double promedioResenasLocal = 0.0;
     private Integer cantidadResenasLocal = 0;
+    
+    //Lista temporal para generar la relación muchos a muchos con géneros
+    private List<Integer> generosTemporales;
     
 	public void setRating(Float rating) {
 		this.rating = rating;
@@ -170,6 +174,13 @@ public class Movie {
 	
 	public void setCantidadResenasLocal(Integer cantidadResenasLocal) {
 		this.cantidadResenasLocal = cantidadResenasLocal;
+	}
+	
+	public List<Integer> getGenerosTemporales() {
+		return generosTemporales;
+	}
+	public void setGenerosTemporales(List<Integer> generosTemporales) {
+		this.generosTemporales = generosTemporales;
 	}
 	
 	@Override

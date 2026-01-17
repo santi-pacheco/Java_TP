@@ -10,7 +10,6 @@ public class GenreController {
     private GenreService genreService;
     
     public GenreController(GenreService genreService) {
-    	//Ahora el repository no necesita la conexión en el constructor, ya no se encarga de eso
     	this.genreService = genreService;
     }
     
@@ -38,7 +37,6 @@ public class GenreController {
 	}
 
     public void saveAllGenres(List<Genre> genres) {
-    	System.out.println("Guardando géneros en la base de datos: " + genres.size() + " registros GenreController");
 		genreService.saveAllGenres(genres);
 	}
     

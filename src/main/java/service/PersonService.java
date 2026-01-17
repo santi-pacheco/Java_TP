@@ -9,6 +9,7 @@ import util.DiscoverReflectionMain.actorCharacter;
 import java.util.ArrayList;
 import java.util.List;
 import exception.ErrorFactory;
+import java.util.Map;
 
 public class PersonService {
 	
@@ -105,4 +106,12 @@ public class PersonService {
 		public void updateAllPersonsbyId_api(List<Person> persons) {
 			personRepository.updateAllPersonsbyId_api(persons);
 		}
+		
+	public void saveAllPersons(List<Person> persons) {
+		personRepository.saveAll(persons);
+	}
+	
+	public Map<Integer, Integer> getMapIds(List<Integer> apiIds) {
+	    return personRepository.getMapIds(apiIds);
+	}
 }

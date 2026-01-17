@@ -2,6 +2,7 @@ package controller;
 
 import service.CountryService;
 import entity.Country;
+import java.util.Map;
 
 import java.util.List;
 
@@ -10,9 +11,6 @@ public class CountryController {
 	private CountryService countryService;
 
 	public CountryController(CountryService countryService) {
-	
-		//CountryRepository countryRepository = new CountryRepository();
-		//this.countryService = new CountryService(countryRepository);
 		this.countryService = countryService;
 	}
 	
@@ -37,5 +35,17 @@ public class CountryController {
 	
 	public void removeCountry(Country country) {
 		countryService.deleteCountry(country);
+	}
+	
+	public void saveAllCountries(List<Country> countries) {
+		countryService.saveAllCountries(countries);
+	}
+	
+	public Map<String, Integer> getMapIds(List<String> isoCodes) {
+		return countryService.getMapIds(isoCodes);
+	}
+	
+	public void saveBatchRelations(List<Object[]> relations) {
+		countryService.saveBatchRelations(relations);
 	}
 }

@@ -20,7 +20,7 @@
         }
         .main-container {
             margin: 80px auto;
-            max-width: 800px;
+            max-width: 900px;
             text-align: center;
             padding: 40px;
             background: #fff;
@@ -61,7 +61,12 @@
             font-weight: 500;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             line-height: 1.4;
+            vertical-align: top;
         }
+        .btn-api {
+            background-color: #8B7355;
+        }
+        
         .option-btn:hover {
             background-color: #555;
             transform: translateY(-5px);
@@ -69,6 +74,10 @@
             text-decoration: none;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
+        .btn-api:hover {
+            background-color: #6e5b42;
+        }
+
         h1 {
             color: #1a1a1a;
             margin-bottom: 40px;
@@ -82,7 +91,9 @@
         <div class="logo-container">
             <img src="utils/export50.svg" alt="Fat Movies Logo" class="logo">
         </div>
+        
         <h1>Sistema de Gestión</h1>
+        
         <div>
             <a href="users" class="option-btn">Gestión de Usuarios</a>
             <a href="movies" class="option-btn">Gestión de Películas</a>
@@ -90,6 +101,7 @@
             <a href="countries" class="option-btn">Gestión de Países</a>
             <a href="reviews-admin" class="option-btn">Gestión de Reseñas</a>
             <a href="configuracion-reglas" class="option-btn">Configuración de Reglas</a>
+            <a href="data-load" class="option-btn">Carga de Datos (TMDB)</a>
         </div>
     </div>
 </body>

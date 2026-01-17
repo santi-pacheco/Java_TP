@@ -12,11 +12,8 @@ import util.DataSourceProvider;
 import exception.ErrorFactory;
 
 public class GenreRepository {
-
-    //private Connection connection;
     
     public GenreRepository() {
-    	//Ya no se crea la conexión aquí, se obtiene en cada método usando el pool de conexiones
     }
 
     public List<Genre> findAll() {
@@ -126,14 +123,13 @@ public class GenreRepository {
 	}
     
     public void saveAll(List<Genre> genres) {
-        String sql = "INSERT INTO generos (id_genero, name, id_api) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
-        System.out.println("Guardando géneros en la base de datos... repository");
+        String sql = "INSERT INTO generos (name, id_api) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Genre genre : genres) {
-                stmt.setInt(1, genre.getId());
-                stmt.setString(2, genre.getName());
-                stmt.setInt(3, genre.getId_api());
+                stmt.setString(1, genre.getName());
+                stmt.setInt(2, genre.getId_api());
                 stmt.addBatch();
             }
             stmt.executeBatch();
