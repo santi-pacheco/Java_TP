@@ -25,3 +25,6 @@ apache-tomcat-*
 bin/
 gen/
 build/
+
+# Ignorar Archivos con claves de la API
+config.properties

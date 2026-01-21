@@ -8,13 +8,15 @@ import jakarta.servlet.annotation.WebListener;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import service.ReviewModerationService;
 import util.DataSourceProvider;
 
 @WebListener
 public class AppServletContextListener implements ServletContextListener {
 
-	private static ValidatorFactory validatorFactory;
-	
+    private static ValidatorFactory validatorFactory;
+    private ReviewModerationService moderationService; // Solo para inicializar el pool de threads
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         System.out.println(">>> La aplicación se ha iniciado.");
@@ -23,34 +25,42 @@ public class AppServletContextListener implements ServletContextListener {
         try {
             validatorFactory = Validation.buildDefaultValidatorFactory();
             Validator validator = validatorFactory.getValidator();
-            
-            // Guardar el Validator en el contexto de la aplicación
+
             ServletContext context = sce.getServletContext();
-            context.setAttribute("miValidador", validator); // <-- Clave importante
-            
+            context.setAttribute("miValidador", validator);
+
             System.out.println("Validator creado y guardado en el contexto.");
         } catch (Exception e) {
             System.err.println("!!! Error fatal al inicializar el Validator: " + e.getMessage());
-            // Aquí podrías querer detener la aplicación si la validación es crítica
         }
+
+        // Inicializar el servicio de moderación (solo para crear el ExecutorService)
+        System.out.println("Inicializando servicio de moderación...");
+        moderationService = ReviewModerationService.getInstance();
+        System.out.println("Servicio de moderación listo (sin tareas programadas).");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         System.out.println(">>> La aplicación se está deteniendo...");
-        
+
         if (validatorFactory != null) {
             System.out.println("Cerrando ValidatorFactory...");
             validatorFactory.close();
             System.out.println("ValidatorFactory cerrado.");
         }
-        
-        // 1. Cerramos el pool de conexiones Hikari de forma ordenada
+
+        // Cerrar el servicio de moderación
+        if (moderationService != null) {
+            System.out.println("Cerrando servicio de moderación...");
+            ReviewModerationService.getInstance().shutdown();
+            System.out.println("Servicio de moderación cerrado.");
+        }
+
         System.out.println("Cerrando el pool de conexiones...");
         DataSourceProvider.shutdown();
         System.out.println("Pool de conexiones cerrado.");
 
-        // 2. Detenemos el hilo de limpieza de MySQL
         try {
             System.out.println("Deteniendo hilos del driver JDBC...");
             AbandonedConnectionCleanupThread.checkedShutdown();

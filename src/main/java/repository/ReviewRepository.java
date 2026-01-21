@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import entity.ModerationStatus;
 import entity.Review;
 import exception.ErrorFactory;
 import util.DataSourceProvider;
@@ -368,5 +369,75 @@ public class ReviewRepository {
         }
         
         return reviews;
+    }
+    
+    public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) throws SQLException {
+        String query = "UPDATE reviews SET moderation_status = ?, moderation_reason = ? WHERE id_review = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, status.getValue());
+            stmt.setString(2, reason);
+            stmt.setInt(3, reviewId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+    
+    public List<Review> getReviewsByModerationStatus(ModerationStatus status) throws SQLException {
+        String query = "SELECT r.*, u.username, p.titulo_original as movie_title " +
+                       "FROM reviews r " +
+                       "JOIN usuarios u ON r.id_user = u.id_user " +
+                       "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                       "WHERE r.moderation_status = ? " +
+                       "ORDER BY r.created_at DESC";
+        
+        List<Review> reviews = new ArrayList<>();
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, status.getValue());
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Review review = extractReviewFromResultSet(rs);
+                    reviews.add(review);
+                }
+            }
+        }
+        
+        return reviews;
+    }
+    //Utilizar este nuevo metodo en todo el documento para evitar repeticion de codigo
+    private Review extractReviewFromResultSet(ResultSet rs) throws SQLException {
+        Review review = new Review();
+        review.setId(rs.getInt("id_review"));
+        review.setId_user(rs.getInt("id_user"));
+        review.setId_movie(rs.getInt("id_movie"));
+        review.setReview_text(rs.getString("review_text"));
+        review.setRating(rs.getDouble("rating"));
+        
+        java.sql.Date watchedDate = rs.getDate("watched_on");
+        if (watchedDate != null) {
+            review.setWatched_on(watchedDate.toLocalDate());
+        }
+        
+        java.sql.Date createdDate = rs.getDate("created_at");
+        if (createdDate != null) {
+            review.setCreated_at(createdDate.toLocalDate());
+        }
+        
+        String statusStr = rs.getString("moderation_status");
+        if (statusStr != null) {
+            review.setModerationStatus(ModerationStatus.fromString(statusStr));
+        }
+        review.setModerationReason(rs.getString("moderation_reason"));
+        review.setUsername(rs.getString("username"));
+        review.setMovieTitle(rs.getString("movie_title"));
+        
+        return review;
     }
 }

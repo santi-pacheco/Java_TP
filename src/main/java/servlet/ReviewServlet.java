@@ -31,6 +31,7 @@ import repository.MovieRepository;
 import service.ReviewService;
 import service.UserService;
 import service.MovieService;
+import service.ReviewModerationService;
 import service.ConfiguracionReglasService;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -146,7 +147,7 @@ public class ReviewServlet extends HttpServlet {
         User loggedUser = getLoggedUser(request);
         String contentType = request.getContentType();
         
-        Review newReview;
+        Review newReview = new Review();
         int movieId = 0;
         
         try {
@@ -179,6 +180,8 @@ public class ReviewServlet extends HttpServlet {
             }
             
             Review createdReview = reviewController.createOrUpdateReview(newReview);
+            ReviewModerationService moderationService = ReviewModerationService.getInstance();
+            moderationService.moderateReviewAsync(createdReview.getId());
             
             if (contentType != null && contentType.contains("application/json")) {
                 response.setStatus(HttpServletResponse.SC_CREATED);
@@ -233,7 +236,10 @@ public class ReviewServlet extends HttpServlet {
         }
         
         Review updatedReview = reviewController.updateReview(reviewToUpdate);
-        
+        if (!existingReview.getReview_text().equals(reviewToUpdate.getReview_text())) {
+            ReviewModerationService moderationService = ReviewModerationService.getInstance();
+            moderationService.moderateReviewAsync(updatedReview.getId());
+        }
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(gson.toJson(updatedReview));
