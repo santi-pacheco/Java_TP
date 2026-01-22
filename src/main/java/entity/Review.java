@@ -29,7 +29,8 @@ public class Review {
     
     private LocalDate created_at; // Fecha en que se creó la reseña (automática)
     
-    private Boolean contieneSpoiler; // null = no revisado, true = tiene spoiler, false = no tiene spoiler
+    private ModerationStatus moderationStatus;
+    private String moderationReason;
     
     private String username; // Para mostrar el nombre del usuario
     private String movieTitle; // Para mostrar el título de la película
@@ -38,7 +39,7 @@ public class Review {
     public Review() {
         this.watched_on = LocalDate.now(); // Por defecto: hoy
         this.created_at = LocalDate.now(); // Fecha de creación automática
-        this.contieneSpoiler = null; // Por defecto no revisado
+        this.moderationStatus = ModerationStatus.PENDING_MODERATION; // Estado por defecto
     }
     
     public Review(int id_user, int id_movie, String review_text, Double rating, LocalDate watched_on) {
@@ -48,7 +49,7 @@ public class Review {
         this.rating = rating;
         this.watched_on = watched_on != null ? watched_on : LocalDate.now();
         this.created_at = LocalDate.now();
-        this.contieneSpoiler = null;
+        this.moderationStatus = ModerationStatus.PENDING_MODERATION;
     }
     
     // Getters and Setters
@@ -107,13 +108,13 @@ public class Review {
     public void setCreated_at(LocalDate created_at) {
         this.created_at = created_at;
     }
-
-    public Boolean getContieneSpoiler() {
-        return contieneSpoiler;
-    }
-
-    public void setContieneSpoiler(Boolean contieneSpoiler) {
-        this.contieneSpoiler = contieneSpoiler;
+    
+    public ModerationStatus getModerationStatus() {
+		return moderationStatus;
+	}
+    
+    public void setModerationStatus(ModerationStatus moderationStatus) {
+    	this.moderationStatus = moderationStatus;
     }
     
     public String getUsername() {
@@ -132,6 +133,15 @@ public class Review {
         this.movieTitle = movieTitle;
     }
     
+    public String getModerationReason() {
+        return moderationReason;
+    }
+
+    public void setModerationReason(String moderationReason) {
+        this.moderationReason = moderationReason;
+    }
+    
+
     @Override
     public String toString() {
         return "Review{" +
@@ -142,7 +152,7 @@ public class Review {
                 ", rating=" + rating +
                 ", watched_on=" + watched_on +
                 ", created_at=" + created_at +
-                ", contieneSpoiler=" + contieneSpoiler +
+                ", moderationStatus=" + moderationStatus +
                 '}';
     }
 }

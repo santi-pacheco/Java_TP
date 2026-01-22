@@ -4,6 +4,7 @@
 <%@ page import="entity.ActorWithCharacter" %>
 <%@ page import="entity.Review" %>
 <%@ page import="entity.User" %>
+<%@ page import="entity.ModerationStatus" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="entity.Country" %>
@@ -345,6 +346,7 @@
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
         }
         
         .review-header {
@@ -373,23 +375,23 @@
             color: #888;
         }
         
-        .review-spoiler {
-            position: relative;
-        }
-        
         .spoiler-checkbox {
             display: none;
         }
         
-        .review-spoiler .review-text {
+        .review-spoiler-text {
             filter: blur(8px);
             user-select: none;
             transition: filter 0.3s;
         }
         
-        .spoiler-checkbox:checked ~ .review-text {
+        .spoiler-checkbox:checked ~ .review-content .review-spoiler-text {
             filter: none;
             user-select: text;
+        }
+        
+        .spoiler-checkbox:checked ~ .spoiler-overlay {
+            display: none;
         }
         
         .spoiler-overlay {
@@ -406,10 +408,6 @@
             z-index: 10;
         }
         
-        .spoiler-checkbox:checked ~ .spoiler-overlay {
-            display: none;
-        }
-        
         .spoiler-overlay:hover {
             background: rgba(255, 255, 255, 1);
             transform: translate(-50%, -50%) scale(1.05);
@@ -418,11 +416,13 @@
         .spoiler-icon {
             font-size: 2rem;
             margin-bottom: 5px;
+            text-align: center;
         }
         
         .spoiler-text {
             font-weight: 600;
             color: #333;
+            text-align: center;
         }
         
         .spoiler-badge {
@@ -825,60 +825,63 @@
                 if (reviews != null && !reviews.isEmpty()) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
+                    	boolean isSpoiler = ModerationStatus.SPOILER.equals(review.getModerationStatus());
             %>
-            <div class="review-card <%= review.getContieneSpoiler() != null && review.getContieneSpoiler() ? "review-spoiler" : "" %>">
-                <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
-                    <input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>">
-                <% } %>
-                <div class="review-header">
-                    <div>
-                        <strong><%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %></strong>
-                        <span class="review-meta"> • Visto el <%= review.getWatched_on().format(formatter) %></span>
-                        <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
-                            <span class="spoiler-badge">SPOILER</span>
-                        <% } %>
-                    </div>
-                    <div class="review-stars" style="display: inline-flex; gap: 5px;">
-                        <% 
-                            double rating = review.getRating();
-                            String iconPath;
-                            if (rating <= 2) {
-                                iconPath = request.getContextPath() + "/utils/bad_movie.svg";
-                            } else if (rating <= 4) {
-                                iconPath = request.getContextPath() + "/utils/good_movie.svg";
-                            } else {
-                                iconPath = request.getContextPath() + "/utils/great_movie.svg";
-                            }
-                            
-                            for (int i = 1; i <= 5; i++) {
-                                String opacity = "0.3";
-                                String display = "inline-block";
-                                String clipPath = "";
-                                
-                                if (rating >= i) {
-                                    opacity = "1";
-                                } else if (rating >= i - 0.5) {
-                                    opacity = "1";
-                                    clipPath = "clip-path: inset(0 50% 0 0);";
-                                } else {
-                                    opacity = "0.3";
-                                }
-                                
-                                String scale = iconPath.contains("great_movie") ? "transform: scale(1.25);" : "";
-                        %>
-                        <img src="<%= iconPath %>" style="width: 30px; height: 30px; opacity: <%= opacity %>; <%= clipPath %> <%= scale %> object-fit: contain;" alt="rating">
-                        <% } %>
-                    </div>
-                </div>
-                <div class="review-text"><%= review.getReview_text() %></div>
-                <div class="review-meta">Publicado el <%= review.getCreated_at() != null ? review.getCreated_at().format(formatter) : "N/A" %></div>
-                <% if (review.getContieneSpoiler() != null && review.getContieneSpoiler()) { %>
-                    <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
-                        <div class="spoiler-icon">👁️</div>
-                        <div class="spoiler-text">Click para ver spoiler</div>
-                    </label>
-                <% } %>
-            </div>
+			<div class="review-card">
+			    <% if (isSpoiler) { %>
+			        <input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>">
+			    <% } %>
+			    <div class="review-content">
+				    <div class="review-header">
+				        <div>
+				            <strong><%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %></strong>
+				            <span class="review-meta"> • Visto el <%= review.getWatched_on().format(formatter) %></span>
+				            <% if (isSpoiler) { %>
+				                <span class="spoiler-badge">SPOILER</span>
+				            <% } %>
+				        </div>
+	                    <div class="review-stars" style="display: inline-flex; gap: 5px;">
+	                        <% 
+	                            double rating = review.getRating();
+	                            String iconPath;
+	                            if (rating <= 2) {
+	                                iconPath = request.getContextPath() + "/utils/bad_movie.svg";
+	                            } else if (rating <= 4) {
+	                                iconPath = request.getContextPath() + "/utils/good_movie.svg";
+	                            } else {
+	                                iconPath = request.getContextPath() + "/utils/great_movie.svg";
+	                            }
+	                            
+	                            for (int i = 1; i <= 5; i++) {
+	                                String opacity = "0.3";
+	                                String display = "inline-block";
+	                                String clipPath = "";
+	                                
+	                                if (rating >= i) {
+	                                    opacity = "1";
+	                                } else if (rating >= i - 0.5) {
+	                                    opacity = "1";
+	                                    clipPath = "clip-path: inset(0 50% 0 0);";
+	                                } else {
+	                                    opacity = "0.3";
+	                                }
+	                                
+	                                String scale = iconPath.contains("great_movie") ? "transform: scale(1.25);" : "";
+	                        %>
+	                        <img src="<%= iconPath %>" style="width: 30px; height: 30px; opacity: <%= opacity %>; <%= clipPath %> <%= scale %> object-fit: contain;" alt="rating">
+	                        <% } %>
+	                    </div>
+					 </div>
+					    <div class="<%= isSpoiler ? "review-text review-spoiler-text" : "review-text" %>"><%= review.getReview_text() %></div>
+					    <div class="review-meta">Publicado el <%= review.getCreated_at() != null ? review.getCreated_at().format(formatter) : "N/A" %></div>
+				    </div>
+				    <% if (isSpoiler) { %>
+				        <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
+				            <div class="spoiler-icon">👁️</div>
+				            <div class="spoiler-text">Click para ver spoiler</div>
+				        </label>
+				    <% } %>
+				</div>
             <%
                     }
                 } else {

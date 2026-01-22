@@ -6,6 +6,7 @@ import entity.Review;
 import entity.User;
 import entity.Movie;
 import entity.ConfiguracionReglas;
+import entity.ModerationStatus;
 import repository.ReviewRepository;
 import service.UserService;
 import service.MovieService;
@@ -48,8 +49,8 @@ public class ReviewService {
             throw ErrorFactory.validation("La reseña debe tener al menos 10 caracteres");
         }
 
-        // 4. Asegurar que contieneSpoiler sea null al crear (para revisión posterior)
-        review.setContieneSpoiler(null);
+        // 4. Asegurar que el moderationStatus esté en PENDING_MODERATION al crear
+        review.setModerationStatus(entity.ModerationStatus.PENDING_MODERATION);
 
         // 5. Guardar la reseña
         Review savedReview = reviewRepository.add(review);
@@ -95,8 +96,8 @@ public class ReviewService {
             throw ErrorFactory.validation("La reseña debe tener al menos 10 caracteres");
         }
 
-        // 3. Al actualizar, resetear el estado de spoiler para nueva revisión
-        review.setContieneSpoiler(null);
+        // 3. Al actualizar, resetear el estado de moderacion para nueva revisión
+        review.setModerationStatus(entity.ModerationStatus.PENDING_MODERATION);
 
         // 4. Actualizar
         Review updatedReview = reviewRepository.update(review);
@@ -140,21 +141,6 @@ public class ReviewService {
         return reviewRepository.existsByUserAndMovie(userId, movieId);
     }
 
-    // Métodos para Validacion de Spoilers
-    public List<Review> getPendingSpoilerReviews() {
-        return reviewRepository.findPendingSpoilerReviews();
-    }
-
-    public void updateSpoilerStatus(int reviewId, boolean containsSpoiler) {
-        // Verificar que la reseña existe
-        Review existingReview = reviewRepository.findOne(reviewId);
-        if (existingReview == null) {
-            throw ErrorFactory.notFound("Reseña con ID " + reviewId + " no encontrada");
-        }
-
-        reviewRepository.updateSpoilerStatus(reviewId, containsSpoiler);
-    }
-
     // Método para el caso de uso principal: crear o actualizar reseña
     public Review createOrUpdateReview(Review review) {
         // Verificar si ya existe una reseña del usuario para esta película
@@ -167,6 +153,23 @@ public class ReviewService {
         } else {
             // Si no existe, crear nueva reseña
             return createReview(review);
+        }
+    }
+    
+    public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) {
+        Review review = reviewRepository.findOne(reviewId);
+        if (review == null) {
+            throw ErrorFactory.notFound("Reseña no encontrada con ID: " + reviewId);
+        }
+        
+        try {
+            boolean updated = reviewRepository.updateModerationStatus(reviewId, status, reason);
+            if (updated) {
+                movieService.updateReviewStats(review.getId_movie());
+            }
+            return updated;
+        } catch (Exception e) {
+            throw ErrorFactory.internal("Error al actualizar estado de moderación");
         }
     }
     

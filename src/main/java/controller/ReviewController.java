@@ -2,6 +2,7 @@ package controller;
 
 import java.util.List;
 
+import entity.ModerationStatus;
 import entity.Review;
 import service.ReviewService;
 
@@ -50,12 +51,7 @@ public class ReviewController {
         return reviewService.createOrUpdateReview(review);
     }
 
-    // Métodos para administradores
-    public List<Review> getPendingSpoilerReviews() {
-        return reviewService.getPendingSpoilerReviews();
-    }
-
-    public void updateSpoilerStatus(int reviewId, boolean containsSpoiler) {
-        reviewService.updateSpoilerStatus(reviewId, containsSpoiler);
+    public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) {
+        return reviewService.updateModerationStatus(reviewId, status, reason);
     }
 }

@@ -2,7 +2,6 @@ package controller;
 import entity.Watchlist;
 import service.WatchlistService;
 import java.util.List;
-import entity.Movie;
 
 public class WatchlistController {
 	
