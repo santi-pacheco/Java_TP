@@ -1,4 +1,5 @@
 <%@ page import="entity.Review"%>
+<%@ page import="entity.ModerationStatus"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,6 +14,10 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
 .review-text { background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0; line-height: 1.6; }
 .info-row { margin: 10px 0; }
 .info-label { font-weight: 600; display: inline-block; width: 150px; }
+.status-badge { padding: 5px 10px; border-radius: 3px; font-weight: 600; display: inline-block; }
+.status-pending { background-color: #fff3cd; color: #856404; }
+.status-approved { background-color: #d4edda; color: #155724; }
+.status-rejected { background-color: #f8d7da; color: #721c24; }
 </style>
 </head>
 <body>
@@ -46,27 +51,61 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
             <span class="info-label">Visto el:</span>
             <span><%= review.getWatched_on() %></span>
         </div>
+        <div class="info-row">
+            <span class="info-label">Estado de Moderación:</span>
+            <% 
+                String statusClass = "";
+                String statusText = "";
+                if (review.getModerationStatus() == ModerationStatus.PENDING_MODERATION) {
+                    statusClass = "status-pending";
+                    statusText = "Pendiente de Moderación";
+                } else if (review.getModerationStatus() == ModerationStatus.APPROVED) {
+                    statusClass = "status-approved";
+                    statusText = "Aprobada";
+                } else if (review.getModerationStatus() == ModerationStatus.REJECTED) {
+                    statusClass = "status-rejected";
+                    statusText = "Rechazada";
+                }
+            %>
+            <span class="status-badge <%= statusClass %>"><%= statusText %></span>
+        </div>
+        <% if (review.getModerationStatus() == ModerationStatus.REJECTED && review.getModerationReason() != null) { %>
+        <div class="info-row">
+            <span class="info-label">Razón del rechazo:</span>
+            <span class="text-danger"><%= review.getModerationReason() %></span>
+        </div>
+        <% } %>
         
         <h4 style="margin-top: 30px;">Texto de la Reseña:</h4>
         <div class="review-text">
             <%= review.getReview_text() %>
         </div>
         
-        <h4>Estado de Spoiler:</h4>
+        <h4>Actualizar Estado de Moderación:</h4>
         <form action="<%= request.getContextPath() %>/reviews-admin" method="POST">
-            <input type="hidden" name="accion" value="actualizarSpoiler">
+            <input type="hidden" name="accion" value="actualizarModeracion">
             <input type="hidden" name="id" value="<%= review.getId() %>">
             
             <div class="form-group">
                 <label>
-                    <input type="radio" name="contieneSpoiler" value="false" <%= review.getContieneSpoiler() != null && !review.getContieneSpoiler() ? "checked" : "" %>>
-                    No contiene spoiler
+                    <input type="radio" name="status" value="PENDING_MODERATION" <%= review.getModerationStatus() == ModerationStatus.PENDING_MODERATION ? "checked" : "" %>>
+                    Pendiente de Moderación
                 </label>
                 <br>
                 <label>
-                    <input type="radio" name="contieneSpoiler" value="true" <%= review.getContieneSpoiler() != null && review.getContieneSpoiler() ? "checked" : "" %>>
-                    Contiene spoiler
+                    <input type="radio" name="status" value="APPROVED" <%= review.getModerationStatus() == ModerationStatus.APPROVED ? "checked" : "" %>>
+                    Aprobar
                 </label>
+                <br>
+                <label>
+                    <input type="radio" name="status" value="REJECTED" <%= review.getModerationStatus() == ModerationStatus.REJECTED ? "checked" : "" %>>
+                    Rechazar
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label for="reason">Razón (opcional para aprobar, requerido para rechazar):</label>
+                <textarea class="form-control" name="reason" id="reason" rows="3"><%= review.getModerationReason() != null ? review.getModerationReason() : "" %></textarea>
             </div>
             
             <button type="submit" class="btn btn-primary">Guardar Estado</button>

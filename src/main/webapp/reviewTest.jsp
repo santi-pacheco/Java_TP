@@ -111,21 +111,7 @@
       <button type="button" class="btn" onclick="getReviewByUserAndMovie()">Ver Reseña Específica</button>
     </div>
 
-    <!-- Sección 3: Administración (solo admins) -->
-    <% if (loggedUser != null && "admin".equals(loggedUser.getRole())) { %>
-      <div class="section">
-        <h3>🛠️ Administración (Solo Admins)</h3>
-        <button type="button" class="btn" onclick="getPendingSpoilerReviews()">Ver Reseñas Pendientes de Revisión</button>
-        <br><br>
-        
-        <label>ID Reseña:</label>
-        <input type="number" id="spoilerReviewId" value="1" min="1">
-        <button type="button" class="btn" onclick="markAsSpoiler(true)">Marcar como Spoiler</button>
-        <button type="button" class="btn" onclick="markAsSpoiler(false)">Marcar como No Spoiler</button>
-      </div>
-    <% } %>
-
-    <!-- Sección 4: Resultados -->
+    <!-- Sección 3: Resultados -->
     <div class="section">
       <h3>📊 Resultados</h3>
       <div id="result" class="result">Los resultados aparecerán aquí...</div>
@@ -135,7 +121,7 @@
   <script>
     const contextPath = '<%= request.getContextPath() %>';
     
-    // Star rating system
+    // Star rating system (sin cambios)
     document.addEventListener('DOMContentLoaded', function() {
       const starContainers = document.querySelectorAll('.star-container');
       const ratingInput = document.getElementById('rating');
@@ -274,7 +260,7 @@
         
         const data = await response.json();
         if (response.ok) {
-          let result = '📋 Reseñas de la película ' + movieId + ':\n\n';
+          let result = '📋 Reseñas APROBADAS de la película ' + movieId + ':\n\n';
           data.forEach(review => {
             const stars = getStarDisplay(review.rating);
             result += `👤 ${review.username || 'Usuario #' + review.id_user}\n`;
@@ -315,23 +301,6 @@
       }
     }
 
-    async function getPendingSpoilerReviews() {
-      try {
-        const response = await fetch(contextPath + '/reviews', {
-          credentials: 'include'
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-          showResult('⏳ Reseñas pendientes de revisión:\n' + JSON.stringify(data, null, 2));
-        } else {
-          showResult('❌ Error: ' + data.message, true);
-        }
-      } catch (error) {
-        showResult('❌ Error de conexión: ' + error.message, true);
-      }
-    }
-
     function getStarDisplay(rating) {
       let stars = '';
       for (let i = 1; i <= 5; i++) {
@@ -344,27 +313,6 @@
         }
       }
       return stars;
-    }
-    
-    async function markAsSpoiler(containsSpoiler) {
-      try {
-        const reviewId = document.getElementById('spoilerReviewId').value;
-        const response = await fetch(contextPath + '/reviews?id=' + reviewId, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ contieneSpoiler: containsSpoiler })
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-          showResult('✅ Estado de spoiler actualizado: ' + (containsSpoiler ? 'TIENE SPOILER' : 'NO TIENE SPOILER'));
-        } else {
-          showResult('❌ Error: ' + data.message, true);
-        }
-      } catch (error) {
-        showResult('❌ Error de conexión: ' + error.message, true);
-      }
     }
   </script>
 </body>

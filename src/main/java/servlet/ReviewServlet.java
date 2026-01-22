@@ -134,9 +134,9 @@ public class ReviewServlet extends HttpServlet {
             response.getWriter().write(gson.toJson(reviews));
             
         } else {
-            // GET /reviews - Para administradores: obtener reseñas pendientes de revisión de spoilers
-            List<Review> pendingReviews = reviewController.getPendingSpoilerReviews();
-            response.getWriter().write(gson.toJson(pendingReviews));
+            // GET /reviews - Para Administradores: obtener todas las resenias 
+            List<Review> Reviews = reviewController.getAllReviews();
+            response.getWriter().write(gson.toJson(Reviews));
         }
     }
 
@@ -269,47 +269,4 @@ public class ReviewServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        if (request.getMethod().equalsIgnoreCase("PATCH")) {
-            this.doPatch(request, response);
-        } else {
-            super.service(request, response);
-        }
-    }
-
-    protected void doPatch(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-    	
-    	//Solo administradores pueden actualizar estado de spoiler
-        User loggedUser = getLoggedUser(request);
-        if (!"admin".equals(loggedUser.getRole())) {
-            throw ErrorFactory.forbidden("Solo los administradores pueden actualizar el estado de spoiler");
-        }
-        
-        // PATCH para actualizar estado de spoiler (solo administradores)
-        String idParam = request.getParameter("id");
-        if (idParam == null || idParam.isEmpty()) {
-            throw ErrorFactory.badRequest("El ID de la reseña es requerido");
-        }
-        
-        int id = Integer.parseInt(idParam);
-        
-        // Leer el JSON con el estado de spoiler
-        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<java.util.Map<String, Object>>(){}.getType();
-        java.util.Map<String, Object> changes = gson.fromJson(request.getReader(), type);
-        
-        if (changes.containsKey("contieneSpoiler")) {
-            boolean containsSpoiler = (Boolean) changes.get("contieneSpoiler");
-            reviewController.updateSpoilerStatus(id, containsSpoiler);
-            
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"success\":true,\"message\":\"Estado de spoiler actualizado\"}");
-        } else {
-            throw ErrorFactory.badRequest("Se requiere el campo 'contieneSpoiler'");
-        }
-    }
 }
