@@ -237,7 +237,7 @@ public class ReviewRepository {
         return reviews;
     }
     
-    public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) throws SQLException {
+    public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason){
         String query = "UPDATE reviews SET moderation_status = ?, moderation_reason = ? WHERE id_review = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
@@ -254,7 +254,7 @@ public class ReviewRepository {
         }
     }
     
-    public List<Review> getReviewsByModerationStatus(ModerationStatus status) throws SQLException {
+    public List<Review> getReviewsByModerationStatus(ModerationStatus status){
         String query = "SELECT r.*, u.username, p.titulo_original as movie_title " +
                        "FROM reviews r " +
                        "JOIN usuarios u ON r.id_user = u.id_user " +

@@ -17,11 +17,11 @@ public class GeminiModerationService {
 
     static {
         ResourceBundle config = ResourceBundle.getBundle("config");
-        API_KEY = config.getString("gemini.api.key");
-        API_URL = config.getString("gemini.api.url");
+        API_KEY = config.getString("gemini.api.key").trim();
+        API_URL = config.getString("gemini.api.url").trim();
     }
 
-    // Clase interna para el resultado de moderación
+
     public static class ModerationResult {
         private final boolean hasSpoilers;
         private final boolean hasOffensiveContent;
@@ -54,14 +54,14 @@ public class GeminiModerationService {
         } catch (Exception e) {
             System.err.println("Error al moderar reseña: " + e.getMessage());
             e.printStackTrace();
-            return new ModerationResult(false, false, "Error en la moderación");
+            return new ModerationResult(false, false, "Error en la moderación: " + e.getMessage());
         }
     }
 
     private String buildPrompt(String reviewText, String moviePlot, String movieTitle) {
         return String.format(
             "Eres un sistema de moderación de reseñas de películas. Tu tarea es analizar la siguiente reseña usando el método del 'Tribunal de Expertos':\n\n" +
-        	"**Título de la Película:** %s\n\n" +
+            "**Título de la Película:** %s\n\n" +
             "**Contexto de la Película:**\n%s\n\n" +
             "**Reseña a Analizar:**\n%s\n\n" +
             "**REGLA DE EXCEPCIÓN (VAGUEDAD PERMITIDA):**\n" +
@@ -72,7 +72,7 @@ public class GeminiModerationService {
             "3. **Juez de Hechos**: Comparando con el argumento oficial, ¿la reseña revela información que arruinaría la experiencia?\n\n" +
             "Además, verifica si contiene:\n" +
             "- Lenguaje ofensivo, insultos, discriminación o contenido inapropiado.\n\n" +
-            "Responde en formato JSON:\n" +
+            "Responde SOLO en formato JSON (sin bloques de código):\n" +
             "{\n" +
             "  \"hasSpoilers\": true/false,\n" +
             "  \"hasOffensiveContent\": true/false,\n" +
@@ -116,7 +116,6 @@ public class GeminiModerationService {
 
         int responseCode = conn.getResponseCode();
         if (responseCode != 200) {
-            // Leer mensaje de error
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
                 StringBuilder errorResponse = new StringBuilder();
@@ -148,20 +147,32 @@ public class GeminiModerationService {
             JSONArray parts = content.getJSONArray("parts");
             String text = parts.getJSONObject(0).getString("text");
 
-            int startIdx = text.indexOf("{");
-            int endIdx = text.lastIndexOf("}") + 1;
-            String jsonText = text.substring(startIdx, endIdx);
+            if (text == null || text.trim().isEmpty()) {
+                return new ModerationResult(false, false, "Error: Respuesta vacía de la IA");
+            }
 
-            JSONObject result = new JSONObject(jsonText);
-            return new ModerationResult(
-                result.getBoolean("hasSpoilers"),
-                result.getBoolean("hasOffensiveContent"),
-                result.getString("reason")
-            );
+            int startIdx = text.indexOf("{");
+            int endIdx = text.lastIndexOf("}");
+
+            if (startIdx != -1 && endIdx != -1 && startIdx < endIdx) {
+
+                String jsonText = text.substring(startIdx, endIdx + 1);
+                JSONObject result = new JSONObject(jsonText);
+                
+
+                return new ModerationResult(
+                    result.optBoolean("hasSpoilers", false),
+                    result.optBoolean("hasOffensiveContent", false),
+                    result.optString("reason", "Sin razón proporcionada")
+                );
+            } else {
+          
+                return new ModerationResult(false, false, "Error: Formato de respuesta inválido (No JSON)");
+            }
+            
         } catch (Exception e) {
             System.err.println("Error al parsear respuesta de Gemini: " + e.getMessage());
-            return new ModerationResult(false, false, "Error al parsear respuesta");
+            return new ModerationResult(false, false, "Error técnico al procesar la respuesta");
         }
     }
 }
-

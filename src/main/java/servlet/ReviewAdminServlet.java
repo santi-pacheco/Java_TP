@@ -39,35 +39,50 @@ public class ReviewAdminServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String accion = request.getParameter("accion");
-		if (accion == null) accion = "listar";
-		
-		try {
-			switch (accion) {
-				case "listar":
-					String statusParam = request.getParameter("status");
-					List<Review> reviews;
-					
-					if (statusParam != null && !statusParam.isEmpty()) {
-						ModerationStatus status = ModerationStatus.fromString(statusParam);
-						reviews = reviewRepository.getReviewsByModerationStatus(status);
-					} else {
-						reviews = reviewController.getAllReviews();
-					}
-					
-					request.setAttribute("reviews", reviews);
-					request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
-					break;
-				case "detalle":
-					int idDetalle = Integer.parseInt(request.getParameter("id"));
-					Review review = reviewController.getReviewById(idDetalle);
-					request.setAttribute("review", review);
-					request.getRequestDispatcher("/reviewDetail.jsp").forward(request, response);
-					break;
-			}
-		} catch (SQLException e) {
-			throw new ServletException("Error al procesar la solicitud", e);
-		}
+	    String accion = request.getParameter("accion");
+	    if (accion == null) accion = "listar";
+	    
+	    try {
+	        switch (accion) {
+	            case "listar":
+	                String statusParam = request.getParameter("status");
+	                List<Review> reviews;
+	                
+	                if (statusParam != null && !statusParam.isEmpty()) {
+	                    try {
+	                        // Validar que el status exista
+	                        ModerationStatus status = ModerationStatus.fromString(statusParam);
+	                        reviews = reviewRepository.getReviewsByModerationStatus(status);
+	                    } catch (IllegalArgumentException e) {
+	                        reviews = reviewController.getAllReviews();
+	                        request.setAttribute("error", "Estado de filtro inválido: " + statusParam);
+	                    }
+	                } else {
+	                    reviews = reviewController.getAllReviews();
+	                }
+	                
+	                request.setAttribute("reviews", reviews);
+	                request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
+	                break;
+	                
+	            case "detalle":
+	                String idStr = request.getParameter("id");
+	                if (idStr != null && !idStr.isEmpty()) {
+	                    int idDetalle = Integer.parseInt(idStr);
+	                    Review review = reviewController.getReviewById(idDetalle);
+	                    request.setAttribute("review", review);
+	                    request.getRequestDispatcher("/reviewDetail.jsp").forward(request, response);
+	                } else {
+	                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de reseña faltante");
+	                }
+	                break;
+	            default:
+	                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción desconocida");
+	                break;
+	        }
+	    } catch (Exception e) {
+	        throw new ServletException("Error al procesar la solicitud: " + e.getMessage(), e);
+	    }
 	}
 	
 	@Override
@@ -75,14 +90,32 @@ public class ReviewAdminServlet extends HttpServlet {
 	    String accion = request.getParameter("accion");
 	    
 	    if ("actualizarModeracion".equals(accion)) {
+	    	try {
 	        int reviewId = Integer.parseInt(request.getParameter("id"));
 	        String statusStr = request.getParameter("status");
 	        String reason = request.getParameter("reason");
+	       
+	        if (statusStr == null || statusStr.isBlank()) {
+	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el parámetro status");
+	            return;
+	        }
 	        
 	        ModerationStatus status = ModerationStatus.fromString(statusStr);
-	        reviewController.updateModerationStatus(reviewId, status, reason);
 	        
+	        if (status == ModerationStatus.REJECTED && (reason == null || reason.trim().isEmpty())) {
+	            request.setAttribute("error", "Debes escribir una razón para rechazar la reseña.");
+	            request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
+	            return; 
+	        }
+	        reviewController.updateModerationStatus(reviewId, status, reason);
 	        response.sendRedirect(request.getContextPath() + "/reviews-admin?accion=listar&exito=true");
+	       } catch (IllegalArgumentException e) {
+	           response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Status inválido: " + e.getMessage());
+	       } catch (Exception e) {
+	           response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error procesando solicitud");
+	       }
+	    	   	        
+	       }
 	    }
 	}
-}
+
