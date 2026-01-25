@@ -15,7 +15,7 @@ import entity.User;
 import controller.UserController;
 import service.UserService;
 import repository.UserRepository;
-
+import repository.FollowRepository;
 import exception.AppException;
 
 @WebServlet("/login")
@@ -27,8 +27,9 @@ public class LoginServlet extends HttpServlet {
  public void init() throws ServletException {
 	 super.init();
 	 UserRepository userRepository = new UserRepository();
+	 FollowRepository followRepository = new FollowRepository();
      BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-     UserService userService = new UserService(userRepository, passwordEncoder);
+     UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
      this.userController = new UserController(userService);
  }
 

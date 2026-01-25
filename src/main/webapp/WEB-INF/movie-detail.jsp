@@ -220,6 +220,9 @@
             border-radius: 10px;
             background: #FAF8F3;
             transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .actor-card:hover {
@@ -268,6 +271,9 @@
             border-radius: 10px;
             background: #F0EDE6;
             transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .director-card:hover {
@@ -379,6 +385,17 @@
             display: none;
         }
         
+		.user-profile-link {
+		    text-decoration: none;
+		    color: #333;
+		    transition: color 0.2s;
+		}
+		
+		.user-profile-link:hover {
+		    color: #8B7355;
+		    text-decoration: underline;
+		}
+		        
         .review-spoiler-text {
             filter: blur(8px);
             user-select: none;
@@ -536,6 +553,18 @@
             position: relative;
             z-index: 2;
         }
+
+        /* ESTILOS NUEVOS PARA LAS FOTOS */
+        .actor-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%; /* Foto redonda */
+            object-fit: cover;  /* Para que no se deforme */
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #ddd; /* Color de fondo mientras carga */
+            border: 3px solid #fff;
+        }
     </style>
 </head>
 <body>
@@ -584,7 +613,7 @@
 					<% 
 					    @SuppressWarnings("unchecked")
 					    List<entity.Country> countries = (List<entity.Country>) request.getAttribute("countries");
-					    if (countries != null && !countries.isEmpty()) { 
+                        if (countries != null && !countries.isEmpty()) { 
 					%>
 					<div class="meta-item">
 					    <span class="meta-label">Países</span>
@@ -592,7 +621,7 @@
 					        <% 
 					            for (int i = 0; i < countries.size(); i++) {
 					                if (i > 0) out.print(", ");
-					                out.print(countries.get(i).getIso_3166_1());
+                                    out.print(countries.get(i).getIso_3166_1());
 					            }
 					        %>
 					    </span>
@@ -619,6 +648,7 @@
                     <% } %>
                 </div>
                 
+
                 <div style="margin-top: auto; padding-top: auto;">
                     <% 
                         if (session.getAttribute("usuarioLogueado") != null) {
@@ -651,7 +681,6 @@
         </a>
     <% } %>
     
-    <!-- Formulario de Reseña -->
     <% if (session.getAttribute("usuarioLogueado") != null) {
         Review userReview = (Review) request.getAttribute("userReview");
     %>
@@ -769,8 +798,16 @@
         <div class="actors-grid">
             <%
                 for (ActorWithCharacter actorWithChar : actors) {
+                    // Lógica para la foto del actor
+                    String profilePath = actorWithChar.getActor().getProfile_path();
+                    String imgUrl = (profilePath != null && !profilePath.isEmpty()) 
+                        ? "https://image.tmdb.org/t/p/w185" + profilePath
+                        : request.getContextPath() + "/utils/no-user.png"; 
             %>
             <div class="actor-card">
+                <img src="<%= imgUrl %>" alt="<%= actorWithChar.getActor().getName() %>" class="actor-photo"
+                     onerror="this.src='<%= request.getContextPath() %>/utils/no-user.png'">
+
                 <div class="actor-name"><%= actorWithChar.getActor().getName() %></div>
                 <% if (actorWithChar.getCharacterName() != null && !actorWithChar.getCharacterName().trim().isEmpty()) { %>
                     <div class="actor-character"><%= actorWithChar.getCharacterName() %></div>
@@ -790,22 +827,29 @@
         List<Person> directors = (List<Person>) request.getAttribute("directors");
     %>
     
-    <!-- Sección de Dirección -->
     <div class="directors-section">
         <h2 class="section-title">Dirección</h2>
         <div class="directors-grid">
             <%
                 if (directors != null && !directors.isEmpty()) {
                     for (Person director : directors) {
+                        // Lógica para la foto del director
+                        String profilePath = director.getProfile_path();
+                        String imgUrl = (profilePath != null && !profilePath.isEmpty()) 
+                            ? "https://image.tmdb.org/t/p/w185" + profilePath
+                            : request.getContextPath() + "/utils/no-user.png";
             %>
             <div class="director-card">
+                <img src="<%= imgUrl %>" alt="<%= director.getName() %>" class="actor-photo"
+                     onerror="this.src='<%= request.getContextPath() %>/utils/no-user.png'">
+
                 <div class="director-name"><%= director.getName() %></div>
             </div>
             <%
                     }
                 } else {
             %>
-            <div class="director-card">
+            <div class="director-card" style="width: 100%;">
                 <div class="director-name">No hay directores registrados</div>
             </div>
             <%
@@ -814,7 +858,6 @@
         </div>
     </div>
     
-    <!-- Sección de Reseñas -->
     <div class="reviews-section">
         <h2 class="section-title">Reseñas de la Comunidad</h2>
         
@@ -834,12 +877,17 @@
 			    <div class="review-content">
 				    <div class="review-header">
 				        <div>
-				            <strong><%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %></strong>
+				            <strong>
+							    <a href="${pageContext.request.contextPath}/profile?id=<%= review.getId_user() %>" class="user-profile-link">
+							        <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %>
+							    </a>
+							</strong>
 				            <span class="review-meta"> • Visto el <%= review.getWatched_on().format(formatter) %></span>
 				            <% if (isSpoiler) { %>
 				                <span class="spoiler-badge">SPOILER</span>
 				            <% } %>
 				        </div>
+	                    
 	                    <div class="review-stars" style="display: inline-flex; gap: 5px;">
 	                        <% 
 	                            double rating = review.getRating();
@@ -877,8 +925,7 @@
 				    </div>
 				    <% if (isSpoiler) { %>
 				        <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
-				            <div class="spoiler-icon">👁️</div>
-				            <div class="spoiler-text">Click para ver spoiler</div>
+				            <div class="spoiler-text">Mostrar reseña</div>
 				        </label>
 				    <% } %>
 				</div>
@@ -932,7 +979,7 @@
                         ratingDisplay.textContent = value + ' kCal';
                         updateStars(value);
                     });
-                    
+
                     container.addEventListener('mousemove', function(e) {
                         const rect = container.getBoundingClientRect();
                         const mouseX = e.clientX - rect.left;
@@ -947,7 +994,7 @@
                     const currentValue = parseFloat(ratingInput.value);
                     updateStars(currentValue);
                 });
-                
+
                 function highlightStars(value) {
                     starContainers.forEach(container => {
                         const index = parseInt(container.getAttribute('data-index'));

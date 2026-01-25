@@ -12,6 +12,7 @@ import validations.OnCreate;
 import entity.User;
 import exception.AppException;
 import exception.ErrorFactory;
+import repository.FollowRepository;
 import repository.UserRepository;
 import service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,7 +38,8 @@ public class RegisterServlet extends HttpServlet {
         
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.userService = new UserService(userRepository, passwordEncoder);
+        FollowRepository followRepository = new FollowRepository();
+        this.userService = new UserService(userRepository, passwordEncoder, followRepository);
         
         ServletContext context = getServletContext();
         this.validator = (Validator) context.getAttribute("miValidador");

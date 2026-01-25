@@ -17,6 +17,7 @@ import controller.UserController;
 import service.WatchlistService;
 import service.MovieService;
 import service.UserService;
+import repository.FollowRepository;
 import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.UserRepository;
@@ -42,7 +43,8 @@ public class WatchlistServlet extends HttpServlet {
         
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserService userService = new UserService(userRepository, passwordEncoder);
+        FollowRepository followRepository = new FollowRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);

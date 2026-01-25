@@ -13,6 +13,7 @@ import entity.ModerationStatus;
 import entity.Review;
 import repository.ReviewRepository;
 import service.ReviewService;
+import repository.FollowRepository;
 
 @WebServlet("/reviews-admin")
 public class ReviewAdminServlet extends HttpServlet {
@@ -27,9 +28,9 @@ public class ReviewAdminServlet extends HttpServlet {
 		repository.UserRepository userRepository = new repository.UserRepository();
 		repository.MovieRepository movieRepository = new repository.MovieRepository();
 		repository.ConfiguracionReglasRepository configRepository = new repository.ConfiguracionReglasRepository();
-		
+		FollowRepository followRepository = new FollowRepository();
 		org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-		service.UserService userService = new service.UserService(userRepository, passwordEncoder);
+		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository);
 		service.MovieService movieService = new service.MovieService(movieRepository);
 		service.ConfiguracionReglasService configService = new service.ConfiguracionReglasService(configRepository);
 		

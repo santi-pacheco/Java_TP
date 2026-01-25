@@ -30,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import repository.FollowRepository;
 
 public class MovieDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -53,7 +54,8 @@ public class MovieDetailServlet extends HttpServlet {
             
             UserRepository userRepository = new UserRepository();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            UserService userService = new UserService(userRepository, passwordEncoder);
+            FollowRepository followRepository = new FollowRepository();
+            UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);

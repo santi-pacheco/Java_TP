@@ -122,11 +122,6 @@
             color: #D32F2F;
         }
         
-        .spoiler-no {
-            background: #E8F5E9;
-            color: #388E3C;
-        }
-        
         .spoiler-pending {
             background: #FFF3E0;
             color: #F57C00;
@@ -225,19 +220,17 @@
                                 <div class="date">
                                     <%= review.getCreated_at() != null ? review.getCreated_at().toString() : "" %>
                                 </div>
+                                
                                 <%
-                                    Boolean spoiler = review.getContieneSpoiler();
-                                    if (spoiler == null) {
+                                    String status = (review.getModerationStatus() != null) ? review.getModerationStatus().toString() : "PENDING_MODERATION";
+
+                                    if ("PENDING_MODERATION".equals(status)) {
                                 %>
                                     <span class="spoiler-badge spoiler-pending">Pendiente de revisión</span>
                                 <%
-                                    } else if (spoiler) {
+                                    } else if ("SPOILER".equals(status)) {
                                 %>
-                                    <span class="spoiler-badge spoiler-yes">Contiene Spoiler</span>
-                                <%
-                                    } else {
-                                %>
-                                    <span class="spoiler-badge spoiler-no">Sin Spoiler</span>
+                                    <span class="spoiler-badge spoiler-yes" style="background:#ffcccc; color:#cc0000;">Contiene Spoiler</span>
                                 <%
                                     }
                                 %>

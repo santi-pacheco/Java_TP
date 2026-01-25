@@ -2,6 +2,7 @@ package service;
 import java.util.List;
 
 import entity.User;
+import repository.FollowRepository;
 import repository.UserRepository;
 import exception.ErrorFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,10 +11,12 @@ public class UserService {
 
 	private UserRepository userRepository;
 	private BCryptPasswordEncoder passwordEncoder;
+	private FollowRepository followRepository;
 	
-	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.followRepository = followRepository;
 	}
 
 	public List<User> getAllUsers() {
@@ -37,7 +40,6 @@ public class UserService {
 	}
 	
 	public User updateUser(User user) {
-		// 1. Primero, verifica que el usuario exista
 	    User existingUser = userRepository.findOne(user.getId());
 	    if (existingUser == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getId() + " no encontrado.");
@@ -48,7 +50,6 @@ public class UserService {
 	    existingUser.setBirthDate(user.getBirthDate());
 	    existingUser.setEsUsuarioActivo(user.isEsUsuarioActivo());
 
-	    // 2. Si existe, ahora sí actualiza
 	    return userRepository.update(existingUser);
 	}
 	
@@ -111,5 +112,30 @@ public class UserService {
 		// Este método necesita acceso al ReviewRepository
 		// Se implementará en ReviewService
 		return 0;
+	}
+	
+	public void toggleFollow(int currentUserId, int targetUserId) {
+        if (currentUserId == targetUserId) {
+            throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
+        }
+        boolean isFollowing = followRepository.isFollowing(currentUserId, targetUserId);
+
+        if (isFollowing) {
+            followRepository.removeFollow(currentUserId, targetUserId);
+        } else {
+            followRepository.addFollow(currentUserId, targetUserId);
+        }
+    }
+	
+	public boolean isFollowing(int currentUserId, int targetUserId) {
+        return followRepository.isFollowing(currentUserId, targetUserId);
+    }
+	
+	public List<User> getFollowers(int userId) {
+	    return followRepository.findFollowers(userId);
+	}
+
+	public List<User> getFollowing(int userId) {
+	    return followRepository.findFollowing(userId);
 	}
 }

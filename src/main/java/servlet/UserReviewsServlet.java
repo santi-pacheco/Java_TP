@@ -17,6 +17,7 @@ import entity.Movie;
 import repository.ReviewRepository;
 import repository.UserRepository;
 import repository.MovieRepository;
+import repository.FollowRepository;
 import repository.ConfiguracionReglasRepository;
 import service.ReviewService;
 import service.UserService;
@@ -33,8 +34,8 @@ public class UserReviewsServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
         ConfiguracionReglasRepository configuracionRepository = new ConfiguracionReglasRepository();
-        
-        UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder());
+        FollowRepository followRepository = new FollowRepository();
+        UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository);
         movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
         
