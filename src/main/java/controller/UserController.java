@@ -41,4 +41,20 @@ public class UserController {
 		return userService.authenticateUser(username, password);
 	}
 	
+	public void handleFollowAction(int currentUserId, int targetUserId) {
+        userService.toggleFollow(currentUserId, targetUserId);
+    }
+    
+    public boolean checkFollowStatus(int currentUserId, int targetUserId) {
+        return userService.isFollowing(currentUserId, targetUserId);
+    }
+    
+    public List<User> getFollowers(int userId) {
+        return userService.getFollowers(userId);
+    }
+
+    public List<User> getFollowing(int userId) {
+        return userService.getFollowing(userId);
+    }
+	
 }

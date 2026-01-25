@@ -18,6 +18,7 @@ import service.WatchlistService;
 import service.MovieService;
 import repository.WatchlistRepository;
 import repository.MovieRepository;
+import repository.FollowRepository;
 import service.UserService;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +37,8 @@ public class RouletteServlet extends HttpServlet {
         
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserService userService = new UserService(userRepository, passwordEncoder);
+        FollowRepository followRepository = new FollowRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);

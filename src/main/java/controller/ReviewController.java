@@ -54,4 +54,8 @@ public class ReviewController {
     public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) {
         return reviewService.updateModerationStatus(reviewId, status, reason);
     }
+    
+    public List<Review> getReviewsByUser(int userId) {
+		return reviewService.getReviewsByUser(userId);
+	}
 }

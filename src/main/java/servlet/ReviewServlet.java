@@ -38,6 +38,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
 import exception.ErrorFactory;
+import repository.FollowRepository;
 
 @WebServlet("/reviews")
 public class ReviewServlet extends HttpServlet {
@@ -59,7 +60,8 @@ public class ReviewServlet extends HttpServlet {
         
         // Inicializar servicios
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserService userService = new UserService(userRepository, passwordEncoder);
+        FollowRepository followRepository = new FollowRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         MovieService movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);

@@ -24,6 +24,7 @@ import exception.AppException;
 import validations.OnCreate;
 import jakarta.validation.groups.Default;
 import jakarta.servlet.ServletContext;
+import repository.FollowRepository;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
@@ -38,7 +39,8 @@ public class UserServlet extends HttpServlet {
         super.init();
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserService userService = new UserService(userRepository, passwordEncoder);
+        FollowRepository followRepository = new FollowRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         this.userController = new UserController(userService);
         
         ServletContext context = getServletContext();

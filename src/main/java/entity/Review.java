@@ -34,7 +34,6 @@ public class Review {
     
     private String username; // Para mostrar el nombre del usuario
     private String movieTitle; // Para mostrar el título de la película
-    
     // Constructors
     public Review() {
         this.watched_on = LocalDate.now(); // Por defecto: hoy
@@ -141,7 +140,6 @@ public class Review {
         this.moderationReason = moderationReason;
     }
     
-
     @Override
     public String toString() {
         return "Review{" +
