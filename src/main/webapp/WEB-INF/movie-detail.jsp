@@ -868,7 +868,7 @@
                 if (reviews != null && !reviews.isEmpty()) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
-                    	boolean isSpoiler = ModerationStatus.SPOILER.equals(review.getModerationStatus());
+                    	boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
             %>
 			<div class="review-card">
 			    <% if (isSpoiler) { %>
