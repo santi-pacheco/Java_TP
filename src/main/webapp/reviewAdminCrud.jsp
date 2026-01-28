@@ -67,7 +67,7 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 12px; ver
                                 statusBadge = "✅ Aprobada";
                                 statusClass = "badge-approved";
                             } else if (review.getModerationStatus() == ModerationStatus.REJECTED) {
-                                statusBadge = "❌ Rechazada";
+                                statusBadge = "❌ Rechazada por Spoiler";
                                 statusClass = "badge-rejected";
                             } else {
                                 statusBadge = "⏳ Pendiente";
