@@ -75,7 +75,6 @@ public class RegisterServlet extends HttpServlet {
                 return;
             }
 
-            // Usamos OnCreate.class para validar también la contraseña
             Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
             
             if (!violations.isEmpty()) {
@@ -87,7 +86,6 @@ public class RegisterServlet extends HttpServlet {
 
             User createdUser = userService.CreateUser(userFromForm);
             
-            // Crear watchlist automáticamente para el nuevo usuario
             try {
                 repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository(new repository.MovieRepository());
                 watchlistRepo.addWatchlist(createdUser.getId());
@@ -95,7 +93,6 @@ public class RegisterServlet extends HttpServlet {
                 System.err.println("Error creating watchlist for new user: " + e.getMessage());
             }
             
-            // Iniciar sesión automáticamente
             request.getSession().setAttribute("usuarioLogueado", createdUser);
 
             response.sendRedirect(request.getContextPath() + "/");

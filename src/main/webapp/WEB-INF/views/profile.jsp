@@ -12,7 +12,7 @@
     <style>
         body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
         .profile-container { max-width: 1000px; margin: 30px auto; }
-        .profile-header { background: #fff; padding: 30px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 20px; }
+        .profile-header { background: #fff; padding: 30px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 20px; text-align: center; }
         .profile-header h1 { margin: 0 0 10px 0; color: #333; }
         .stats-box { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 20px; }
         .chart-container { background: #fff; padding: 20px 20px 50px 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 20px; }
@@ -25,62 +25,69 @@
         .review-item { border-bottom: 1px solid #eee; padding: 15px 0; }
         .review-item:last-child { border-bottom: none; }
         .rating-stars { color: #f39c12; }
-		.spoiler-wrapper {
-		    position: relative;
-		    cursor: pointer;
-		}
-		.spoiler-content {
-		    filter: blur(4px);
-		    user-select: none;
-		    transition: filter 0.3s ease;
-		    background-color: #fff;
-		}
-		.spoiler-visible {
-		    filter: none;
-		    user-select: text;
-		    background-color: transparent;
-		}
-		.spoiler-overlay-label {
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
-		    background: #333; /*#d9534f;*/
-		    color: white;
-		    padding: 5px 15px;
-		    border-radius: 20px;
-		    font-size: 12px;
-		    font-weight: bold;
-		    pointer-events: none;
-		    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-		    z-index: 10;
-		}
-		.spoiler-trigger {
-		    display: none;
-		}
-		.spoiler-trigger:checked + .spoiler-wrapper .spoiler-content {
-		    filter: none;
-		    user-select: text;
-		}
-		.spoiler-trigger:checked + .spoiler-wrapper .spoiler-overlay-label {
-		    display: none;
-		}
-		.spoiler-badge {
-		    padding: 4px 12px;
-		    border-radius: 12px;
-		    font-size: 11px;
-		    font-weight: 600;
-		    display: inline-block;
-		    margin-left: 10px;
-		    vertical-align: middle;
-		}
-		.spoiler-yes {
-		    background: #FFE5E5;
-		    color: #D32F2F;
-		    border: 1px solid #ffcccc;
-		}
+        .spoiler-wrapper { position: relative; cursor: pointer; }
+        .spoiler-content { filter: blur(4px); user-select: none; transition: filter 0.3s ease; background-color: #fff; }
+        .spoiler-visible { filter: none; user-select: text; background-color: transparent; }
+        .spoiler-overlay-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+        .spoiler-trigger { display: none; }
+        .spoiler-trigger:checked + .spoiler-wrapper .spoiler-content { filter: none; user-select: text; }
+        .spoiler-trigger:checked + .spoiler-wrapper .spoiler-overlay-label { display: none; }
+        .spoiler-badge { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; margin-left: 10px; vertical-align: middle; }
+        .spoiler-yes { background: #FFE5E5; color: #D32F2F; border: 1px solid #ffcccc; }
         .stat-item:hover { background-color: #f9f9f9; border-radius: 5px; }
         .modal-body ul { padding: 0; list-style: none; }
+        
+        /* --- ESTILOS FOTO DE PERFIL ACTUALIZADOS --- */
+        .profile-avatar-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background-color: #eee;
+        }
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(0,0,0,0.7); /* Fondo un poco más oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Espacio entre los botones */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .profile-avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        /* Botones del overlay */
+        .overlay-btn {
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .overlay-btn:hover {
+            color: #ddd;
+        }
+        .overlay-btn-danger:hover {
+            color: #ff6b6b; /* Rojo al pasar el mouse por la basura */
+        }
     </style>
 </head>
 <body>
@@ -99,7 +106,36 @@
         <i class="glyphicon glyphicon-arrow-left"></i> Volver
     </a>
     
-    <div class="profile-header">
+    <div class="profile-header">  
+        <div class="profile-avatar-container">
+            <% 
+                entity.User uProfile = (entity.User) request.getAttribute("user");
+                String pImage = uProfile.getProfileImage();
+                String displayImg = (pImage != null && !pImage.isEmpty()) 
+                    ? request.getContextPath() + "/uploads/" + pImage 
+                    : request.getContextPath() + "/utils/no-user.png";
+                
+                boolean hasPhoto = (pImage != null && !pImage.isEmpty());
+            %>
+            <img src="<%= displayImg %>" alt="Foto de perfil" class="profile-avatar">
+            
+            <c:if test="${isMyProfile}">
+                <div class="avatar-overlay">
+                    <button type="button" class="overlay-btn" title="Cambiar foto" data-toggle="modal" data-target="#uploadPhotoModal">
+                        <span class="glyphicon glyphicon-camera"></span>
+                    </button>
+
+                    <% if (hasPhoto) { %>
+                        <form action="<%= request.getContextPath() %>/profile-image?accion=eliminar" method="post" style="display:inline;">
+                            <button type="submit" class="overlay-btn overlay-btn-danger" title="Eliminar foto" onclick="return confirm('¿Seguro que quieres quitar tu foto?');">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </form>
+                    <% } %>
+                </div>
+            </c:if>
+        </div>
+        
         <h1><i class="glyphicon glyphicon-user"></i> ${user.username}</h1>
         <p style="color: #666; margin: 0;">${user.email}</p>
 
@@ -107,7 +143,6 @@
             <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
                 <form action="<%= request.getContextPath() %>/follow" method="POST">
                     <input type="hidden" name="idUsuario" value="${user.id}">
-                    
                     <c:choose>
                         <c:when test="${isFollowing}">
                             <button type="submit" class="btn btn-danger">
@@ -193,12 +228,12 @@
                                     </c:choose>
                                 </a>
                                 <div class="rating-stars" style="margin-top: 5px;">
-								    <c:forEach begin="1" end="${review.rating}">★</c:forEach>
-								    <c:forEach begin="${review.rating + 1}" end="5">☆</c:forEach>
-								    <c:if test="${review.moderationStatus == 'SPOILER'}">
-								        <span class="spoiler-badge spoiler-yes">Contiene Spoiler</span>
-								    </c:if>
-								</div>
+                                    <c:forEach begin="1" end="${review.rating}">★</c:forEach>
+                                    <c:forEach begin="${review.rating + 1}" end="5">☆</c:forEach>
+                                    <c:if test="${review.moderationStatus == 'SPOILER'}">
+                                        <span class="spoiler-badge spoiler-yes">Contiene Spoiler</span>
+                                    </c:if>
+                                </div>
                             </div>
                             <small style="color: #999;">${review.created_at}</small>
                         </div>
@@ -206,7 +241,6 @@
                         <c:choose>
                             <c:when test="${review.moderationStatus == 'SPOILER'}">
                                 <input type="checkbox" id="spoiler-check-${review.id}" class="spoiler-trigger">
-                                
                                 <label for="spoiler-check-${review.id}" class="spoiler-wrapper" style="display: block; margin: 10px 0 0 0;">
                                     <div class="spoiler-overlay-label">Mostrar reseña</div>
                                     <p class="spoiler-content" style="margin: 0; color: #666;">
@@ -218,7 +252,6 @@
                                 <p style="margin: 10px 0 0 0; color: #666;">${review.review_text}</p>
                             </c:otherwise>
                         </c:choose>
-                        
                     </div>
                 </c:forEach>
             </c:otherwise>
@@ -271,6 +304,30 @@
                         </c:if>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="uploadPhotoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cambiar Foto de Perfil</h4>
+                </div>
+                
+                <form action="<%= request.getContextPath() %>/profile-image?accion=subir" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Selecciona una imagen (Máx 10MB)</label>
+                            <input type="file" name="photo" class="form-control" accept="image/*" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border:none;">Guardar Foto</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -6,6 +6,7 @@ import repository.FollowRepository;
 import repository.UserRepository;
 import exception.ErrorFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.io.File;
 
 public class UserService {
 
@@ -40,7 +41,7 @@ public class UserService {
 	}
 	
 	public User updateUser(User user) {
-	    User existingUser = userRepository.findOne(user.getId());
+	    User existingUser = userRepository.findOne(user.getId());    
 	    if (existingUser == null) {
 	        throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getId() + " no encontrado.");
 	    }
@@ -49,7 +50,10 @@ public class UserService {
 	    existingUser.setRole(user.getRole());
 	    existingUser.setBirthDate(user.getBirthDate());
 	    existingUser.setEsUsuarioActivo(user.isEsUsuarioActivo());
-
+	    if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+	        String hashedPassword = this.passwordEncoder.encode(user.getPassword());
+	        existingUser.setPassword(hashedPassword);
+	    }
 	    return userRepository.update(existingUser);
 	}
 	
@@ -138,4 +142,31 @@ public class UserService {
 	public List<User> getFollowing(int userId) {
 	    return followRepository.findFollowing(userId);
 	}
+	
+	public void updateProfileImage(int userId, String newFileName, String uploadDir) {
+	    User user = userRepository.findOne(userId);
+	    if (user != null && user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { 
+	        File oldFile = new File(uploadDir + File.separator + user.getProfileImage());
+	        if (oldFile.exists()) {
+	            boolean deleted = oldFile.delete();
+	            if (!deleted) {
+	                System.err.println("ADVERTENCIA: No se pudo borrar la imagen vieja: " + oldFile.getAbsolutePath());
+	            }
+	        }
+	    }
+	    userRepository.updateProfileImage(userId, newFileName);
+	}
+
+    public void removeProfileImage(int userId, String uploadDir) {
+        User user = userRepository.findOne(userId);
+
+        if (user != null && user.getProfileImage() != null) {
+            File file = new File(uploadDir + File.separator + user.getProfileImage());
+            if (file.exists()) {
+                file.delete();
+            }
+            userRepository.updateProfileImage(userId, null);
+        }
+    }
+	
 }
