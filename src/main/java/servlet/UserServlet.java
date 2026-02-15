@@ -151,21 +151,21 @@ public class UserServlet extends HttpServlet {
                     break;
                     
                 case "eliminar":
-                	try {
-	                    int idEliminar = Integer.parseInt(request.getParameter("id")); 
-	                    User userToDelete = userController.getUserById(idEliminar);
-	                    
-	                    if (userToDelete != null && userToDelete.getProfileImage() != null) {
-	                        String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
-	                        File file = new File(uploadPath + File.separator + userToDelete.getProfileImage());
-	                        if (file.exists()) {
-	                            file.delete();
-	                        }
-	                    }
-	                    userController.removeUser(userToDelete);
-	                    
+                    try {
+                        int idEliminar = Integer.parseInt(request.getParameter("id"));
+                        User userToDelete = userController.getUserById(idEliminar);
+                        if (userToDelete != null && userToDelete.getProfileImage() != null) {
+                            String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+                            String fileName = java.nio.file.Paths.get(userToDelete.getProfileImage()).getFileName().toString();
+                            File file = new File(uploadPath, fileName);
+                            if (file.exists() && file.getCanonicalPath().startsWith(new File(uploadPath).getCanonicalPath())) {
+                                file.delete();
+                            }
+                        }
+                        userController.removeUser(userToDelete);
+                        
                    } catch (NumberFormatException e) {
-						throw ErrorFactory.badRequest("El ID proporcionado no es un número válido.");
+                        throw ErrorFactory.badRequest("El ID proporcionado no es un número válido.");
                    }
                    break;
                    

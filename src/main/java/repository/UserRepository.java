@@ -196,10 +196,9 @@ public class UserRepository {
             
             stmt.setBoolean(1, isActive);
             stmt.setInt(2, userId);
-            stmt.executeUpdate();
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
-                throw ErrorFactory.notFound("No se encontró el usuario para actualizar su foto.");
+                throw ErrorFactory.notFound("No se encontró el usuario para actualizar su estado activo.");
             }
             
         } catch (SQLException e) {

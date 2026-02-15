@@ -21,6 +21,7 @@ import repository.FollowRepository;
 import repository.UserRepository;
 import service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Set;
 
 @WebServlet("/profile-image")
 @MultipartConfig(
@@ -32,6 +33,8 @@ public class ProfileImageServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private UserController userController;
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of("image/jpeg", "image/png", "image/gif");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".gif");
 
     @Override
     public void init() throws ServletException {
@@ -56,27 +59,38 @@ public class ProfileImageServlet extends HttpServlet {
         String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
         try {
             switch (accion) {
-                case "subir":
-                    Part filePart = request.getPart("photo");
-                    if (filePart == null || filePart.getSize() == 0) {
-                        throw ErrorFactory.validation("Debes seleccionar una imagen.");
-                    }
-                    File uploadDir = new File(uploadPath);
-                    if (!uploadDir.exists()) uploadDir.mkdir();
+	            case "subir":
+	                Part filePart = request.getPart("photo");
+	                if (filePart == null || filePart.getSize() == 0) {
+	                    throw ErrorFactory.validation("Debes seleccionar una imagen.");
+	                }
+	                String contentType = filePart.getContentType();
+	                if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+	                    throw ErrorFactory.validation("El tipo de archivo no es válido. Solo se permiten imágenes (JPG, PNG, GIF).");
+	                }
 
-                    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                    String extension = "";
-                    int i = fileName.lastIndexOf('.');
-                    if (i > 0) extension = fileName.substring(i);
-                    
-                    String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
-
-                    filePart.write(uploadPath + File.separator + uniqueFileName);
-                    userController.updateProfileImage(user.getId(), uniqueFileName, uploadPath);
-                    user.setProfileImage(uniqueFileName);
-                    request.getSession().setAttribute("flashMessage", "¡Foto actualizada con éxito!");
-                    request.getSession().setAttribute("flashType", "success");
-                    break;
+	                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+	                int i = fileName.lastIndexOf('.');
+	                
+	                if (i <= 0) {
+	                    throw ErrorFactory.validation("El archivo debe tener una extensión válida.");
+	                }
+	                
+	                String extension = fileName.substring(i).toLowerCase();
+	                if (!ALLOWED_EXTENSIONS.contains(extension)) {
+	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
+	                }
+	                File uploadDir = new File(uploadPath);
+	                if (!uploadDir.exists()) uploadDir.mkdir();
+	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
+	                filePart.write(uploadPath + File.separator + uniqueFileName);
+	                
+	                userController.updateProfileImage(user.getId(), uniqueFileName, uploadPath);
+	                user.setProfileImage(uniqueFileName);
+	                
+	                request.getSession().setAttribute("flashMessage", "¡Foto actualizada con éxito!");
+	                request.getSession().setAttribute("flashType", "success");
+	                break;
 
                 case "eliminar":
                     userController.removeProfileImage(user.getId(), uploadPath);
