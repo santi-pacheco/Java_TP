@@ -56,7 +56,13 @@ public class ProfileImageServlet extends HttpServlet {
             return;
         }
         User user = (User) request.getSession().getAttribute("usuarioLogueado");
-        String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+        String uploadPath = "C:" + File.separator + "fatmovies_uploads"; 
+        //////////////////////////////
+	    java.io.File uploadDir = new java.io.File(uploadPath);
+	    if (!uploadDir.exists()) {
+	    	uploadDir.mkdirs();
+	    }
+	    //////////////////////////////
         try {
             switch (accion) {
 	            case "subir":
@@ -80,14 +86,12 @@ public class ProfileImageServlet extends HttpServlet {
 	                if (!ALLOWED_EXTENSIONS.contains(extension)) {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
-	                File uploadDir = new File(uploadPath);
-	                if (!uploadDir.exists()) uploadDir.mkdir();
 	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
 	                filePart.write(uploadPath + File.separator + uniqueFileName);
 	                
 	                userController.updateProfileImage(user.getId(), uniqueFileName, uploadPath);
 	                user.setProfileImage(uniqueFileName);
-	                
+	                System.out.println(uploadPath);
 	                request.getSession().setAttribute("flashMessage", "¡Foto actualizada con éxito!");
 	                request.getSession().setAttribute("flashType", "success");
 	                break;

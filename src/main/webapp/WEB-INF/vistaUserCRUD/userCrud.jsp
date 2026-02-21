@@ -1,7 +1,3 @@
-<%-- 
-  Fichero: /WEB-INF/vistaUserCRUD/userCrud.jsp
-  Propósito: Muestra la lista de usuarios con su foto (Avatar) y acciones CRUD.
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -83,7 +79,7 @@
                         <td>
                             <c:choose>
                                 <c:when test="${not empty user.profileImage}">
-                                    <img src="${pageContext.request.contextPath}/uploads/${user.profileImage}" class="avatar-thumb" alt="Avatar">
+                                    <img src="/fatmovies_uploads/${user.profileImage}" class="avatar-thumb" alt="Avatar">
                                 </c:when>
                                 <c:otherwise>
                                     <img src="${pageContext.request.contextPath}/utils/no-user.png" class="avatar-thumb" alt="Sin foto" style="opacity: 0.5;">

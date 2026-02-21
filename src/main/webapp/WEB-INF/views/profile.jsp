@@ -36,8 +36,6 @@
         .spoiler-yes { background: #FFE5E5; color: #D32F2F; border: 1px solid #ffcccc; }
         .stat-item:hover { background-color: #f9f9f9; border-radius: 5px; }
         .modal-body ul { padding: 0; list-style: none; }
-        
-        /* --- ESTILOS FOTO DE PERFIL ACTUALIZADOS --- */
         .profile-avatar-container {
             position: relative;
             width: 150px;
@@ -60,19 +58,17 @@
             left: 0;
             width: 100%;
             height: 40px;
-            background: rgba(0,0,0,0.7); /* Fondo un poco más oscuro */
+            background: rgba(0,0,0,0.7);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px; /* Espacio entre los botones */
+            gap: 15px;
             opacity: 0;
             transition: opacity 0.3s;
         }
         .profile-avatar-container:hover .avatar-overlay {
             opacity: 1;
         }
-        
-        /* Botones del overlay */
         .overlay-btn {
             color: white;
             font-size: 18px;
@@ -86,7 +82,7 @@
             color: #ddd;
         }
         .overlay-btn-danger:hover {
-            color: #ff6b6b; /* Rojo al pasar el mouse por la basura */
+            color: #ff6b6b;
         }
     </style>
 </head>
@@ -112,7 +108,7 @@
                 entity.User uProfile = (entity.User) request.getAttribute("user");
                 String pImage = uProfile.getProfileImage();
                 String displayImg = (pImage != null && !pImage.isEmpty()) 
-                    ? request.getContextPath() + "/uploads/" + pImage 
+                    ? "/fatmovies_uploads/" + pImage 
                     : request.getContextPath() + "/utils/no-user.png";
                 
                 boolean hasPhoto = (pImage != null && !pImage.isEmpty());

@@ -1,7 +1,3 @@
-<%-- 
-  Fichero: /WEB-INF/vistaUserCRUD/editarUsuario.jsp
-  Propósito: Formulario para editar un usuario existente (Foto, Datos y Password).
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -80,7 +76,7 @@
             <div class="text-center" style="margin-bottom: 25px;">
                 <c:choose>
                     <c:when test="${not empty user.profileImage}">
-                        <img src="${pageContext.request.contextPath}/uploads/${user.profileImage}" class="avatar-preview" alt="Foto actual">
+                        <img src="/fatmovies_uploads/${user.profileImage}" class="avatar-preview" alt="Foto actual">
                     </c:when>
                     <c:otherwise>
                         <img src="${pageContext.request.contextPath}/utils/no-user.png" class="avatar-preview" alt="Sin foto" style="opacity: 0.5;">

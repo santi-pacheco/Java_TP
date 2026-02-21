@@ -137,10 +137,9 @@
             if (usuarioLogueado != null) {
                 entity.User user = (entity.User) usuarioLogueado;
                 
-                // --- LÓGICA DE FOTO NUEVA ---
                 String navAvatar = request.getContextPath() + "/utils/no-user.png";
                 if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-                    navAvatar = request.getContextPath() + "/uploads/" + user.getProfileImage();
+                    navAvatar = "/fatmovies_uploads/" + user.getProfileImage();
                 }
         %>
             <% if ("admin".equals(user.getRole())) { %>
