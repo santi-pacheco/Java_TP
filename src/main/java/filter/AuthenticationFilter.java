@@ -30,6 +30,7 @@ public class AuthenticationFilter implements Filter {
                                    requestURI.startsWith(httpRequest.getContextPath() + "/js/") ||
                                    requestURI.startsWith(httpRequest.getContextPath() + "/images/") ||
                                    requestURI.startsWith(httpRequest.getContextPath() + "/utils/") ||
+                                   requestURI.startsWith(httpRequest.getContextPath() + "/uploads/") ||
                                    requestURI.endsWith("/landing.jsp");
 
         HttpSession session = httpRequest.getSession(false);

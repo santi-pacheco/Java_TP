@@ -1,6 +1,9 @@
 package servlet;
 
 import java.io.File;
+import okhttp3.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -22,6 +25,9 @@ import repository.UserRepository;
 import service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Set;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 @WebServlet("/profile-image")
 @MultipartConfig(
@@ -35,7 +41,15 @@ public class ProfileImageServlet extends HttpServlet {
     private UserController userController;
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of("image/jpeg", "image/png", "image/gif");
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".gif");
-
+    private OkHttpClient httpClient;
+    private static final String apiUser;
+    private static final String apiSecret;
+    static {
+        ResourceBundle config = ResourceBundle.getBundle("config");
+        apiUser = config.getString("sightengine.api.user").trim();
+        apiSecret = config.getString("sightengine.api.secret").trim();
+    }
+    
     @Override
     public void init() throws ServletException {
         super.init();
@@ -44,6 +58,12 @@ public class ProfileImageServlet extends HttpServlet {
         FollowRepository followRepository = new FollowRepository();
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         this.userController = new UserController(userService);
+        this.httpClient = new OkHttpClient.Builder()
+        	    .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        	    .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        	    .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        	    .build();
+        
     }
 
     @Override
@@ -57,12 +77,11 @@ public class ProfileImageServlet extends HttpServlet {
         }
         User user = (User) request.getSession().getAttribute("usuarioLogueado");
         String uploadPath = "C:" + File.separator + "fatmovies_uploads"; 
-        //////////////////////////////
 	    java.io.File uploadDir = new java.io.File(uploadPath);
 	    if (!uploadDir.exists()) {
 	    	uploadDir.mkdirs();
 	    }
-	    //////////////////////////////
+
         try {
             switch (accion) {
 	            case "subir":
@@ -87,8 +106,59 @@ public class ProfileImageServlet extends HttpServlet {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
 	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
-	                filePart.write(uploadPath + File.separator + uniqueFileName);
-	                
+                    String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
+                    File archivoFisico = new File(uploadPath, safeFileName);
+                    
+                    filePart.write(archivoFisico.getAbsolutePath());
+                    
+                    try {
+                        RequestBody requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("models", "nudity-2.0,weapon,gore")
+                            .addFormDataPart("api_user", apiUser)
+                            .addFormDataPart("api_secret", apiSecret)
+                            .addFormDataPart("media", archivoFisico.getName(),
+                                RequestBody.create(MediaType.parse("application/octet-stream"), archivoFisico))
+                            .build();
+
+                        Request sightengineRequest = new Request.Builder()
+                            .url("https://api.sightengine.com/1.0/check.json")
+                            .post(requestBody)
+                            .build();
+
+                        try (Response apiResponse = httpClient.newCall(sightengineRequest).execute()) {
+                            
+                            if (!apiResponse.isSuccessful()) {
+                                throw new IOException("Sightengine API devolvió un estado de error: " + apiResponse.code());
+                            }
+                            ResponseBody responseBody = apiResponse.body();
+                            if (responseBody == null) {
+                                throw new IOException("Sightengine API devolvió un cuerpo de respuesta nulo");
+                            }
+                            String responseData = responseBody.string();
+                            if (responseData == null || responseData.isEmpty()) {
+                                throw new IOException("Sightengine API devolvió una respuesta vacía");
+                            }
+                            JsonObject jsonObject = JsonParser.parseString(responseData).getAsJsonObject();
+
+                            double nudityScore = jsonObject.getAsJsonObject("nudity").get("none").getAsDouble();
+                            JsonObject weaponClasses = jsonObject.getAsJsonObject("weapon").getAsJsonObject("classes");
+                            double firearmScore = weaponClasses.get("firearm").getAsDouble();
+                            double knifeScore = weaponClasses.get("knife").getAsDouble();
+                            double goreScore = jsonObject.getAsJsonObject("gore").get("prob").getAsDouble();
+                            
+                            if (nudityScore < 0.80 || firearmScore > 0.20 || knifeScore > 0.20 || goreScore > 0.15) {
+                                archivoFisico.delete();
+                                throw ErrorFactory.validation("La imagen no cumple con nuestras normas de comunidad (contiene desnudez, armas o violencia extrema).");
+                            }
+                        }
+                    } catch (AppException e) {
+                        throw e; 
+                    } catch (Exception e) {
+                        archivoFisico.delete();
+                        throw ErrorFactory.internal("No pudimos verificar la seguridad de tu foto en este momento. Inténtalo más tarde.");
+                    }
+
 	                userController.updateProfileImage(user.getId(), uniqueFileName, uploadPath);
 	                user.setProfileImage(uniqueFileName);
 	                System.out.println(uploadPath);
@@ -124,5 +194,14 @@ public class ProfileImageServlet extends HttpServlet {
             request.getSession().setAttribute("flashType", "danger");
             response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getId());
         }
+    }
+    
+    @Override
+    public void destroy() {
+        if (httpClient != null) {
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
+        }
+        super.destroy();
     }
 }
