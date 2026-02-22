@@ -12,7 +12,9 @@ import controller.ReviewController;
 import entity.ModerationStatus;
 import entity.Review;
 import repository.ReviewRepository;
+import repository.WatchlistRepository;
 import service.ReviewService;
+import service.WatchlistService;
 import repository.FollowRepository;
 
 @WebServlet("/reviews-admin")
@@ -33,8 +35,9 @@ public class ReviewAdminServlet extends HttpServlet {
 		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository);
 		service.MovieService movieService = new service.MovieService(movieRepository);
 		service.ConfiguracionReglasService configService = new service.ConfiguracionReglasService(configRepository);
-		
-		ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configService);
+		WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+		ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configService, watchlistService);
 		this.reviewController = new ReviewController(reviewService);
 	}
 

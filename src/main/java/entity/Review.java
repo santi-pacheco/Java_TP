@@ -34,6 +34,10 @@ public class Review {
     
     private String username; // Para mostrar el nombre del usuario
     private String movieTitle; // Para mostrar el título de la película
+    
+    private int likesCount; // Número de "me gusta"
+    private int commentsCount; // Número de comentarios 
+    
     // Constructors
     public Review() {
         this.watched_on = LocalDate.now(); // Por defecto: hoy
@@ -140,6 +144,22 @@ public class Review {
         this.moderationReason = moderationReason;
     }
     
+    public int getLikesCount() { 
+    	return likesCount; 
+    }
+    
+    public void setLikesCount(int likesCount) {
+    	this.likesCount = likesCount;
+    }
+    
+    public int getCommentsCount() {
+		return commentsCount;
+	}
+    
+    public void setCommentsCount(int commentsCount) {
+    	this.commentsCount = commentsCount;
+    }
+
     @Override
     public String toString() {
         return "Review{" +

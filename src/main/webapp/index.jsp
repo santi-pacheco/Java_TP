@@ -1,3 +1,4 @@
+<%@ page import="entity.User" %>
 <%
     entity.User user = (entity.User) session.getAttribute("usuarioLogueado");
     if (user != null && "admin".equals(user.getRole())) {

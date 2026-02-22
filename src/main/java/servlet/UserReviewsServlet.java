@@ -16,11 +16,13 @@ import entity.User;
 import entity.Movie;
 import repository.ReviewRepository;
 import repository.UserRepository;
+import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.FollowRepository;
 import repository.ConfiguracionReglasRepository;
 import service.ReviewService;
 import service.UserService;
+import service.WatchlistService;
 import service.MovieService;
 import service.ConfiguracionReglasService;
 
@@ -38,8 +40,9 @@ public class UserReviewsServlet extends HttpServlet {
         UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository);
         movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
-        
-        reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
+        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+        reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
     }
 
     @Override

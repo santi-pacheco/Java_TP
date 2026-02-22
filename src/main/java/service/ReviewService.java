@@ -8,9 +8,10 @@ import entity.Movie;
 import entity.ConfiguracionReglas;
 import entity.ModerationStatus;
 import repository.ReviewRepository;
-import service.UserService;
-import service.MovieService;
-import service.ConfiguracionReglasService;
+import repository.UserRepository;
+import service.GeminiModerationService.ModerationResult;
+import service.WatchlistService;
+import exception.BanException;
 import exception.ErrorFactory;
 
 public class ReviewService {
@@ -18,16 +19,24 @@ public class ReviewService {
     private ReviewRepository reviewRepository;
     private UserService userService;
     private MovieService movieService;
+    private WatchlistService watchlistService;
     private ConfiguracionReglasService configuracionService;
-
-    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, ConfiguracionReglasService configuracionService) {
+    private final UserRepository userRepository;
+    private static final int BAN_DAYS = 7;
+    
+    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, ConfiguracionReglasService configuracionService, WatchlistService watchlistService) {
         this.reviewRepository = reviewRepository;
         this.userService = userService;
         this.movieService = movieService;
         this.configuracionService = configuracionService;
+        this.watchlistService = watchlistService;
+        this.userRepository = new UserRepository();
     }
 
     public Review createReview(Review review) {
+        // 0. Checkear si el usuario esta baneado
+        checkUserBanStatus(review.getId_user());
+        
         // 1. Verificar que la película existe
         Movie movie = movieService.getMovieById(review.getId_movie());
 
@@ -50,7 +59,7 @@ public class ReviewService {
         }
 
         // 4. Asegurar que el moderationStatus esté en PENDING_MODERATION al crear
-        review.setModerationStatus(entity.ModerationStatus.PENDING_MODERATION);
+        review.setModerationStatus(ModerationStatus.PENDING_MODERATION);
 
         // 5. Guardar la reseña
         Review savedReview = reviewRepository.add(review);
@@ -60,6 +69,11 @@ public class ReviewService {
         
         // 7. Verificar y actualizar estado activo del usuario
         checkUserActiveStatus(review.getId_user());
+        
+        //8. Si el usuario tiene la película en su watchlist, removerla
+        if (watchlistService.getWatchlist(review.getId_user()).getMovies().contains(String.valueOf(movie.getId()))) {
+			watchlistService.removeMovie(review.getId_user(), String.valueOf(movie.getId()));
+		}
         
         return savedReview;
     }
@@ -77,6 +91,9 @@ public class ReviewService {
     }
 
     public Review updateReview(Review review) {
+    	// 0. Checkear si el usuario esta baneado
+        checkUserBanStatus(review.getId_user());
+        
         // 1. Verificar que la reseña existe
         Review existingReview = reviewRepository.findOne(review.getId());
         if (existingReview == null) {
@@ -97,7 +114,7 @@ public class ReviewService {
         }
 
         // 3. Al actualizar, resetear el estado de moderacion para nueva revisión
-        review.setModerationStatus(entity.ModerationStatus.PENDING_MODERATION);
+        review.setModerationStatus(ModerationStatus.PENDING_MODERATION);
 
         // 4. Actualizar
         Review updatedReview = reviewRepository.update(review);
@@ -109,19 +126,13 @@ public class ReviewService {
     }
 
     public void deleteReview(int reviewId) {
-        // 1. Verificar que la reseña existe
         Review existingReview = reviewRepository.findOne(reviewId);
         if (existingReview == null) {
             throw ErrorFactory.notFound("No se puede eliminar. Reseña con ID " + reviewId + " no encontrada");
         }
 
-        // 2. Eliminar
         reviewRepository.delete(existingReview);
-        
-        // 3. Actualizar estadísticas de la película
         movieService.updateReviewStats(existingReview.getId_movie());
-        
-        // 4. Verificar y actualizar estado activo del usuario
         validateUserActiveStatusOnDelete(existingReview.getId_user());
     }
 
@@ -141,17 +152,13 @@ public class ReviewService {
         return reviewRepository.existsByUserAndMovie(userId, movieId);
     }
 
-    // Método para el caso de uso principal: crear o actualizar reseña
     public Review createOrUpdateReview(Review review) {
-        // Verificar si ya existe una reseña del usuario para esta película
         Review existingReview = reviewRepository.findByUserAndMovie(review.getId_user(), review.getId_movie());
         
         if (existingReview != null) {
-            // Si existe, actualizar la reseña existente
             review.setId(existingReview.getId());
             return updateReview(review);
         } else {
-            // Si no existe, crear nueva reseña
             return createReview(review);
         }
     }
@@ -207,5 +214,28 @@ public class ReviewService {
     private User createInactiveUser(User user) {
         user.setEsUsuarioActivo(false);
         return user;
+    }
+    
+    private void checkUserBanStatus(int userId) {
+        java.sql.Timestamp bannedUntil = userRepository.getBannedUntil(userId);
+        if (bannedUntil != null && bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()))) {
+            throw new BanException(bannedUntil);
+        }
+    }
+    
+
+    public void applyModerationResult(int reviewId, int userId, ModerationResult result) {
+        if (result.hasOffensiveContent()) {
+            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.REJECTED, result.getReason());
+            userRepository.banUser(userId, BAN_DAYS);
+        } else if (result.hasSpoilers()) {
+            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.SPOILER, result.getReason());
+        } else {
+            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.APPROVED, null);
+        }
+    }
+    
+    public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
+        return reviewRepository.findByMovieSortedByLikes(movieId);
     }
 }

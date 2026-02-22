@@ -27,9 +27,11 @@ import entity.Review;
 import entity.User;
 import repository.ReviewRepository;
 import repository.UserRepository;
+import repository.WatchlistRepository;
 import repository.MovieRepository;
 import service.ReviewService;
 import service.UserService;
+import service.WatchlistService;
 import service.MovieService;
 import service.ReviewModerationService;
 import service.ConfiguracionReglasService;
@@ -64,7 +66,9 @@ public class ReviewServlet extends HttpServlet {
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         MovieService movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
-        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
+        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
         
         // Inicializar controller
         this.reviewController = new ReviewController(reviewService);
