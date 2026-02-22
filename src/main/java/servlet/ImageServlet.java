@@ -22,14 +22,15 @@ public class ImageServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        File imageFile = new File(uploadPath, fileName);
+        String safeFileName = java.nio.file.Paths.get(fileName).getFileName().toString();
+        File imageFile = new File(uploadPath, safeFileName);
         if (!imageFile.exists()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         String contentType = getServletContext().getMimeType(imageFile.getName());
         response.setContentType(contentType != null ? contentType : "application/octet-stream");
-        response.setContentLength((int) imageFile.length());
+        response.setContentLengthLong(imageFile.length());
         Files.copy(imageFile.toPath(), response.getOutputStream());
     }
 }

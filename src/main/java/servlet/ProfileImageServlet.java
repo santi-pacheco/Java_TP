@@ -58,7 +58,11 @@ public class ProfileImageServlet extends HttpServlet {
         FollowRepository followRepository = new FollowRepository();
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
         this.userController = new UserController(userService);
-        this.httpClient = new OkHttpClient();
+        this.httpClient = new OkHttpClient.Builder()
+        	    .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        	    .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        	    .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+        	    .build();
         
     }
 
@@ -102,9 +106,10 @@ public class ProfileImageServlet extends HttpServlet {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
 	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
-	                String rutaAbsolutaArchivo = uploadPath + File.separator + uniqueFileName;
-                    File archivoFisico = new File(rutaAbsolutaArchivo);
-                    filePart.write(rutaAbsolutaArchivo);
+                    String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
+                    File archivoFisico = new File(uploadPath, safeFileName);
+                    
+                    filePart.write(archivoFisico.getAbsolutePath());
                     
                     try {
                         RequestBody requestBody = new MultipartBody.Builder()
@@ -122,7 +127,9 @@ public class ProfileImageServlet extends HttpServlet {
                             .build();
 
                         try (Response apiResponse = httpClient.newCall(sightengineRequest).execute()) {
-                            
+                        	if (!apiResponse.isSuccessful()) {
+                                throw new IOException("Error de la API: Código " + apiResponse.code());
+                            }
                             String responseData = apiResponse.body().string();
                             JsonObject jsonObject = JsonParser.parseString(responseData).getAsJsonObject();
 
