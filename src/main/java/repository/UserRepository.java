@@ -188,49 +188,6 @@ public class UserRepository {
         return user;
     }
     
-    public void updateActiveStatus(int userId, boolean isActive) {
-        String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
-        
-        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setBoolean(1, isActive);
-            stmt.setInt(2, userId);
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw ErrorFactory.notFound("No se encontró el usuario para actualizar su estado activo.");
-            }
-            
-        } catch (SQLException e) {
-            throw ErrorFactory.internal("Error updating user active status");
-        }
-    }
-public User findByUsername(String username) {
-	User user = null;
-	String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo FROM usuarios WHERE username = ?";
-	
-	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		 PreparedStatement stmt = conn.prepareStatement(sql)) {
-		
-		stmt.setString(1, username);
-		try (ResultSet rs = stmt.executeQuery()) {
-			if (rs.next()) {
-				user = new User();
-				user.setId(rs.getInt("id_user"));
-				user.setPassword(rs.getString("password"));
-				user.setUsername(rs.getString("username"));
-				user.setRole(rs.getString("role"));
-				user.setEmail(rs.getString("email"));
-				user.setBirthDate(rs.getDate("birthdate"));
-				user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
-			}
-		}
-	} catch (SQLException e) {
-		throw ErrorFactory.internal("Error fetching user by username from database");
-	}
-	
-	return user;
-}
 
 public void updateActiveStatus(int userId, boolean isActive) {
 	String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";

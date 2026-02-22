@@ -82,7 +82,7 @@
     </style>
 </head>
 <body>
-    <%@ include file="/WEB-INF/components/navbar.jsp" %>
+    <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="container">
         <div class="search-header">
