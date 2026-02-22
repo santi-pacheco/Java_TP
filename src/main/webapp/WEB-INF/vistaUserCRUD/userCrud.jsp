@@ -1,9 +1,3 @@
-<%-- 
-  Fichero: /WEB-INF/vistaUserCRUD/userCrud.jsp
-  Propósito: Muestra la lista de usuarios y permite acciones CRUD.
---%>
-
-<%-- 1. Directivas JSP: Importamos JSTL (core) para bucles y URLs --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -33,12 +27,21 @@
         .table-title .btn {
             float: right;
         }
+        /* Estilo para la miniatura del avatar en la tabla */
+        .avatar-thumb {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;"><i class="glyphicon glyphicon-home"></i> Volver al Inicio</a>
+    
     <div class="table-wrapper">
         <div class="table-title">
             <div class="row">
@@ -46,11 +49,6 @@
                     <h2>Gestión de <b>Usuarios</b></h2>
                 </div>
                 <div class="col-sm-6">
-                    <%-- 
-                      2. BOTÓN AÑADIR (Tu Requerimiento)
-                      Llama al UserServlet con accion=mostrarFormCrear.
-                      Usamos <c:url> para construir la URL correctamente.
-                    --%>
                     <c:url var="addUrl" value="/users?accion=mostrarFormCrear" />
                     <a href="${addUrl}" class="btn btn-success">
                         <span class="glyphicon glyphicon-plus"></span> Añadir Nuevo Usuario
@@ -59,10 +57,6 @@
             </div>
         </div>
 
-        <%-- 
-          3. MENSAJE DE ÉXITO (Opcional)
-          Lee el parámetro 'exito=true' que pusimos en el sendRedirect
-        --%>
         <c:if test="${param.exito == 'true'}">
             <div class="alert alert-success" style="margin-top: 15px;">
                 ¡Operación realizada con éxito!
@@ -72,7 +66,7 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Avatar</th> <th>ID</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Rol</th>
@@ -80,43 +74,46 @@
                 </tr>
             </thead>
             <tbody>
-                <%-- 
-                  4. LISTA DE USUARIOS (Tu Requerimiento)
-                  Usamos un bucle <c:forEach> para iterar sobre la lista "users"
-                  que nuestro UserServlet puso en el request.
-                --%>
                 <c:forEach var="user" items="${users}">
                     <tr>
+                        <td>
+                            <c:choose>
+                                <c:when test="${not empty user.profileImage}">
+                                    <img src="/fatmovies_uploads/${user.profileImage}" class="avatar-thumb" alt="Avatar">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="${pageContext.request.contextPath}/utils/no-user.png" class="avatar-thumb" alt="Sin foto" style="opacity: 0.5;">
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        
                         <td>${user.id}</td>
                         <td>${user.username}</td>
                         <td>${user.email}</td>
-                        <td>${user.role}</td>
                         <td>
-                            <%-- 
-                              5. ACCIONES (Modificar y Borrar)
-                              
-                              MODIFICAR (y "Mostrar Info"):
-                              Llama al servlet con accion=mostrarFormEditar y el ID.
-                              Esta es la acción que "muestra más info" para editarla.
-                            --%>
+                            <c:if test="${user.role == 'admin'}">
+                                <span class="label label-danger">Admin</span>
+                            </c:if>
+                            <c:if test="${user.role == 'user'}">
+                                <span class="label label-info">User</span>
+                            </c:if>
+                        </td>
+                        <td>
                             <c:url var="editUrl" value="/users">
                                 <c:param name="accion" value="mostrarFormEditar" />
                                 <c:param name="id" value="${user.id}" />
                             </c:url>
-                            <a href="${editUrl}" class="btn btn-warning btn-xs">Modificar</a>
+                            <a href="${editUrl}" class="btn btn-warning btn-xs" title="Editar">
+                                <span class="glyphicon glyphicon-pencil"></span> Modificar
+                            </a>
                             
-                            <%-- 
-                              BORRAR:
-                              Esto es un mini-formulario que envía un POST.
-                              Es más seguro que un enlace GET para borrar.
-                            --%>
                             <c:url var="deleteActionUrl" value="/users" />
                             <form action="${deleteActionUrl}" method="POST" style="display:inline;">
                                 <input type="hidden" name="accion" value="eliminar">
                                 <input type="hidden" name="id" value="${user.id}">
-                                <button type="submit" class="btn btn-danger btn-xs" 
-                                        onclick="return confirm('¿Está seguro de que desea eliminar a ${user.username}?')">
-                                    Eliminar
+                                <button type="submit" class="btn btn-danger btn-xs" title="Eliminar"
+                                        onclick="return confirm('¿Está seguro de que desea eliminar a ${user.username}? Esta acción borrará también sus reseñas y foto.')">
+                                    <span class="glyphicon glyphicon-trash"></span> Eliminar
                                 </button>
                             </form>
                         </td>

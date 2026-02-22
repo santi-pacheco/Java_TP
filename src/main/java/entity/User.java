@@ -13,8 +13,8 @@ public class User {
     private String username;
     
     @NotBlank(message = "La contraseña no puede estar vacía.", groups = OnCreate.class)
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.", groups = OnCreate.class)
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$", message = "La contraseña debe contener mayúscula, minúscula, número y un carácter especial.", groups = OnCreate.class)
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$", message = "La contraseña debe contener mayúscula, minúscula, número y un carácter especial.")
     private String password;
     
     @NotBlank(message = "El rol no puede estar vacío.")
@@ -30,6 +30,8 @@ public class User {
     private Date birthDate;
     
     private boolean esUsuarioActivo;
+    
+    private String profileImage;
     
     private java.sql.Timestamp bannedUntil;
     
@@ -106,6 +108,13 @@ public class User {
 		birthDate = b;
 	}
 	
+	public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 	public java.sql.Timestamp getBannedUntil() { 
 		return bannedUntil; 
 		}

@@ -57,4 +57,12 @@ public class UserController {
         return userService.getFollowing(userId);
     }
 	
+    public void updateProfileImage(int userId, String newImagePath, String uploadDir) {
+		userService.updateProfileImage(userId, newImagePath, uploadDir);
+	}
+    
+    public void removeProfileImage(int userId, String uploadDir) {
+        userService.removeProfileImage(userId, uploadDir);
+    }
+    
 }
