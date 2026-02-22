@@ -30,7 +30,7 @@ public class ImageServlet extends HttpServlet {
         }
         String contentType = getServletContext().getMimeType(imageFile.getName());
         response.setContentType(contentType != null ? contentType : "application/octet-stream");
-        response.setContentLengthLong(imageFile.length());
+        response.setContentLengthLong(imageFile.length());	
         Files.copy(imageFile.toPath(), response.getOutputStream());
     }
 }

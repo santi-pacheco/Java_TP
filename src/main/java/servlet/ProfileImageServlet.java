@@ -127,10 +127,18 @@ public class ProfileImageServlet extends HttpServlet {
                             .build();
 
                         try (Response apiResponse = httpClient.newCall(sightengineRequest).execute()) {
-                        	if (!apiResponse.isSuccessful()) {
-                                throw new IOException("Error de la API: Código " + apiResponse.code());
+                            
+                            if (!apiResponse.isSuccessful()) {
+                                throw new IOException("Sightengine API devolvió un estado de error: " + apiResponse.code());
                             }
-                            String responseData = apiResponse.body().string();
+                            ResponseBody responseBody = apiResponse.body();
+                            if (responseBody == null) {
+                                throw new IOException("Sightengine API devolvió un cuerpo de respuesta nulo");
+                            }
+                            String responseData = responseBody.string();
+                            if (responseData == null || responseData.isEmpty()) {
+                                throw new IOException("Sightengine API devolvió una respuesta vacía");
+                            }
                             JsonObject jsonObject = JsonParser.parseString(responseData).getAsJsonObject();
 
                             double nudityScore = jsonObject.getAsJsonObject("nudity").get("none").getAsDouble();
