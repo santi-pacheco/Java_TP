@@ -109,7 +109,7 @@ public class ProfileImageServlet extends HttpServlet {
                     try {
                         RequestBody requestBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
-                            .addFormDataPart("models", "nudity-2.0,weapon")
+                            .addFormDataPart("models", "nudity-2.0,weapon,gore")
                             .addFormDataPart("api_user", apiUser)
                             .addFormDataPart("api_secret", apiSecret)
                             .addFormDataPart("media", archivoFisico.getName(),
@@ -130,11 +130,11 @@ public class ProfileImageServlet extends HttpServlet {
                             JsonObject weaponClasses = jsonObject.getAsJsonObject("weapon").getAsJsonObject("classes");
                             double firearmScore = weaponClasses.get("firearm").getAsDouble();
                             double knifeScore = weaponClasses.get("knife").getAsDouble();
+                            double goreScore = jsonObject.getAsJsonObject("gore").get("prob").getAsDouble();
                             
-                            // 3. Si NO es limpia (< 80%), o si detecta armas/cuchillos (> 20%)
-                            if (nudityScore < 0.80 || firearmScore > 0.20 || knifeScore > 0.20) {
-                                archivoFisico.delete(); 
-                                throw ErrorFactory.validation("La imagen no cumple con nuestras normas de comunidad (contiene desnudez o armas).");
+                            if (nudityScore < 0.80 || firearmScore > 0.20 || knifeScore > 0.20 || goreScore > 0.15) {
+                                archivoFisico.delete(); // Borramos la foto inapropiada
+                                throw ErrorFactory.validation("La imagen no cumple con nuestras normas de comunidad (contiene desnudez, armas o violencia extrema).");
                             }
                         }
                     } catch (AppException e) {
