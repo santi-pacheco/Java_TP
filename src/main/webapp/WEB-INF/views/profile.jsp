@@ -108,8 +108,8 @@
                 entity.User uProfile = (entity.User) request.getAttribute("user");
                 String pImage = uProfile.getProfileImage();
                 String displayImg = (pImage != null && !pImage.isEmpty()) 
-                    ? "/fatmovies_uploads/" + pImage 
-                    : request.getContextPath() + "/utils/no-user.png";
+                        ? request.getContextPath() + "/uploads/" + pImage 
+                        : request.getContextPath() + "/utils/no-user.png";
                 
                 boolean hasPhoto = (pImage != null && !pImage.isEmpty());
             %>

@@ -139,7 +139,7 @@
                 
                 String navAvatar = request.getContextPath() + "/utils/no-user.png";
                 if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-                    navAvatar = "/fatmovies_uploads/" + user.getProfileImage();
+                    navAvatar = request.getContextPath() + "/uploads/" + user.getProfileImage();
                 }
         %>
             <% if ("admin".equals(user.getRole())) { %>
