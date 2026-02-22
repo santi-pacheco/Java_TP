@@ -33,6 +33,8 @@ public class User {
     
     private String profileImage;
     
+    private java.sql.Timestamp bannedUntil;
+    
     public boolean isEsUsuarioActivo() {
 		return esUsuarioActivo;
 	}
@@ -113,6 +115,20 @@ public class User {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+	public java.sql.Timestamp getBannedUntil() { 
+		return bannedUntil; 
+		}
+	
+	public void setBannedUntil(java.sql.Timestamp bannedUntil) {
+		this.bannedUntil = bannedUntil; 
+		}
+
+	// Helper para ver si el usuario esta baneado
+	public boolean isBanned() {
+	    if (bannedUntil == null) return false;
+	    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
+	}
+	
 	
 	
 }

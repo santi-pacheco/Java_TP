@@ -58,6 +58,31 @@ public class GeminiModerationService {
         }
     }
 
+    private String buildCommentPrompt(String commentText, String reviewText, String moviePlot, String movieTitle) {
+        return String.format(
+            "Eres un sistema de moderación de COMENTARIOS en reseñas de películas.\n\n" +
+            "**Título de la Película:** %s\n\n" +
+            "**Contexto de la Película:**\n%s\n\n" +
+            "**Reseña Original (contexto):**\n%s\n\n" +
+            "**Comentario a Analizar:**\n%s\n\n" +
+            "**REGLAS:**\n" +
+            "1. El comentario NO debe revelar spoilers, incluso si hace referencia a algo que dijo la reseña.\n" +
+            "2. Si el comentario referencia un spoiler de la reseña, SIGUE SIENDO SPOILER.\n" +
+            "3. Frases genéricas como 'estoy de acuerdo' o 'el final me sorprendió' ESTÁN PERMITIDAS.\n" +
+            "4. Verifica si contiene lenguaje ofensivo, insultos, ataques al autor de la reseña o contenido inapropiado.\n\n" +
+            "Responde SOLO en formato JSON (sin bloques de código):\n" +
+            "{\n" +
+            "  \"hasSpoilers\": true/false,\n" +
+            "  \"hasOffensiveContent\": true/false,\n" +
+            "  \"reason\": \"Explicación del veredicto\"\n" +
+            "}",
+            movieTitle,
+            moviePlot,
+            reviewText,
+            commentText
+        );
+    }
+    
     private String buildPrompt(String reviewText, String moviePlot, String movieTitle) {
         return String.format(
             "Eres un sistema de moderación de reseñas de películas. Tu tarea es analizar la siguiente reseña usando el método del 'Tribunal de Expertos':\n\n" +
@@ -107,6 +132,7 @@ public class GeminiModerationService {
 
         JSONObject generationConfig = new JSONObject();
         generationConfig.put("temperature", 0);
+        generationConfig.put("responseMimeType", "application/json");
         requestBody.put("generationConfig", generationConfig);
 
         try (OutputStream os = conn.getOutputStream()) {
@@ -175,4 +201,19 @@ public class GeminiModerationService {
             return new ModerationResult(false, false, "Error técnico al procesar la respuesta");
         }
     }
+    
+    
+    public ModerationResult moderateComment(String commentText, String reviewText, String moviePlot, String movieTitle) {
+        try {
+            String prompt = buildCommentPrompt(commentText, reviewText, moviePlot, movieTitle);
+            String response = callGeminiAPI(prompt);
+            return parseResponse(response);
+        } catch (Exception e) {
+            System.err.println("Error al moderar comentario: " + e.getMessage());
+            e.printStackTrace();
+            return new ModerationResult(false, false, "Error en la moderación: " + e.getMessage());
+        }
+    }
+
+
 }

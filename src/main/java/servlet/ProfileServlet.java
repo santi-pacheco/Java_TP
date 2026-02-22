@@ -16,10 +16,12 @@ import jakarta.servlet.http.HttpSession;
 import controller.UserController;
 import controller.ReviewController;
 import service.UserService;
+import service.WatchlistService;
 import service.ReviewService;
 import service.MovieService;
 import service.ConfiguracionReglasService;
 import repository.UserRepository;
+import repository.WatchlistRepository;
 import repository.ReviewRepository;
 import repository.MovieRepository;
 import repository.FollowRepository;
@@ -38,6 +40,7 @@ public class ProfileServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         
+        
         UserRepository userRepository = new UserRepository();
         ReviewRepository reviewRepository = new ReviewRepository();
         MovieRepository movieRepository = new MovieRepository();
@@ -47,7 +50,9 @@ public class ProfileServlet extends HttpServlet {
         ConfiguracionReglasService configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
         MovieService movieService = new MovieService(movieRepository);
         UserService userService = new UserService(userRepository, encoder, followRepository);
-        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionReglasService);
+        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+        ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionReglasService, watchlistService);
         
         this.userController = new UserController(userService);
         this.reviewController = new ReviewController(reviewService);
