@@ -26,6 +26,7 @@ import service.PersonService;
 import service.WatchlistService;
 import service.UserService;
 import service.ReviewService;
+import service.LikeService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public class MovieDetailServlet extends HttpServlet {
     private WatchlistController watchlistController;
     private ReviewController reviewController;
     private controller.ConfiguracionReglasController configController;
+    private LikeService likeService;
     
     @Override
     public void init() throws ServletException {
@@ -63,9 +65,10 @@ public class MovieDetailServlet extends HttpServlet {
             ReviewRepository reviewRepository = new ReviewRepository();
             repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
             service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
-            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService);
+            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
             this.reviewController = new ReviewController(reviewService);
             this.configController = new controller.ConfiguracionReglasController(configuracionService);
+            this.likeService = new LikeService();
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
         }
@@ -123,9 +126,32 @@ public class MovieDetailServlet extends HttpServlet {
                 canAddToWatchlist = cantidadPeliculas < limite;
             }
             
-            List<Review> reviews = reviewController.getReviewsByMovie(movieId);
+            String sortBy = request.getParameter("sortBy");
+            List<Review> reviews;
+            if ("likes".equals(sortBy)) {
+                reviews = reviewController.getReviewsByMovieSortedByLikes(movieId);
+            } else {
+                reviews = reviewController.getReviewsByMovie(movieId);
+            }
+            
+            java.util.Map<Integer, Integer> likesCountMap = new java.util.HashMap<>();
+            java.util.Map<Integer, Boolean> userLikesMap = new java.util.HashMap<>();
+            
+            for (Review review : reviews) {
+                int likesCount = likeService.getLikesCount(review.getId());
+                likesCountMap.put(review.getId(), likesCount);
+                
+                if (session != null && session.getAttribute("usuarioLogueado") != null) {
+                    User user = (User) session.getAttribute("usuarioLogueado");
+                    boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getId());
+                    userLikesMap.put(review.getId(), hasLiked);
+                }
+            }
             
             request.setAttribute("movie", movie);
+            request.setAttribute("likesCountMap", likesCountMap);
+            request.setAttribute("userLikesMap", userLikesMap);
+            request.setAttribute("currentSort", sortBy != null ? sortBy : "date");
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);
             request.setAttribute("countries", countries);

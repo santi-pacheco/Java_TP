@@ -35,13 +35,28 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
         }
+        
+        /* MEJORAS: Animación de hover para la tarjeta */
         .movie-card {
             background: white;
             border-radius: 10px;
             padding: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        /* MEJORAS: Estilo limpio para el enlace (sin subrayado azul feo) */
+        .movie-link {
+            text-decoration: none;
+            color: inherit;
+            display: block; /* Para que todo el área sea clickeable */
+        }
+        
         .movie-poster {
             width: 100%;
             height: 280px;
@@ -67,7 +82,7 @@
     </style>
 </head>
 <body>
-    <%@ include file="/WEB-INF/components/navbar.jsp" %>
+    <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="container">
         <div class="search-header">
@@ -83,12 +98,14 @@
                     for (Movie movie : movies) {
                 %>
                     <div class="movie-card">
-                        <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
-                             alt="<%= movie.getTitulo() %>" 
-                             class="movie-poster"
-                             onerror="this.src='https://via.placeholder.com/200x280?text=Sin+Imagen'">
-                        <div class="movie-title"><%= movie.getTitulo() %></div>
-                        <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                        <a href="${pageContext.request.contextPath}/movie/<%= movie.getId() %>" class="movie-link">
+                            <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
+                                 alt="<%= movie.getTitulo() %>" 
+                                 class="movie-poster"
+                                 onerror="this.src='https://via.placeholder.com/200x280?text=Sin+Imagen'">
+                            <div class="movie-title"><%= movie.getTitulo() %></div>
+                            <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                        </a>
                     </div>
                 <%
                     }

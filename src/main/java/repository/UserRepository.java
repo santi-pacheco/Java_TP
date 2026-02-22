@@ -188,21 +188,59 @@ public class UserRepository {
         return user;
     }
     
-    public void updateActiveStatus(int userId, boolean isActive) {
-        String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
+
+public void updateActiveStatus(int userId, boolean isActive) {
+	String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
+	
+	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	     PreparedStatement stmt = conn.prepareStatement(sql)) {
+		
+		stmt.setBoolean(1, isActive);
+		stmt.setInt(2, userId);
+		stmt.executeUpdate();
+		
+	} catch (SQLException e) {
+		throw ErrorFactory.internal("Error updating user active status");
+	}
+}
+
+public void banUser(int userId, int daysToban) {
+    String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
+    
+    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
         
-        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setBoolean(1, isActive);
-            stmt.setInt(2, userId);
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw ErrorFactory.notFound("No se encontró el usuario para actualizar su estado activo.");
-            }
-            
-        } catch (SQLException e) {
-            throw ErrorFactory.internal("Error updating user active status");
-        }
+        stmt.setInt(1, daysToban);
+        stmt.setInt(2, userId);
+        stmt.executeUpdate();
+        
+    } catch (SQLException e) {
+        throw ErrorFactory.internal("Error banning user");
     }
+}
+
+public java.sql.Timestamp getBannedUntil(int userId) {
+    String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
+    
+    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        stmt.setInt(1, userId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getTimestamp("banned_until");
+            }
+        }
+    } catch (SQLException e) {
+        throw ErrorFactory.internal("Error checking user ban status");
+    }
+    return null;
+}
+
+public boolean isUserBanned(int userId) {
+    java.sql.Timestamp bannedUntil = getBannedUntil(userId);
+    if (bannedUntil == null) return false;
+    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
+}
+
 }
