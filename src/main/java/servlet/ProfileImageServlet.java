@@ -133,7 +133,7 @@ public class ProfileImageServlet extends HttpServlet {
                             double goreScore = jsonObject.getAsJsonObject("gore").get("prob").getAsDouble();
                             
                             if (nudityScore < 0.80 || firearmScore > 0.20 || knifeScore > 0.20 || goreScore > 0.15) {
-                                archivoFisico.delete(); // Borramos la foto inapropiada
+                                archivoFisico.delete();
                                 throw ErrorFactory.validation("La imagen no cumple con nuestras normas de comunidad (contiene desnudez, armas o violencia extrema).");
                             }
                         }
