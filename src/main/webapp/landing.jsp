@@ -1,12 +1,33 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page import="entity.Movie" %>
+<%
+
+    List<Movie> originalList = (List<Movie>) request.getAttribute("movies");
+    List<String> fastLoadUrls = new ArrayList<>();
+    
+    if (originalList != null && !originalList.isEmpty()) {
+        int limit = Math.min(72, originalList.size()); 
+        for (int i = 0; i < limit; i++) {
+            String posterPath = originalList.get(i).getPosterPath();
+            if (posterPath != null && !posterPath.trim().isEmpty()) {
+                fastLoadUrls.add("https://image.tmdb.org/t/p/w185" + posterPath);
+            }
+        }
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fat Movies</title>
+    
+    <% for(String url : fastLoadUrls) { %>
+        <link rel="preload" as="image" href="<%= url %>">
+    <% } %>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -22,6 +43,36 @@
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
             height: 100vh;
+        }
+        
+
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #FAF8F3;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: hideSplash 0.5s ease-in-out 1.5s forwards;
+        }
+        
+        .splash-logo {
+            width: 150px;
+            animation: pulseSplash 1s infinite alternate;
+        }
+        
+        @keyframes hideSplash {
+            0% { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        @keyframes pulseSplash {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
         }
         
         .container {
@@ -80,6 +131,7 @@
             position: relative;
         }
         
+
         .poster-rows {
             position: absolute;
             width: 100%;
@@ -90,26 +142,34 @@
             overflow: hidden;
         }
         
-        .poster-row {
+        .row-wrapper {
             position: absolute;
+            width: 100%;
+            opacity: 0; 
+        }
+        
+        .intro-from-right {
+            animation: slideInFromRight 2s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+        }
+        
+        .intro-from-left {
+            animation: slideInFromLeft 2s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+        }
+        
+        .intro-from-right-late {
+            animation: slideInFromRight 2s cubic-bezier(0.16, 1, 0.3, 1) 2.1s forwards;
+        }
+        
+        .poster-row {
             display: flex;
             gap: 20px;
+            width: max-content;
+            will-change: transform;
         }
         
-        .poster-row:nth-child(1) {
-            top: 20%;
-            animation: scrollLeft 60s linear infinite;
-        }
-        
-        .poster-row:nth-child(2) {
-            top: 45%;
-            animation: scrollRight 80s linear infinite;
-        }
-        
-        .poster-row:nth-child(3) {
-            top: 70%;
-            animation: scrollLeft 100s linear infinite;
-        }
+        .scroll-left { animation: scrollLeft 60s linear infinite; }
+        .scroll-right { animation: scrollRight 80s linear infinite; }
+        .scroll-left-slow { animation: scrollLeft 100s linear infinite; }
         
         .poster {
             width: 150px;
@@ -119,7 +179,17 @@
             flex-shrink: 0;
             background-size: cover;
             background-position: center;
-            background-color: #ddd;
+            background-color: transparent; 
+        }
+        
+        @keyframes slideInFromRight {
+            0% { transform: translateX(300px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInFromLeft {
+            0% { transform: translateX(-300px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
         
         @keyframes scrollLeft {
@@ -134,13 +204,12 @@
     </style>
 </head>
 <body>
-    <%
-        @SuppressWarnings("unchecked")
-        List<Movie> debugMovies = (List<Movie>) request.getAttribute("movies");
-        System.out.println("[JSP DEBUG] Movies attribute: " + debugMovies);
-        System.out.println("[JSP DEBUG] Movies size: " + (debugMovies != null ? debugMovies.size() : "null"));
-    %>
+    <div class="splash-screen">
+        <img src="utils/export50.svg" alt="Cargando FatMovies..." class="splash-logo">
+    </div>
+
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
+    
     <div class="container">
         <div class="logo-container">
             <div class="logo-bg"></div>
@@ -151,59 +220,32 @@
         <h1>Fat Movies</h1>
     </div>
     
-    <div class="poster-rows" id="posterRows"></div>
-    
-    <script>
-        const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
-        const movies = [
-            <%
-                @SuppressWarnings("unchecked")
-                List<Movie> movieList = (List<Movie>) request.getAttribute("movies");
-                System.out.println("[JSP SCRIPT] Building movies array, list is: " + (movieList != null ? "not null, size=" + movieList.size() : "NULL"));
-                if (movieList != null && !movieList.isEmpty()) {
-                    for (int i = 0; i < movieList.size(); i++) {
-                        Movie m = movieList.get(i);
-                        out.print("{posterPath: '" + (m.getPosterPath() != null ? m.getPosterPath() : "") + "'}");
-                        if (i < movieList.size() - 1) out.print(",");
-                    }
-                } else {
-                    System.out.println("[JSP SCRIPT] Movie list is empty or null!");
-                }
-            %>
-        ];
-        
-        console.log('Total movies:', movies.length);
-        console.log('Sample movie:', movies[0]);
-        
-        function initPosters() {
-            if (movies.length === 0) {
-                console.error('No movies available');
-                return;
-            }
-            
-            const posterRows = document.getElementById('posterRows');
-            let idx = 0;
-            
-            for (let i = 0; i < 3; i++) {
-                const row = document.createElement('div');
-                row.className = 'poster-row';
+    <div class="poster-rows">
+        <%
+            if (!fastLoadUrls.isEmpty()) {
+                int totalMovies = fastLoadUrls.size();
                 
-                for (let j = 0; j < 24; j++) {
-                    const movie = movies[idx % movies.length];
-                    const poster = document.createElement('div');
-                    poster.className = 'poster';
-                    if (movie && movie.posterPath) {
-                        poster.style.backgroundImage = 'url(' + IMAGE_BASE + movie.posterPath + ')';
-                    }
-                    row.appendChild(poster);
-                    idx++;
-                }
+                String[] wrapperClasses = {"intro-from-right", "intro-from-left", "intro-from-right-late"};
+                String[] rowClasses = {"scroll-left", "scroll-right", "scroll-left-slow"};
+                String[] topPositions = {"20%", "45%", "70%"};
                 
-                posterRows.appendChild(row);
+                int globalIdx = 0; 
+                
+                for (int i = 0; i < 3; i++) {
+                    out.print("<div class=\"row-wrapper " + wrapperClasses[i] + "\" style=\"top: " + topPositions[i] + ";\">");
+                    out.print("<div class=\"poster-row " + rowClasses[i] + "\">");
+                    
+                    for (int j = 0; j < 24; j++) {
+                        String bgUrl = fastLoadUrls.get(globalIdx % totalMovies);
+                        out.print("<div class=\"poster\" style=\"background-image: url('" + bgUrl + "');\"></div>");
+                        
+                        globalIdx++; 
+                    }
+                    
+                    out.print("</div></div>");
+                }
             }
-        }
-        
-        initPosters();
-    </script>
+        %>
+    </div>
 </body>
 </html>

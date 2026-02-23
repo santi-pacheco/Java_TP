@@ -36,7 +36,8 @@ public class CommentRepository {
     }
 
     public ReviewComment findById(int commentId) {
-        String sql = "SELECT c.*, u.username FROM reviews_comments c INNER JOIN usuarios u ON c.id_usuario = u.id_user WHERE c.id_comment = ?";
+        // MODIFICADO: Se agregó u.profile_image al SELECT
+        String sql = "SELECT c.*, u.username, u.profile_image FROM reviews_comments c INNER JOIN usuarios u ON c.id_usuario = u.id_user WHERE c.id_comment = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, commentId);
@@ -51,7 +52,8 @@ public class CommentRepository {
 
     public List<ReviewComment> findByReviewId(int reviewId) {
         List<ReviewComment> comments = new ArrayList<>();
-        String sql = "SELECT c.*, u.username FROM reviews_comments c INNER JOIN usuarios u ON c.id_usuario = u.id_user WHERE c.id_review = ? AND c.moderation_status IN ('APPROVED', 'SPOILER') ORDER BY c.created_at ASC"; 
+        // MODIFICADO: Se agregó u.profile_image al SELECT
+        String sql = "SELECT c.*, u.username, u.profile_image FROM reviews_comments c INNER JOIN usuarios u ON c.id_usuario = u.id_user WHERE c.id_review = ? AND c.moderation_status IN ('APPROVED', 'SPOILER') ORDER BY c.created_at ASC"; 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, reviewId);
@@ -77,7 +79,6 @@ public class CommentRepository {
         }
     }
 
-    // NUEVO: Método para actualizar texto
     public void updateTextAndStatus(int commentId, String newText, String status, String reason) {
         String sql = "UPDATE reviews_comments SET comment_text = ?, moderation_status = ?, moderation_reason = ? WHERE id_comment = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
@@ -113,7 +114,16 @@ public class CommentRepository {
         String statusStr = rs.getString("moderation_status");
         try { if (statusStr != null) comment.setModerationStatus(ModerationStatus.fromString(statusStr)); } catch (Exception e) {}
         comment.setModerationReason(rs.getString("moderation_reason"));
+        
+        // Traemos los datos cruzados del usuario
         comment.setUsername(rs.getString("username"));
+        
+        try {
+            comment.setProfileImage(rs.getString("profile_image"));
+        } catch (Exception e) {
+            
+        }
+        
         return comment;
     }
 }

@@ -15,7 +15,7 @@ public class Review {
     private int id_movie;
     
     @NotBlank(message = "El texto de la reseña es requerido")
-    @Size(min = 10, max = 1000, message = "La reseña debe tener entre 10 y 1000 caracteres")//EN un futuro puede haber mas caracteres
+    @Size(min = 10, max = 1000, message = "La reseña debe tener entre 10 y 1000 caracteres")
     private String review_text;
     
     @NotNull(message = "El rating es requerido")
@@ -25,24 +25,25 @@ public class Review {
     
     @NotNull(message = "La fecha en que viste la película es requerida")
     @PastOrPresent(message = "La fecha de visualización no puede ser futura")
-    private LocalDate watched_on; // Fecha en que el usuario vio la película
+    private LocalDate watched_on; 
     
-    private LocalDate created_at; // Fecha en que se creó la reseña (automática)
+    private LocalDate created_at; 
     
     private ModerationStatus moderationStatus;
     private String moderationReason;
     
-    private String username; // Para mostrar el nombre del usuario
-    private String movieTitle; // Para mostrar el título de la película
+    private String username; 
+    private String movieTitle; 
+    private String profileImage; 
     
-    private int likesCount; // Número de "me gusta"
-    private int commentsCount; // Número de comentarios 
+    private int likesCount; 
+    private int commentsCount; 
     
     // Constructors
     public Review() {
-        this.watched_on = LocalDate.now(); // Por defecto: hoy
-        this.created_at = LocalDate.now(); // Fecha de creación automática
-        this.moderationStatus = ModerationStatus.PENDING_MODERATION; // Estado por defecto
+        this.watched_on = LocalDate.now(); 
+        this.created_at = LocalDate.now(); 
+        this.moderationStatus = ModerationStatus.PENDING_MODERATION; 
     }
     
     public Review(int id_user, int id_movie, String review_text, Double rating, LocalDate watched_on) {
@@ -56,109 +57,48 @@ public class Review {
     }
     
     // Getters and Setters
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getId_user() { return id_user; }
+    public void setId_user(int id_user) { this.id_user = id_user; }
 
-    public int getId_user() {
-        return id_user;
-    }
+    public int getId_movie() { return id_movie; }
+    public void setId_movie(int id_movie) { this.id_movie = id_movie; }
 
-    public void setId_user(int id_user) {
-        this.id_user = id_user;
-    }
+    public String getReview_text() { return review_text; }
+    public void setReview_text(String review_text) { this.review_text = review_text; }
 
-    public int getId_movie() {
-        return id_movie;
-    }
+    public Double getRating() { return rating; }
+    public void setRating(Double rating) { this.rating = rating; }
 
-    public void setId_movie(int id_movie) {
-        this.id_movie = id_movie;
-    }
+    public LocalDate getWatched_on() { return watched_on; }
+    public void setWatched_on(LocalDate watched_on) { this.watched_on = watched_on; }
 
-    public String getReview_text() {
-        return review_text;
-    }
-
-    public void setReview_text(String review_text) {
-        this.review_text = review_text;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public LocalDate getWatched_on() {
-        return watched_on;
-    }
-
-    public void setWatched_on(LocalDate watched_on) {
-        this.watched_on = watched_on;
-    }
-
-    public LocalDate getCreated_at() {
-        return created_at;
-    }
-
-    public void setCreated_at(LocalDate created_at) {
-        this.created_at = created_at;
-    }
+    public LocalDate getCreated_at() { return created_at; }
+    public void setCreated_at(LocalDate created_at) { this.created_at = created_at; }
     
-    public ModerationStatus getModerationStatus() {
-		return moderationStatus;
-	}
+    public ModerationStatus getModerationStatus() { return moderationStatus; }
+    public void setModerationStatus(ModerationStatus moderationStatus) { this.moderationStatus = moderationStatus; }
     
-    public void setModerationStatus(ModerationStatus moderationStatus) {
-    	this.moderationStatus = moderationStatus;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
     
-    public String getUsername() {
-        return username;
-    }
+    public String getMovieTitle() { return movieTitle; }
+    public void setMovieTitle(String movieTitle) { this.movieTitle = movieTitle; }
+    
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     
-    public String getMovieTitle() {
-        return movieTitle;
-    }
-
-    public void setMovieTitle(String movieTitle) {
-        this.movieTitle = movieTitle;
-    }
+    public String getModerationReason() { return moderationReason; }
+    public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
     
-    public String getModerationReason() {
-        return moderationReason;
-    }
-
-    public void setModerationReason(String moderationReason) {
-        this.moderationReason = moderationReason;
-    }
+    public int getLikesCount() { return likesCount; }
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
     
-    public int getLikesCount() { 
-    	return likesCount; 
-    }
-    
-    public void setLikesCount(int likesCount) {
-    	this.likesCount = likesCount;
-    }
-    
-    public int getCommentsCount() {
-		return commentsCount;
-	}
-    
-    public void setCommentsCount(int commentsCount) {
-    	this.commentsCount = commentsCount;
-    }
+    public int getCommentsCount() { return commentsCount; }
+    public void setCommentsCount(int commentsCount) { this.commentsCount = commentsCount; }
 
     @Override
     public String toString() {

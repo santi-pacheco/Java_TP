@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+// Importamos lo necesario para validar a quién seguimos
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; 
+import service.UserService;
+import repository.UserRepository;
+import repository.FollowRepository;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -37,6 +43,13 @@ public class CommentServlet extends HttpServlet {
             StringBuilder json = new StringBuilder("[");
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             
+           
+            HttpSession session = req.getSession(false);
+            User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
+            
+          
+            UserService userService = new UserService(new UserRepository(), new BCryptPasswordEncoder(), new FollowRepository());
+            
             for (int i = 0; i < comments.size(); i++) {
                 ReviewComment c = comments.get(i);
                 String dateStr = c.getCreatedAt() != null ? sdf.format(c.getCreatedAt()) : "";
@@ -44,13 +57,29 @@ public class CommentServlet extends HttpServlet {
                 String safeUser = c.getUsername() != null ? c.getUsername().replace("\"", "\\\"") : "Usuario";
                 String status = c.getModerationStatus() != null ? c.getModerationStatus().getValue() : "APPROVED";
                 
+                String avatarName = "";
+                try { avatarName = c.getProfileImage(); } catch (Exception e) {}
+                
+              
+                String profilePicture = (avatarName != null && !avatarName.trim().isEmpty()) 
+                        ? "/fatmovies_uploads/" + avatarName 
+                        : req.getContextPath() + "/utils/default_profile.png";
+
+            
+                boolean isFollowing = false;
+                if (loggedUser != null && loggedUser.getId() != c.getIdUsuario()) {
+                    isFollowing = userService.isFollowing(loggedUser.getId(), c.getIdUsuario());
+                }
+                
                 json.append("{")
                     .append("\"idComment\":").append(c.getIdComment()).append(",")
                     .append("\"idUsuario\":").append(c.getIdUsuario()).append(",") 
                     .append("\"username\":\"").append(safeUser).append("\",")
                     .append("\"createdAt\":\"").append(dateStr).append("\",")
                     .append("\"status\":\"").append(status).append("\",")
-                    .append("\"commentText\":\"").append(safeText).append("\"")
+                    .append("\"commentText\":\"").append(safeText).append("\",")
+                    .append("\"profilePicture\":\"").append(profilePicture).append("\",")
+                    .append("\"isFollowing\":").append(isFollowing)
                     .append("}");
                 if (i < comments.size() - 1) json.append(",");
             }
