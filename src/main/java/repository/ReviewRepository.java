@@ -44,7 +44,8 @@ public class ReviewRepository {
 
     public Review findOne(int id) {
         Review review = null;
-        String sql = "SELECT r.*, p.name as movie_title, u.username FROM reviews r JOIN peliculas p ON r.id_movie = p.id_pelicula LEFT JOIN usuarios u ON r.id_user = u.id_user WHERE r.id_review = ?";
+        // AGREGADO: u.profile_image
+        String sql = "SELECT r.*, p.name as movie_title, u.username, u.profile_image FROM reviews r JOIN peliculas p ON r.id_movie = p.id_pelicula LEFT JOIN usuarios u ON r.id_user = u.id_user WHERE r.id_review = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
@@ -59,7 +60,8 @@ public class ReviewRepository {
 
     public Review findByUserAndMovie(int userId, int movieId) {
         Review review = null;
-        String sql = "SELECT r.*, u.username, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? AND r.id_movie = ?";
+        // AGREGADO: u.profile_image
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? AND r.id_movie = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
@@ -117,8 +119,8 @@ public class ReviewRepository {
 
     public List<Review> findByMovie(int movieId) {
         List<Review> reviews = new ArrayList<>();
-        // AGREGADO: COALESCE para contar comentarios dinámicamente
-        String sql = "SELECT r.*, u.username, p.name as movie_title, " +
+        // AGREGADO: u.profile_image
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title, " +
                      "COALESCE((SELECT COUNT(*) FROM reviews_comments rc WHERE rc.id_review = r.id_review AND rc.moderation_status IN ('APPROVED', 'SPOILER')), 0) as comments_count " +
                      "FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula " +
                      "WHERE r.id_movie = ? ORDER BY r.created_at DESC";
@@ -136,7 +138,8 @@ public class ReviewRepository {
 
     public List<Review> findAll() {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.*, u.username, p.name as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula ORDER BY r.created_at DESC";
+        // AGREGADO: u.profile_image
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -163,7 +166,8 @@ public class ReviewRepository {
 
     public List<Review> findByUser(int userId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.*, u.username, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? ORDER BY r.created_at DESC";
+        // AGREGADO: u.profile_image
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
@@ -190,7 +194,8 @@ public class ReviewRepository {
     }
 
     public List<Review> getReviewsByModerationStatus(ModerationStatus status){
-        String query = "SELECT r.*, u.username, p.titulo_original as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.moderation_status = ? ORDER BY r.created_at DESC";
+        // AGREGADO: u.profile_image
+        String query = "SELECT r.*, u.username, u.profile_image, p.titulo_original as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.moderation_status = ? ORDER BY r.created_at DESC";
         List<Review> reviews = new ArrayList<>();
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -225,7 +230,9 @@ public class ReviewRepository {
         review.setUsername(rs.getString("username"));
         review.setMovieTitle(rs.getString("movie_title"));
 
-        // Intentar obtener los likes_count y comments_count si están en la consulta
+        // NUEVO: Intentar extraer profile_image de forma segura
+        try { review.setProfileImage(rs.getString("profile_image")); } catch (Exception e) {}
+
         try { review.setLikesCount(rs.getInt("likes_count")); } catch (Exception e) {}
         try { review.setCommentsCount(rs.getInt("comments_count")); } catch (Exception e) {}
         
@@ -234,10 +241,10 @@ public class ReviewRepository {
 
     public List<Review> findByMovieSortedByLikes(int movieId) {
         List<Review> reviews = new ArrayList<>();
-        // Corrección: Usamos 'p.titulo_original' en lugar de 'p.name' para evitar el Crash SQL
+        // AGREGADO: u.profile_image
         String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, " +
                      "r.watched_on, r.created_at, r.moderation_status, r.moderation_reason, " +
-                     "u.username, p.titulo_original as movie_title, " +
+                     "u.username, u.profile_image, p.titulo_original as movie_title, " +
                      "COALESCE((SELECT COUNT(*) FROM review_likes rl WHERE rl.id_review = r.id_review), 0) as likes_count " +
                      "FROM reviews r " +
                      "JOIN usuarios u ON r.id_user = u.id_user " +

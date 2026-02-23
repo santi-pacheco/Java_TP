@@ -31,6 +31,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 import repository.FollowRepository;
 
 public class MovieDetailServlet extends HttpServlet {
@@ -42,6 +46,7 @@ public class MovieDetailServlet extends HttpServlet {
     private ReviewController reviewController;
     private controller.ConfiguracionReglasController configController;
     private LikeService likeService;
+    private UserService userService; // NUEVO: Guardamos el userService para usarlo después
     
     @Override
     public void init() throws ServletException {
@@ -57,15 +62,18 @@ public class MovieDetailServlet extends HttpServlet {
             UserRepository userRepository = new UserRepository();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             FollowRepository followRepository = new FollowRepository();
-            UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+            
+            // AHORA LO GUARDAMOS EN LA VARIABLE DE CLASE
+            this.userService = new UserService(userRepository, passwordEncoder, followRepository);
+            
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
-            WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
+            WatchlistService watchlistService = new WatchlistService(watchlistRepository, this.userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);
             
             ReviewRepository reviewRepository = new ReviewRepository();
             repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
             service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
-            ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
+            ReviewService reviewService = new ReviewService(reviewRepository, this.userService, movieService, configuracionService, watchlistService);
             this.reviewController = new ReviewController(reviewService);
             this.configController = new controller.ConfiguracionReglasController(configuracionService);
             this.likeService = new LikeService();
@@ -113,6 +121,10 @@ public class MovieDetailServlet extends HttpServlet {
             boolean isInWatchlist = false;
             boolean canAddToWatchlist = true;
             Review userReview = null;
+            
+            // NUEVO: Set para guardar rápido a quiénes seguimos
+            Set<Integer> followingIds = new HashSet<>();
+            
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
                 List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
@@ -124,6 +136,14 @@ public class MovieDetailServlet extends HttpServlet {
                     ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
                     : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
                 canAddToWatchlist = cantidadPeliculas < limite;
+                
+                // NUEVO: Obtenemos a quiénes sigue este usuario y los guardamos en el Set
+                List<User> followingList = userService.getFollowing(user.getId());
+                if (followingList != null) {
+                    for (User u : followingList) {
+                        followingIds.add(u.getId());
+                    }
+                }
             }
             
             String sortBy = request.getParameter("sortBy");
@@ -134,8 +154,9 @@ public class MovieDetailServlet extends HttpServlet {
                 reviews = reviewController.getReviewsByMovie(movieId);
             }
             
-            java.util.Map<Integer, Integer> likesCountMap = new java.util.HashMap<>();
-            java.util.Map<Integer, Boolean> userLikesMap = new java.util.HashMap<>();
+            Map<Integer, Integer> likesCountMap = new HashMap<>();
+            Map<Integer, Boolean> userLikesMap = new HashMap<>();
+            Map<Integer, Boolean> followedUsersMap = new HashMap<>(); // NUEVO: Mapa de seguidos
             
             for (Review review : reviews) {
                 int likesCount = likeService.getLikesCount(review.getId());
@@ -146,11 +167,17 @@ public class MovieDetailServlet extends HttpServlet {
                     boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getId());
                     userLikesMap.put(review.getId(), hasLiked);
                 }
+                
+                // NUEVO: Evaluamos si el autor de esta reseña está en nuestra lista de "Seguidos"
+                if (!followedUsersMap.containsKey(review.getId_user())) {
+                    followedUsersMap.put(review.getId_user(), followingIds.contains(review.getId_user()));
+                }
             }
             
             request.setAttribute("movie", movie);
             request.setAttribute("likesCountMap", likesCountMap);
             request.setAttribute("userLikesMap", userLikesMap);
+            request.setAttribute("followedUsersMap", followedUsersMap); // ENVIAMOS EL MAPA AL JSP
             request.setAttribute("currentSort", sortBy != null ? sortBy : "date");
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);

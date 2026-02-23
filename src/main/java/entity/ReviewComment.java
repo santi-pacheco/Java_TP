@@ -12,6 +12,8 @@ public class ReviewComment {
     private String moderationReason;
     private String username;
 
+    private String profileImage;
+
     public ReviewComment() {
         this.moderationStatus = ModerationStatus.PENDING_MODERATION;
     }
@@ -42,4 +44,14 @@ public class ReviewComment {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    
+    // Agregá sus Getters y Setters
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+    
 }
