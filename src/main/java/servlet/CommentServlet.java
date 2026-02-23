@@ -43,11 +43,11 @@ public class CommentServlet extends HttpServlet {
             StringBuilder json = new StringBuilder("[");
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             
-            // Obtenemos el usuario logueado
+           
             HttpSession session = req.getSession(false);
             User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
             
-            // Instanciamos el servicio de usuarios para saber a quién seguimos
+          
             UserService userService = new UserService(new UserRepository(), new BCryptPasswordEncoder(), new FollowRepository());
             
             for (int i = 0; i < comments.size(); i++) {
@@ -60,12 +60,12 @@ public class CommentServlet extends HttpServlet {
                 String avatarName = "";
                 try { avatarName = c.getProfileImage(); } catch (Exception e) {}
                 
-                // CORRECCIÓN DE LA RUTA DE LA FOTO: Sin getContextPath para los uploads
+              
                 String profilePicture = (avatarName != null && !avatarName.trim().isEmpty()) 
                         ? "/fatmovies_uploads/" + avatarName 
                         : req.getContextPath() + "/utils/default_profile.png";
 
-                // VALIDACIÓN REAL DE SI LO SIGUE O NO
+            
                 boolean isFollowing = false;
                 if (loggedUser != null && loggedUser.getId() != c.getIdUsuario()) {
                     isFollowing = userService.isFollowing(loggedUser.getId(), c.getIdUsuario());

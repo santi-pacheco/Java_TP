@@ -118,11 +118,10 @@ public class CommentRepository {
         // Traemos los datos cruzados del usuario
         comment.setUsername(rs.getString("username"));
         
-        // NUEVO: Intentamos extraer la foto de perfil (usamos try-catch por si alguna otra consulta vieja no trae esta columna)
         try {
             comment.setProfileImage(rs.getString("profile_image"));
         } catch (Exception e) {
-            // Ignorar silenciosamente
+            
         }
         
         return comment;

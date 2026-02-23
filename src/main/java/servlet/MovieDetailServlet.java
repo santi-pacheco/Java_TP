@@ -46,7 +46,7 @@ public class MovieDetailServlet extends HttpServlet {
     private ReviewController reviewController;
     private controller.ConfiguracionReglasController configController;
     private LikeService likeService;
-    private UserService userService; // NUEVO: Guardamos el userService para usarlo después
+    private UserService userService; 
     
     @Override
     public void init() throws ServletException {
@@ -63,7 +63,6 @@ public class MovieDetailServlet extends HttpServlet {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             FollowRepository followRepository = new FollowRepository();
             
-            // AHORA LO GUARDAMOS EN LA VARIABLE DE CLASE
             this.userService = new UserService(userRepository, passwordEncoder, followRepository);
             
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
@@ -122,7 +121,6 @@ public class MovieDetailServlet extends HttpServlet {
             boolean canAddToWatchlist = true;
             Review userReview = null;
             
-            // NUEVO: Set para guardar rápido a quiénes seguimos
             Set<Integer> followingIds = new HashSet<>();
             
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
@@ -137,7 +135,6 @@ public class MovieDetailServlet extends HttpServlet {
                     : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
                 canAddToWatchlist = cantidadPeliculas < limite;
                 
-                // NUEVO: Obtenemos a quiénes sigue este usuario y los guardamos en el Set
                 List<User> followingList = userService.getFollowing(user.getId());
                 if (followingList != null) {
                     for (User u : followingList) {
@@ -156,7 +153,7 @@ public class MovieDetailServlet extends HttpServlet {
             
             Map<Integer, Integer> likesCountMap = new HashMap<>();
             Map<Integer, Boolean> userLikesMap = new HashMap<>();
-            Map<Integer, Boolean> followedUsersMap = new HashMap<>(); // NUEVO: Mapa de seguidos
+            Map<Integer, Boolean> followedUsersMap = new HashMap<>(); 
             
             for (Review review : reviews) {
                 int likesCount = likeService.getLikesCount(review.getId());
@@ -168,7 +165,7 @@ public class MovieDetailServlet extends HttpServlet {
                     userLikesMap.put(review.getId(), hasLiked);
                 }
                 
-                // NUEVO: Evaluamos si el autor de esta reseña está en nuestra lista de "Seguidos"
+                
                 if (!followedUsersMap.containsKey(review.getId_user())) {
                     followedUsersMap.put(review.getId_user(), followingIds.contains(review.getId_user()));
                 }

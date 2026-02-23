@@ -34,7 +34,7 @@ public class Review {
     
     private String username; 
     private String movieTitle; 
-    private String profileImage; // NUEVO: Para guardar la ruta de la foto de perfil
+    private String profileImage; 
     
     private int likesCount; 
     private int commentsCount; 
@@ -87,7 +87,7 @@ public class Review {
     public String getMovieTitle() { return movieTitle; }
     public void setMovieTitle(String movieTitle) { this.movieTitle = movieTitle; }
     
-    // NUEVO: Getter y Setter de profileImage
+
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     

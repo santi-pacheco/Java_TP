@@ -166,7 +166,6 @@ public class ReviewRepository {
 
     public List<Review> findByUser(int userId) {
         List<Review> reviews = new ArrayList<>();
-        // AGREGADO: u.profile_image
         String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
