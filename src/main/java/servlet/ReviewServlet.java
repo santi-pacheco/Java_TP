@@ -40,6 +40,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
 import exception.ErrorFactory;
+import exception.BanException; 
 import repository.FollowRepository;
 
 @WebServlet("/reviews")
@@ -196,6 +197,20 @@ public class ReviewServlet extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getId_movie());
             }
+            
+        // --- NUEVO: ATRAPAMOS EL BANEO AQUÍ ---
+        } catch (BanException e) {
+            if (contentType != null && contentType.contains("application/json")) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"success\":false,\"error\":\"Has sido baneado por incumplir las normas de la comunidad hasta el: " + e.getBannedUntil() + "\"}");
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("reviewError", "Has sido baneado por incumplir las normas de la comunidad. Tu baneo termina el: " + e.getBannedUntil());
+                session.setAttribute("reviewData", request.getParameterMap()); // Guarda lo que escribió para que no lo pierda si quiere borrar las groserías
+                response.sendRedirect(request.getContextPath() + "/movie/" + movieId + "#review-form");
+            }
+        // ---------------------------------------
         } catch (Exception e) {
             if (contentType != null && contentType.contains("application/json")) {
                 throw e;
@@ -211,10 +226,9 @@ public class ReviewServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-    	
-    	//Verificar que el usuario esté logueado
-        User loggedUser = getLoggedUser(request);
         
+        //Verificar que el usuario esté logueado
+        User loggedUser = getLoggedUser(request);
         
         // Actualizar reseña existente
         String idParam = request.getParameter("id");
@@ -241,22 +255,30 @@ public class ReviewServlet extends HttpServlet {
             throw ErrorFactory.validation(errorMessages);
         }
         
-        Review updatedReview = reviewController.updateReview(reviewToUpdate);
-        if (!existingReview.getReview_text().equals(reviewToUpdate.getReview_text())) {
-            ReviewModerationService moderationService = ReviewModerationService.getInstance();
-            moderationService.moderateReviewAsync(updatedReview.getId());
+
+        try {
+            Review updatedReview = reviewController.updateReview(reviewToUpdate);
+            if (!existingReview.getReview_text().equals(reviewToUpdate.getReview_text())) {
+                ReviewModerationService moderationService = ReviewModerationService.getInstance();
+                moderationService.moderateReviewAsync(updatedReview.getId());
+            }
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(gson.toJson(updatedReview));
+            
+        } catch (BanException e) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"success\":false,\"error\":\"Has sido baneado por incumplir las normas de la comunidad hasta el: " + e.getBannedUntil() + "\"}");
         }
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(gson.toJson(updatedReview));
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-    	User loggedUser = getLoggedUser(request);
-    	
+        User loggedUser = getLoggedUser(request);
+        
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
             throw ErrorFactory.badRequest("El ID de la reseña es requerido para eliminar");

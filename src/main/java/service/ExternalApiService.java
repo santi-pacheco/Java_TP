@@ -88,7 +88,7 @@ public class ExternalApiService {
 	}
 
     public List<info.movito.themoviedbapi.model.core.Movie> getMoviesByGenre(List<Genre> genre) throws TmdbException {
-        final int targetResults = 5000;
+        final int targetResults = 10000;
         final int perPageEstimate = 20;
         final int maxPagesToFetch = (int) Math.ceil((double) targetResults / perPageEstimate);
         final int requestsPerSecond = 3;
@@ -224,6 +224,7 @@ public class ExternalApiService {
             	LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
                 int year = release.getYear();
                 m.setEstrenoYear(year);
+                m.setFechaEstreno(release);
             } catch (DateTimeParseException ex) {
             }
         }
