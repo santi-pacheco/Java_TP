@@ -34,9 +34,11 @@ public class ReviewRepository {
                 }
             }
         } catch (SQLException e) {
+        	System.out.println("SQL Error: " + e.getMessage());
             if (e.getMessage().contains("unique_user_movie_review")) throw ErrorFactory.duplicate("Ya tienes una reseña para esta película");
             else if (e.getMessage().contains("id_user")) throw ErrorFactory.notFound("El usuario especificado no existe");
             else if (e.getMessage().contains("id_movie")) throw ErrorFactory.notFound("La película especificada no existe");
+            
             else throw ErrorFactory.internal("Error adding review to database");
         }
         return review;
@@ -44,7 +46,7 @@ public class ReviewRepository {
 
     public Review findOne(int id) {
         Review review = null;
-        // AGREGADO: u.profile_image
+       
         String sql = "SELECT r.*, p.name as movie_title, u.username, u.profile_image FROM reviews r JOIN peliculas p ON r.id_movie = p.id_pelicula LEFT JOIN usuarios u ON r.id_user = u.id_user WHERE r.id_review = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -60,8 +62,12 @@ public class ReviewRepository {
 
     public Review findByUserAndMovie(int userId, int movieId) {
         Review review = null;
-        // AGREGADO: u.profile_image
-        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? AND r.id_movie = ?";
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title " +
+                     "FROM reviews r " +
+                     "LEFT JOIN usuarios u ON r.id_user = u.id_user " +
+                     "LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                     "WHERE r.id_user = ? AND r.id_movie = ? AND r.moderation_status != 'REJECTED'";
+                     
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
@@ -71,6 +77,26 @@ public class ReviewRepository {
             }
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error fetching review by user and movie");
+        }
+        return review;
+    }
+    public Review findAnyByUserAndMovie(int userId, int movieId) {
+        Review review = null;
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title " +
+                     "FROM reviews r " +
+                     "LEFT JOIN usuarios u ON r.id_user = u.id_user " +
+                     "LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                     "WHERE r.id_user = ? AND r.id_movie = ?";
+                     
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, movieId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) review = extractReviewFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching any review by user and movie");
         }
         return review;
     }
@@ -119,11 +145,10 @@ public class ReviewRepository {
 
     public List<Review> findByMovie(int movieId) {
         List<Review> reviews = new ArrayList<>();
-        // AGREGADO: u.profile_image
         String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title, " +
                      "COALESCE((SELECT COUNT(*) FROM reviews_comments rc WHERE rc.id_review = r.id_review AND rc.moderation_status IN ('APPROVED', 'SPOILER')), 0) as comments_count " +
                      "FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-                     "WHERE r.id_movie = ? ORDER BY r.created_at DESC";
+                     "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, movieId);
@@ -138,7 +163,6 @@ public class ReviewRepository {
 
     public List<Review> findAll() {
         List<Review> reviews = new ArrayList<>();
-        // AGREGADO: u.profile_image
         String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -166,7 +190,7 @@ public class ReviewRepository {
 
     public List<Review> findByUser(int userId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? ORDER BY r.created_at DESC";
+        String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title FROM reviews r LEFT JOIN usuarios u ON r.id_user = u.id_user LEFT JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.id_user = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
@@ -193,7 +217,6 @@ public class ReviewRepository {
     }
 
     public List<Review> getReviewsByModerationStatus(ModerationStatus status){
-        // AGREGADO: u.profile_image
         String query = "SELECT r.*, u.username, u.profile_image, p.titulo_original as movie_title FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula WHERE r.moderation_status = ? ORDER BY r.created_at DESC";
         List<Review> reviews = new ArrayList<>();
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
@@ -229,7 +252,7 @@ public class ReviewRepository {
         review.setUsername(rs.getString("username"));
         review.setMovieTitle(rs.getString("movie_title"));
 
-        // NUEVO: Intentar extraer profile_image de forma segura
+
         try { review.setProfileImage(rs.getString("profile_image")); } catch (Exception e) {}
 
         try { review.setLikesCount(rs.getInt("likes_count")); } catch (Exception e) {}
@@ -240,7 +263,7 @@ public class ReviewRepository {
 
     public List<Review> findByMovieSortedByLikes(int movieId) {
         List<Review> reviews = new ArrayList<>();
-        // AGREGADO: u.profile_image
+
         String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, " +
                      "r.watched_on, r.created_at, r.moderation_status, r.moderation_reason, " +
                      "u.username, u.profile_image, p.titulo_original as movie_title, " +
@@ -248,25 +271,20 @@ public class ReviewRepository {
                      "FROM reviews r " +
                      "JOIN usuarios u ON r.id_user = u.id_user " +
                      "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-                     "WHERE r.id_movie = ? " +
+                     "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
                      "ORDER BY likes_count DESC, r.created_at DESC";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
             stmt.setInt(1, movieId);
-            
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                    reviews.add(extractReviewFromResultSet(rs));
                 }
             }
-            
         } catch (SQLException e) {
-            System.err.println(">>> ERROR CRÍTICO SQL al ordenar por likes: " + e.getMessage());
             throw ErrorFactory.internal("Error fetching reviews by movie sorted by likes");
         }
-        
         return reviews;
     }
 }

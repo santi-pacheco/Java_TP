@@ -53,7 +53,7 @@ public class CommentService {
         return comment;
     }
 
-    // NUEVO: Editar Comentario
+
     public ReviewComment editComment(int userId, int commentId, String newText) {
         checkUserBanStatus(userId);
         if (newText == null || newText.trim().isEmpty()) throw new IllegalArgumentException("El texto no puede estar vacío");

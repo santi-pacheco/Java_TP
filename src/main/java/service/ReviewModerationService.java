@@ -5,6 +5,7 @@ import entity.ModerationStatus;
 import entity.Review;
 import repository.MovieRepository;
 import repository.ReviewRepository;
+import repository.UserRepository;
 import service.GeminiModerationService.ModerationResult;
 
 import java.sql.SQLException;
@@ -16,12 +17,16 @@ public class ReviewModerationService {
     private static ReviewModerationService instance;
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
+    private final UserRepository userRepository; 
     private final GeminiModerationService geminiService;
     private final ExecutorService executorService;
+    
+    private static final int BAN_DAYS = 7; // Días de baneo
 
     private ReviewModerationService() {
         this.reviewRepository = new ReviewRepository();
         this.movieRepository = new MovieRepository();
+        this.userRepository = new UserRepository(); 
         this.geminiService = new GeminiModerationService();
         this.executorService = Executors.newFixedThreadPool(3);
     }
@@ -33,7 +38,6 @@ public class ReviewModerationService {
         return instance;
     }
 
-    // Método principal: ejecuta moderación en segundo plano
     public void moderateReviewAsync(int reviewId) {
         executorService.submit(() -> {
             try {
@@ -63,10 +67,20 @@ public class ReviewModerationService {
         );
 
         ModerationStatus newStatus = determineStatus(result);
+       
+        if (result.getReason() != null && result.getReason().toUpperCase().contains("REJECT")) {
+            newStatus = ModerationStatus.REJECTED;
+        }
+
         boolean updated = reviewRepository.updateModerationStatus(reviewId, newStatus, result.getReason());
 
         if (updated) {
             System.out.println("[MODERACIÓN] Reseña " + reviewId + " → " + newStatus + " | Razón: " + result.getReason());
+            
+            if (newStatus == ModerationStatus.REJECTED) {
+                userRepository.banUser(review.getId_user(), BAN_DAYS);
+                System.out.println("⚠️ [SISTEMA] USUARIO BANEADO: ID " + review.getId_user() + " por " + BAN_DAYS + " días. Motivo: Reseña tóxica.");
+            }
         }
     }
 

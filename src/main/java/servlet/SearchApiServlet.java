@@ -2,6 +2,9 @@ package servlet;
 
 import java.io.IOException;
 import java.util.List;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.sql.Time;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +12,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import controller.MovieController;
 import entity.Movie;
@@ -28,7 +36,22 @@ public class SearchApiServlet extends HttpServlet {
             MovieRepository movieRepository = new MovieRepository();
             MovieService movieService = new MovieService(movieRepository);
             this.movieController = new MovieController(movieService);
-            this.gson = new Gson();
+            
+            this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+                    @Override
+                    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(src.toString());
+                    }
+                })
+                .registerTypeAdapter(Time.class, new JsonSerializer<Time>() {
+                    @Override
+                    public JsonElement serialize(Time src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(src.toString());
+                    }
+                })
+                .create();
+                
         } catch (Exception e) {
             throw new ServletException("Failed to initialize SearchApiServlet", e);
         }
@@ -52,6 +75,8 @@ public class SearchApiServlet extends HttpServlet {
             String json = gson.toJson(movies);
             response.getWriter().write(json);
         } catch (Exception e) {
+            System.err.println("Error en SearchApiServlet: " + e.getMessage()); 
+            e.printStackTrace();
             response.getWriter().write("[]");
         }
     }

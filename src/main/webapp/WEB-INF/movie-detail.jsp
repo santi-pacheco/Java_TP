@@ -73,7 +73,6 @@
         .review-text { color: #444; line-height: 1.6; margin-bottom: 10px; }
         .review-meta { font-size: 0.9rem; color: #888; display: flex; align-items: center; justify-content: space-between; width: 100%; }
         
-        /* ESTILOS DE AVATAR Y BOTÓN SEGUIR */
         .author-container { display: flex; align-items: center; gap: 12px; }
         .author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; background-color: #f5f5f5; }
         .author-details { display: flex; flex-direction: column; }
@@ -158,9 +157,89 @@
         .toast.error { background: #d32f2f; }
         @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutToast { to { opacity: 0; visibility: hidden; margin-top: -50px; } }
+
+
+        #aiLoadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(250, 248, 243, 0.95);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .spinner-ai {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(139, 115, 85, 0.3);
+            border-radius: 50%;
+            border-top-color: #8B7355;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #resultOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideInToast 0.3s ease;
+        }
+
+        .result-icon { font-size: 4rem; margin-bottom: 15px; }
+        .result-title { color: #333; margin-bottom: 15px; font-weight: 700; font-size: 1.5rem; }
+        .result-message { color: #666; margin-bottom: 25px; line-height: 1.6; font-size: 1.05rem; }
+        .result-btn {
+            background: #8B7355; color: white; border: none; padding: 12px 30px; 
+            border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .result-btn:hover { background: #6b5840; }
     </style>
 </head>
 <body>
+    <div id="aiLoadingOverlay">
+        <div class="spinner-ai"></div>
+        <h3 style="color:#333; margin-top:20px;">Nuestra IA está analizando tu reseña...</h3>
+        <p style="color:#666;">Verificando normas de la comunidad y posibles spoilers.</p>
+    </div>
+
+    <div id="resultOverlay">
+        <div class="result-card">
+            <div id="resultIcon" class="result-icon"></div>
+            <div id="resultTitle" class="result-title"></div>
+            <div id="resultMessage" class="result-message"></div>
+            <button class="result-btn" onclick="window.location.reload()">Entendido</button>
+        </div>
+    </div>
+
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div id="toast-container"></div>
@@ -258,32 +337,19 @@
     <div class="section-container" id="review-form">
         <div class="review-form">
             <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
-            <% 
-                String reviewError = (String) session.getAttribute("reviewError");
-                if (reviewError != null) {
-                    session.removeAttribute("reviewError");
-            %>
-                <div style="background:#FFE5E5; color:#D32F2F; padding:12px 20px; border-radius:8px; margin-bottom:15px; font-weight:600; border-left:4px solid #D32F2F;">⚠️ <%= reviewError %></div>
-            <% } %>
-            <form method="post" action="${pageContext.request.contextPath}/reviews">
-                <input type="hidden" name="action" value="create">
-                <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+            
+
+            <form id="ajaxReviewForm">
+                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getId() %>">
                 <% 
-                    Map<String, String[]> reviewData = (Map<String, String[]>) session.getAttribute("reviewData");
                     String savedReviewText = "", savedRating = "0", savedWatchedOn = "";
-                    if (reviewData != null) {
-                        savedReviewText = reviewData.get("reviewText") != null ? reviewData.get("reviewText")[0] : "";
-                        savedRating = reviewData.get("rating") != null ? reviewData.get("rating")[0] : "0";
-                        savedWatchedOn = reviewData.get("watchedOn") != null ? reviewData.get("watchedOn")[0] : "";
-                        session.removeAttribute("reviewData");
-                    }
-                    if (userReview != null && savedReviewText.isEmpty()) {
+                    if (userReview != null) {
                         savedReviewText = userReview.getReview_text();
                         savedRating = String.valueOf(userReview.getRating());
                         savedWatchedOn = userReview.getWatched_on().toString();
                     }
                 %>
-                <textarea name="reviewText" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
+                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Rating:</label>
@@ -297,7 +363,15 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Visto el:</label>
-                        <input type="date" name="watchedOn" value="<%= savedWatchedOn %>" max="<%= java.time.LocalDate.now() %>" required>
+                        <% 
+                            String minDate = "";
+                            if (movie.getFechaEstreno() != null) {
+                                minDate = movie.getFechaEstreno().toString(); 
+                            } else if (movie.getEstrenoYear() > 0) {
+                                minDate = movie.getEstrenoYear() + "-01-01";
+                            }
+                        %>
+                        <input type="date" id="watchedOnInput" name="watchedOn" value="<%= savedWatchedOn %>" min="<%= minDate %>" max="<%= java.time.LocalDate.now() %>" required>
                     </div>
                     <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
                 </div>
@@ -384,7 +458,6 @@
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
                         boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
                         
-                        // CORRECCIÓN FOTOS: Aquí quitamos el contextPath y apuntamos directo a la carpeta
                         String userAvatarPath = request.getContextPath() + "/utils/default_profile.png"; 
                         if (review.getProfileImage() != null && !review.getProfileImage().trim().isEmpty()) {
                             userAvatarPath = "/fatmovies_uploads/" + review.getProfileImage();
@@ -499,7 +572,102 @@
         setTimeout(() => toast.remove(), 4000);
     }
 
-    // CORRECCIÓN BOTÓN SEGUIR: Enviamos 'idUsuario' en vez de 'targetUserId' y sumamos 'ajax=true'
+
+    const ajaxForm = document.getElementById('ajaxReviewForm');
+    if (ajaxForm) {
+        ajaxForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitamos que la página recargue
+
+            // Mostramos el telón de carga
+            document.getElementById('aiLoadingOverlay').style.display = 'flex';
+
+            // Armamos el JSON con los datos
+            const payload = {
+                id_movie: parseInt(document.getElementById('movieIdInput').value),
+                review_text: document.getElementById('reviewTextInput').value,
+                rating: parseFloat(document.getElementById('ratingInput').value),
+                watched_on: document.getElementById('watchedOnInput').value
+            };
+
+            // Enviamos la petición POST para crear/actualizar la reseña
+            fetch(contextPath + '/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if(res.status === 403) {
+                    // Si ya estaba baneado antes de mandar esto
+                    return res.json().then(data => { throw data; });
+                }
+                return res.json();
+            })
+            .then(data => {
+                // La reseña se guardó como PENDING_MODERATION. Iniciamos el sondeo!
+                if(data.id) {
+                    pollReviewStatus(data.id);
+                }
+            })
+            .catch(err => {
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                if(err.error) {
+                    showModerationResult('🚫', 'Acción Denegada', err.error);
+                } else {
+                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.');
+                }
+            });
+        });
+    }
+
+    function pollReviewStatus(reviewId) {
+        let attempts = 0;
+        
+        // Cada 1.5 segundos le preguntamos al servidor cómo va todo
+        const pollInterval = setInterval(() => {
+            attempts++;
+            
+            fetch(contextPath + '/reviews?id=' + reviewId)
+            .then(res => res.json())
+            .then(review => {
+                // Si el status ya no es pendiente, significa que la IA terminó
+                if (review && review.moderationStatus && review.moderationStatus !== 'PENDING_MODERATION') {
+                    clearInterval(pollInterval);
+                    document.getElementById('aiLoadingOverlay').style.display = 'none';
+                    
+                    if (review.moderationStatus === 'APPROVED') {
+                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.');
+                    } else if (review.moderationStatus === 'SPOILER') {
+                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.');
+                    } else if (review.moderationStatus === 'REJECTED') {
+                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'));
+                    }
+                }
+            })
+            .catch(err => {
+                // Si la consulta falla 
+                clearInterval(pollInterval);
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.');
+            });
+
+            // Si por alguna razón la IA tarda más de 30 segundos, cortamos para no dejarlo trabado
+            if(attempts >= 20) {
+                clearInterval(pollInterval);
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.');
+            }
+
+        }, 1500); 
+    }
+
+    function showModerationResult(icon, title, message) {
+        document.getElementById('resultIcon').textContent = icon;
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultMessage').innerHTML = message;
+        document.getElementById('resultOverlay').style.display = 'flex';
+    }
+
+
     function toggleFollow(targetUserId, btnElement) {
         if (currentUserId === null) {
             showToast('Debes iniciar sesión para seguir usuarios', 'error');
@@ -514,18 +682,12 @@
             body: 'idUsuario=' + targetUserId + '&ajax=true'
         })
         .then(async res => {
-            // Verificamos de forma segura qué nos devolvió el servidor
             const text = await res.text();
-            try {
-                return JSON.parse(text);
-            } catch(e) {
-                console.error("El servidor no devolvió JSON. Devolvió:", text);
-                throw new Error("Respuesta inválida del servidor");
-            }
+            try { return JSON.parse(text); } 
+            catch(e) { throw new Error("Respuesta inválida del servidor"); }
         })
         .then(data => {
             if (data && data.success) {
-                // 1. FORZAMOS el cambio visual en el botón que tocaste
                 if (isFollowing) {
                     btnElement.classList.remove('following');
                     btnElement.textContent = 'Seguir';
@@ -534,7 +696,6 @@
                     btnElement.textContent = 'Siguiendo';
                 }
                 
-                // 2. Buscamos SI HAY OTROS botones de esta misma persona en pantalla y los igualamos
                 const otherButtons = document.querySelectorAll('.follow-btn[data-user-id="' + targetUserId + '"]');
                 otherButtons.forEach(btn => {
                     btn.className = btnElement.className;

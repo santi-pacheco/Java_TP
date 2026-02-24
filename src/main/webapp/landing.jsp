@@ -1,14 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collections" %> 
 <%@ page import="entity.Movie" %>
 <%
-
     List<Movie> originalList = (List<Movie>) request.getAttribute("movies");
     List<String> fastLoadUrls = new ArrayList<>();
     
     if (originalList != null && !originalList.isEmpty()) {
-        int limit = Math.min(72, originalList.size()); 
+       
+        int limit = Math.min(46, originalList.size()); 
         for (int i = 0; i < limit; i++) {
             String posterPath = originalList.get(i).getPosterPath();
             if (posterPath != null && !posterPath.trim().isEmpty()) {
@@ -45,7 +46,6 @@
             height: 100vh;
         }
         
-
         .splash-screen {
             position: fixed;
             top: 0;
@@ -131,7 +131,6 @@
             position: relative;
         }
         
-
         .poster-rows {
             position: absolute;
             width: 100%;
@@ -229,17 +228,17 @@
                 String[] rowClasses = {"scroll-left", "scroll-right", "scroll-left-slow"};
                 String[] topPositions = {"20%", "45%", "70%"};
                 
-                int globalIdx = 0; 
-                
                 for (int i = 0; i < 3; i++) {
                     out.print("<div class=\"row-wrapper " + wrapperClasses[i] + "\" style=\"top: " + topPositions[i] + ";\">");
                     out.print("<div class=\"poster-row " + rowClasses[i] + "\">");
                     
+                    
+                    Collections.shuffle(fastLoadUrls);
+                    
                     for (int j = 0; j < 24; j++) {
-                        String bgUrl = fastLoadUrls.get(globalIdx % totalMovies);
-                        out.print("<div class=\"poster\" style=\"background-image: url('" + bgUrl + "');\"></div>");
                         
-                        globalIdx++; 
+                        String bgUrl = fastLoadUrls.get(j % totalMovies);
+                        out.print("<div class=\"poster\" style=\"background-image: url('" + bgUrl + "');\"></div>");
                     }
                     
                     out.print("</div></div>");
