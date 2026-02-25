@@ -1,11 +1,13 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import entity.Review;
 import entity.User;
 import entity.Movie;
 import entity.ConfiguracionReglas;
+import entity.FeedReviewDTO;
 import entity.ModerationStatus;
 import repository.ReviewRepository;
 import repository.UserRepository;
@@ -238,4 +240,26 @@ public class ReviewService {
     public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
         return reviewRepository.findByMovieSortedByLikes(movieId);
     }
+    
+    public List<FeedReviewDTO> getGlobalFeedPaginated(int userId, int offset, int limit) {
+        List<FeedReviewDTO> result = new ArrayList<>();
+        int friendsCount = reviewRepository.countFriendsReviews(userId);
+
+        if (offset < friendsCount) {
+            List<FeedReviewDTO> friendsReviews = reviewRepository.getFriendsFeedPaginated(userId, offset, limit);
+            result.addAll(friendsReviews);
+            if (result.size() < limit) {
+                int needed = limit - result.size();
+                List<FeedReviewDTO> popularReviews = reviewRepository.getPopularFeedPaginated(userId, 0, needed);
+                result.addAll(popularReviews);
+            }
+        } else {
+            int popularOffset = offset - friendsCount;
+            List<FeedReviewDTO> popularReviews = reviewRepository.getPopularFeedPaginated(userId, popularOffset, limit);
+            result.addAll(popularReviews);
+        }
+        
+        return result;
+    }
+    
 }

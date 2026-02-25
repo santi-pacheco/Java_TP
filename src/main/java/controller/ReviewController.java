@@ -62,4 +62,5 @@ public class ReviewController {
 	public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
 		return reviewService.getReviewsByMovieSortedByLikes(movieId);
 	}
+	
 }

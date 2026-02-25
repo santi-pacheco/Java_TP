@@ -1,3 +1,6 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page pageEncoding="UTF-8" %>
 <style>
     .navbar {
@@ -10,7 +13,6 @@
         position: sticky;
         top: 0;
         z-index: 100;
-        position: relative;
     }
     
     .navbar-left {
@@ -30,27 +32,41 @@
     
     .navbar-links {
         display: flex;
-        gap: 25px;
+        gap: 15px;
     }
     
     .navbar-links a {
         text-decoration: none;
         color: #333;
         font-weight: 500;
-        font-size: 18px;
+        font-size: 16px;
+        padding: 8px 16px;
+        border-radius: 8px;
         transition: color 0.3s;
     }
     
     .navbar-links a:hover {
-        color: #666;
+        color: #333;
+        background-color: #F0F0F0;
+    }
+    
+    .navbar-links a.active {
+        color: #111;
+        background-color: #E0E0E0;
+        font-weight: 600;
     }
     
     .navbar-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        flex: 1;
+        display: flex;
+        justify-content: center;
         max-width: 500px;
-        width: 500px;
+        margin: 0 20px;
+    }
+    
+    .navbar-center form {
+        width: 100%;
+        position: relative;
     }
     
     .search-bar {
@@ -81,7 +97,7 @@
         border: none;
         border-radius: 20px;
         font-family: 'Poppins', sans-serif;
-        font-weight: 500;
+        font-weight: 400;
         font-size: 16px;
         cursor: pointer;
         transition: background-color 0.3s;
@@ -91,12 +107,11 @@
         background-color: #555;
     }
     
-    /* --- NUEVO ESTILO PARA LA FOTO EN EL NAVBAR --- */
     .navbar-avatar-img {
-        width: 45px;       /* Mismo tamaño que tenía tu botón anterior */
+        width: 45px;
         height: 45px;
-        border-radius: 50%; /* Redondo */
-        object-fit: cover;  /* Que no se estire la imagen */
+        border-radius: 50%;
+        object-fit: cover;
         border: 2px solid #E0E0E0;
         cursor: pointer;
         transition: all 0.3s;
@@ -105,7 +120,7 @@
     
     .navbar-avatar-img:hover {
         border-color: #999;
-        transform: scale(1.05); /* Un pequeño zoom al pasar el mouse */
+        transform: scale(1.05);
     }
 </style>
 
@@ -115,16 +130,23 @@
             <img src="${pageContext.request.contextPath}/utils/export50.svg" alt="Fat Movies" class="navbar-logo">
         </a>
         
+        <c:set var="realUrl" value="${requestScope['javax.servlet.forward.request_uri'] != null ? requestScope['javax.servlet.forward.request_uri'] : pageContext.request.requestURI}" />
+
         <div class="navbar-links">
-            <a href="${pageContext.request.contextPath}/movies-page">Películas</a>
-            <a href="${pageContext.request.contextPath}/watchlist">Watchlist</a>
-            <a href="${pageContext.request.contextPath}/resenas">Reseñas</a>
+            <a href="${pageContext.request.contextPath}/movies-page" 
+               class="${fn:contains(realUrl, 'movies-page') ? 'active' : ''}">Películas</a>
+            <a href="${pageContext.request.contextPath}/watchlist" 
+               class="${fn:contains(realUrl, 'watchlist') ? 'active' : ''}">Watchlist</a>
+            <a href="${pageContext.request.contextPath}/resenas" 
+               class="${fn:contains(realUrl, 'userReviews') || fn:contains(realUrl, '/resenas') ? 'active' : ''}">Reseñas</a>
+            <a href="${pageContext.request.contextPath}/comunidad" 
+               class="${fn:contains(realUrl, 'community') || fn:contains(realUrl, '/comunidad') ? 'active' : ''}">Comunidad</a>
         </div>
     </div>
     
     <div class="navbar-center">
         <form action="${pageContext.request.contextPath}/search" method="get">
-            <input type="text" class="search-bar" placeholder="Buscar películas..." name="q" id="searchInput" autocomplete="off">
+            <input type="text" class="search-bar" placeholder="Buscar películas, actores, directores..." name="q" id="searchInput" autocomplete="off">
             <div id="searchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd;
             border-radius: 5px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>

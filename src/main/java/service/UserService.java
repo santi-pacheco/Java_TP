@@ -168,5 +168,9 @@ public class UserService {
             userRepository.updateProfileImage(userId, null);
         }
     }
+    
+    public List<User> searchUsers(String query) {
+		return userRepository.searchUsersByUsername(query);
+	}
 	
 }
