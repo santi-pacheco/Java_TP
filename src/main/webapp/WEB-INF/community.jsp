@@ -10,30 +10,28 @@
     <style>
         body { background: #FAF8F3; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
         .community-container { 
-            max-width: 1100px; /* Lo ensanchamos un poco para que entren ambas cosas cómodas */
+            max-width: 1100px;
             margin: 40px auto; 
             padding: 0 20px; 
             display: grid;
-            grid-template-columns: 1fr 350px; /* Feed ocupa el resto, Sidebar ocupa 350px */
+            grid-template-columns: 1fr 350px;
             gap: 40px;
-            align-items: start; /* Súper importante para que el sticky funcione */
+            align-items: start;
         }
-        
-        /* La nueva barra lateral que envuelve al buscador */
+
         .sidebar-section {
             position: sticky;
-            top: 100px; /* Se frena a 100px del techo, para no tapar tu Navbar */
+            top: 100px;
             z-index: 10;
         }
 
-        /* En pantallas pequeñas (celulares/tablets), lo volvemos 1 sola columna */
         @media (max-width: 850px) {
             .community-container {
                 grid-template-columns: 1fr;
             }
             .sidebar-section {
-                position: static; /* Quitamos el efecto pegajoso en móviles */
-                order: -1; /* Obligamos a que el buscador aparezca arriba del feed */
+                position: static;
+                order: -1;
             }
         }
 
@@ -50,7 +48,6 @@
         .feed-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
         .feed-header h2 { font-size: 1.8rem; font-weight: 700; color: #333; margin: 0; }
         
-        /* --- ESTILO DE TARJETAS TIPO USER REVIEWS --- */
         .review-card {
             background: white;
             border-radius: 12px;
@@ -78,7 +75,6 @@
             flex-direction: column;
             gap: 12px;
         }
-        /* Detalles del usuario (Arriba) */
         .user-info { display: flex; align-items: center; gap: 12px; }
         .user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #f0f0f0; }
         .user-details { display: flex; flex-direction: column; }
@@ -86,7 +82,6 @@
         .user-name:hover { text-decoration: underline; color: #8B7355; }
         .review-date { font-size: 13px; color: #999; }
         
-        /* Título, Rating y Texto */
         .movie-title-header { font-size: 22px; font-weight: 600; color: #333; margin: 0; }
         .rating-date { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .rating { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 600; color: #8B7355; }
@@ -132,6 +127,15 @@
 </div>
 
 <script>
+	function escapeHTML(str) {
+	    if (!str) return '';
+	    return String(str)
+	        .replace(/&/g, '&amp;')
+	        .replace(/</g, '&lt;')
+	        .replace(/>/g, '&gt;')
+	        .replace(/"/g, '&quot;')
+	        .replace(/'/g, '&#039;');
+	}
     const userSearchInput = document.getElementById('communitySearchInput');
     const userSearchResults = document.getElementById('communitySearchResults');
     let userSearchTimeout;
@@ -155,10 +159,13 @@
         } else {
             let html = '';
             users.forEach(user => {
-                let avatarUrl = user.profileImage ? '${pageContext.request.contextPath}/uploads/' + user.profileImage : '${pageContext.request.contextPath}/utils/no-user.png';
+                let safeImage = escapeHTML(user.profileImage);
+                let safeUsername = escapeHTML(user.username);
+                let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/${safeImage}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+                
                 html += `<a href="${pageContext.request.contextPath}/profile?id=\${user.id}" class="user-result-item">
-                            <img src="\${avatarUrl}" class="result-avatar" alt="\${user.username}">
-                            <span class="result-username">\${user.username}</span>
+                            <img src="\${avatarUrl}" class="result-avatar" alt="\${safeUsername}">
+                            <span class="result-username">\${safeUsername}</span>
                         </a>`;
             });
             userSearchResults.innerHTML = html;
@@ -213,7 +220,7 @@
                     const reviewHTML = createReviewCard(review);
                     feedContainer.insertAdjacentHTML('beforeend', reviewHTML);
                 });
-                offset += 10;
+                offset += data.length;
                 isFetching = false;
             })
             .catch(error => {
@@ -224,37 +231,34 @@
     }
 
     function createReviewCard(review) {
-        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${review.userAvatar}` : `${pageContext.request.contextPath}/utils/no-user.png`;
-        let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500\${review.posterPath}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
+    	let safeUsername = escapeHTML(review.username);
+        let safeMovieTitle = escapeHTML(review.movieTitle);
+        let safeText = escapeHTML(review.text);
+        
+        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+        let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
         
         return `
-            <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
-                
-                <img src="\${posterUrl}" class="movie-poster" alt="\${review.movieTitle}" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
-                
-                <div class="review-content">
-                    
-                    <div class="user-info">
-                        <img src="\${avatarUrl}" class="user-avatar" alt="\${review.username}">
-                        <div class="user-details">
-                            <a href="${pageContext.request.contextPath}/profile?id=\${review.userId}" class="user-name" onclick="event.stopPropagation()">\${review.username}</a>
-                            <span class="review-date">\${review.dateFormatted}</span>
-                        </div>
+        <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
+            <img src="\${posterUrl}" class="movie-poster" alt="\${safeMovieTitle}" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
+            <div class="review-content">
+                <div class="user-info">
+                    <img src="\${avatarUrl}" class="user-avatar" alt="\${safeUsername}">
+                    <div class="user-details">
+                        <a href="${pageContext.request.contextPath}/profile?id=\${review.userId}" class="user-name" onclick="event.stopPropagation()">\${safeUsername}</a>
+                        <span class="review-date">\${escapeHTML(review.dateFormatted)}</span>
                     </div>
-
-                    <h3 class="movie-title-header">\${review.movieTitle}</h3>
-                    
-                    <div class="rating-date">
-                        <div class="rating">🍿 \${parseFloat(review.rating).toFixed(1)} / 5.0 Kcals</div>
-                    </div>
-                    
-                    <div class="review-text">
-                        \${review.text}
-                    </div>
-                    
+                </div>
+                <h3 class="movie-title-header">\${safeMovieTitle}</h3>
+                <div class="rating-date">
+                    <div class="rating">🍿 \${parseFloat(review.rating).toFixed(1)} / 5.0 Kcals</div>
+                </div>
+                <div class="review-text">
+                    \${safeText}
                 </div>
             </div>
-        `;
+        </div>
+    `;
     }
 </script>
 
