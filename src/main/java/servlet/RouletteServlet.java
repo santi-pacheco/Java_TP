@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +39,8 @@ public class RouletteServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);

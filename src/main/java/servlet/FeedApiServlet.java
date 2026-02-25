@@ -29,11 +29,13 @@ public class FeedApiServlet extends HttpServlet {
         repository.ReviewRepository reviewRepo = new repository.ReviewRepository();
         repository.UserRepository userRepo = new repository.UserRepository();
         repository.MovieRepository movieRepo = new repository.MovieRepository();
+        repository.BlockRepository blockRepository = new repository.BlockRepository();
         service.MovieService movieServ = new service.MovieService(movieRepo);
         service.ConfiguracionReglasService configServ = new service.ConfiguracionReglasService(new repository.ConfiguracionReglasRepository());
-        service.WatchlistService watchServ = new service.WatchlistService(new repository.WatchlistRepository(movieRepo), new service.UserService(userRepo, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), new repository.FollowRepository()), movieServ);
         
-        this.reviewService = new service.ReviewService(reviewRepo, null, movieServ, configServ, watchServ);
+        service.UserService userService = new service.UserService(userRepo, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), new repository.FollowRepository(), blockRepository);
+        service.WatchlistService watchServ = new service.WatchlistService(new repository.WatchlistRepository(movieRepo), userService, movieServ);
+        this.reviewService = new service.ReviewService(reviewRepo, userService, movieServ, configServ, watchServ);
         this.gson = new Gson();
     }
 

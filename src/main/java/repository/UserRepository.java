@@ -245,13 +245,19 @@ public class UserRepository {
 	    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
 	}
 
-	public List<User> searchUsersByUsername(String query) {
+	public List<User> searchUsersByUsername(String query, int loggedUserId) {
 	    List<User> users = new ArrayList<>();
-	    String sql = "SELECT id_user, username, profile_image FROM usuarios WHERE username LIKE ? LIMIT 10";
-	    
+	    String sql = "SELECT id_user, username, profile_image FROM usuarios " +
+	                 "WHERE username LIKE ? AND id_user != ? " +
+	                 "AND id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
+	                 "AND id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
+	                 "LIMIT 10";
 	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
 	        stmt.setString(1, "%" + query + "%");
+	        stmt.setInt(2, loggedUserId);
+	        stmt.setInt(3, loggedUserId);
+	        stmt.setInt(4, loggedUserId);
 	        
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            while (rs.next()) {

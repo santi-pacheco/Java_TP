@@ -34,8 +34,8 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
     }
 
-    public List<Review> getReviewsByMovie(int movieId) {
-        return reviewService.getReviewsByMovie(movieId);
+    public List<Review> getReviewsByMovie(int movieId, int idLector) {
+        return reviewService.getReviewsByMovie(movieId, idLector);
     }
 
     public List<Review> getAllReviews() {
@@ -59,8 +59,8 @@ public class ReviewController {
 		return reviewService.getReviewsByUser(userId);
 	}
 	
-	public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
-		return reviewService.getReviewsByMovieSortedByLikes(movieId);
+	public List<Review> getReviewsByMovieSortedByLikes(int movieId, int idLector) {
+		return reviewService.getReviewsByMovieSortedByLikes(movieId, idLector);
 	}
 	
 }

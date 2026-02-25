@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -31,7 +32,8 @@ public class UserSearchApiServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
     }
 
@@ -45,6 +47,10 @@ public class UserSearchApiServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
 
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        entity.User loggedUser = (session != null) ? (entity.User) session.getAttribute("usuarioLogueado") : null;
+        int loggedUserId = (loggedUser != null) ? loggedUser.getId() : -1;
+        
         if (query == null || query.trim().length() < 1) {
             out.print("[]");
             out.flush();
@@ -52,7 +58,7 @@ public class UserSearchApiServlet extends HttpServlet {
         }
 
         try {
-            List<User> foundUsers = userController.searchUsers(query.trim());
+            List<User> foundUsers = userController.searchUsers(query.trim(), loggedUserId);
 
             JsonArray jsonArray = new JsonArray();
             for (User u : foundUsers) {

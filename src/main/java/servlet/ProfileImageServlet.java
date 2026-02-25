@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.File;
+import repository.BlockRepository;
 import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -57,7 +58,8 @@ public class ProfileImageServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
         this.httpClient = new OkHttpClient.Builder()
         	    .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)

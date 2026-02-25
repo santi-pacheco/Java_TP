@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -62,8 +63,8 @@ public class MovieDetailServlet extends HttpServlet {
             UserRepository userRepository = new UserRepository();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             FollowRepository followRepository = new FollowRepository();
-            
-            this.userService = new UserService(userRepository, passwordEncoder, followRepository);
+            BlockRepository blockRepository = new BlockRepository();
+            this.userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
             
             WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, this.userService, movieService);
@@ -143,12 +144,18 @@ public class MovieDetailServlet extends HttpServlet {
                 }
             }
             
+            int idLector = -1;
+            if (session != null && session.getAttribute("usuarioLogueado") != null) {
+                User user = (User) session.getAttribute("usuarioLogueado");
+                idLector = user.getId();
+            }
+            
             String sortBy = request.getParameter("sortBy");
             List<Review> reviews;
             if ("likes".equals(sortBy)) {
-                reviews = reviewController.getReviewsByMovieSortedByLikes(movieId);
+                reviews = reviewController.getReviewsByMovieSortedByLikes(movieId, idLector);
             } else {
-                reviews = reviewController.getReviewsByMovie(movieId);
+                reviews = reviewController.getReviewsByMovie(movieId, idLector);
             }
             
             Map<Integer, Integer> likesCountMap = new HashMap<>();
