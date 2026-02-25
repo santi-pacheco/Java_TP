@@ -43,14 +43,12 @@ const username = document.getElementById('username').value.trim();
       const pwd2 = document.getElementById('confirmPassword').value;
       const birth = document.getElementById('birthDate').value;
 let msg = '';
-
-      // Regex de la entidad User.java
       const pwdRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$/;
 
       if (username.length < 3) msg = 'El usuario debe tener entre 3 y 50 caracteres.';
 else if (!email || !/^\S+@\S+\.\S+$/.test(email)) msg = 'Ingresá un email válido.';
-else if (!birth) msg = 'Ingresá tu fecha de nacimiento.'; // Descomentado, ya que es @NotNull
-else if (pwd.length < 8) msg = 'La contraseña debe tener al menos 8 caracteres.'; // Cambiado de 6 a 8
+else if (!birth) msg = 'Ingresá tu fecha de nacimiento.';
+else if (pwd.length < 8) msg = 'La contraseña debe tener al menos 8 caracteres.';
       else if (!pwdRegex.test(pwd)) msg = 'La contraseña debe tener mayúscula, minúscula, número y un carácter especial.';
       else if (pwd !== pwd2) msg = 'Las contraseñas no coinciden.';
       
@@ -80,12 +78,10 @@ return false;
       </div>
       <h1>Crear cuenta</h1>
 
-    <%-- 1. Error de Aplicación (ej: "Usuario duplicado") --%>
     <c:if test="${not empty appError}">
       <div class="err">${appError}</div>
     </c:if>
 
-    <%-- 2. Errores de Validación (ej: "Email inválido") --%>
     <c:if test="${not empty errors}">
         <div class="err">
             <strong>Por favor corregí los siguientes errores:</strong>
@@ -113,15 +109,27 @@ value="${user.email}" required />
       </div>
 
       <div class="field">
-        <label for="password">Contraseña</label>
-        <input id="password" name="password" type="password" required />
-        <div class="hint">Mín. 8 caracteres, con mayúscula, minúscula, número y símbolo.</div>
-      </div>
+          <label for="password">Contraseña</label>
+          <div style="position: relative;">
+              <input id="password" name="password" type="password" required style="padding-right: 40px; width: 100%; box-sizing: border-box;" />
+              <span onclick="toggleVisibility('password', 'eyeOpen1', 'eyeClosed1')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; display: flex;">
+                  <svg id="eyeClosed1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  <svg id="eyeOpen1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </span>
+          </div>
+          <span style="font-size: 11px; color: #888;">Mín. 8 caracteres, con mayúscula, minúscula, número y símbolo.</span>
+        </div>
 
-      <div class="field">
-        <label for="confirmPassword">Confirmar contraseña</label>
-        <input id="confirmPassword" name="confirmPassword" type="password" required />
-      </div>
+        <div class="field">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <div style="position: relative;">
+              <input id="confirmPassword" name="confirmPassword" type="password" required style="padding-right: 40px; width: 100%; box-sizing: border-box;" />
+              <span onclick="toggleVisibility('confirmPassword', 'eyeOpen2', 'eyeClosed2')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; display: flex;">
+                  <svg id="eyeClosed2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  <svg id="eyeOpen2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </span>
+          </div>
+        </div>
 
     
   <div class="field">
@@ -138,5 +146,23 @@ value="${user.email}" required />
       </div>
     </div>
   </div>
+  
+  <script>
+            function toggleVisibility(inputId, openIconId, closedIconId) {
+                const pwd = document.getElementById(inputId);
+                const eyeOpen = document.getElementById(openIconId);
+                const eyeClosed = document.getElementById(closedIconId);
+
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    eyeClosed.style.display = 'none';
+                    eyeOpen.style.display = 'block';
+                } else {
+                    pwd.type = 'password';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
+                }
+            }
+  </script>
 </body>
 </html>
