@@ -7,8 +7,13 @@
     <title>Comunidad - FatMovies</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <style>
-        body { background: #FAF8F3; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+   <style>
+        body { 
+            background: #FAF8F3; 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+        }
         .community-container { 
             max-width: 1100px;
             margin: 40px auto; 
@@ -26,28 +31,96 @@
         }
 
         @media (max-width: 850px) {
-            .community-container {
-                grid-template-columns: 1fr;
-            }
-            .sidebar-section {
-                position: static;
-                order: -1;
-            }
+            .community-container { grid-template-columns: 1fr; }
+            .sidebar-section { position: static; order: -1; }
         }
 
-        .search-section { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px; position: relative; }
-        .search-section h3 { margin-top: 0; margin-bottom: 20px; font-weight: 700; color: #333; font-size: 1.5rem; }
-        .user-search-input { width: 100%; padding: 15px 20px; font-size: 16px; border: 2px solid #eee; border-radius: 8px; outline: none; transition: all 0.3s; box-sizing: border-box; }
-        .user-search-input:focus { border-color: #8B7355; box-shadow: 0 0 8px rgba(139, 115, 85, 0.2); }
-        .user-results { position: absolute; top: 100%; left: 30px; right: 30px; background: white; border: 1px solid #eee; border-radius: 0 0 8px 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1000; display: none; max-height: 350px; overflow-y: auto; }
-        .user-result-item { display: flex; align-items: center; padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #f5f5f5; text-decoration: none; color: #333; transition: background 0.2s; }
-        .user-result-item:hover { background-color: #fcfcfc; text-decoration: none; color: #8B7355; }
-        .result-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid #eee; }
-        .result-username { font-weight: 600; font-size: 16px; }
-
-        .feed-header { border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
-        .feed-header h2 { font-size: 1.8rem; font-weight: 700; color: #333; margin: 0; }
+        .search-section { 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            margin-bottom: 30px; 
+            position: relative; 
+        }
+        .search-section h3 { 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            font-weight: 700; 
+            color: #333; 
+            font-size: 1.5rem; 
+        }
         
+        .user-search-input { 
+            width: 100%; 
+            padding: 15px 20px; 
+            font-size: 16px; 
+            border: 2px solid #eee; 
+            border-radius: 8px; 
+            outline: none; 
+            transition: all 0.3s; 
+            box-sizing: border-box; 
+        }
+        
+        .user-search-input:focus { 
+            border-color: #8B7355; 
+            box-shadow: 0 0 8px rgba(139, 115, 85, 0.2); 
+        }
+        
+        .user-results { 
+            position: absolute; 
+            top: 100%; 
+            left: 30px; 
+            right: 30px; 
+            background: white; 
+            border: 1px solid #eee; 
+            border-radius: 0 0 8px 8px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            z-index: 1000; 
+            display: none; 
+            max-height: 350px; 
+            overflow-y: auto; 
+        }
+        
+        .user-result-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 15px 20px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #f5f5f5; 
+            text-decoration: none; 
+            color: #333; 
+            transition: background 0.2s; 
+        }
+        .user-result-item:hover { 
+            background-color: #fcfcfc; 
+            text-decoration: none; 
+            color: #8B7355; 
+        }
+        
+        .result-avatar { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            margin-right: 15px; 
+            border: 2px solid #eee; 
+        }
+        
+        .result-username { font-weight: 600; font-size: 16px; }
+        .feed-header { 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+        }
+        
+        .feed-header h2 { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            color: #333; 
+            margin: 0; 
+        }
+
         .review-card {
             background: white;
             border-radius: 12px;
@@ -55,13 +128,16 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             display: flex;
             gap: 20px;
+            position: relative;
             transition: transform 0.2s, box-shadow 0.2s;
             margin-bottom: 24px;
         }
+        
         .review-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
+        
         .movie-poster {
             width: 120px;
             height: 180px;
@@ -69,29 +145,153 @@
             object-fit: cover;
             flex-shrink: 0;
         }
+        
         .review-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .user-info { display: flex; align-items: center; gap: 12px; }
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #f0f0f0; }
-        .user-details { display: flex; flex-direction: column; }
-        .user-name { font-weight: 700; font-size: 15px; color: #333; text-decoration: none; }
-        .user-name:hover { text-decoration: underline; color: #8B7355; }
-        .review-date { font-size: 13px; color: #999; }
+
+        .spoiler-checkbox { display: none; }
+        .review-spoiler-text { 
+            filter: blur(8px); 
+            user-select: none; 
+            transition: filter 0.3s ease; 
+        }
+
+        .spoiler-checkbox:checked ~ .review-content .review-spoiler-text {
+            filter: none;
+            user-select: text;
+        }
+
+        .spoiler-checkbox:checked ~ .spoiler-overlay { display: none; }
+
+        .spoiler-overlay { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            cursor: pointer; 
+            transition: all 0.3s;
+            z-index: 10; 
+            text-align: center;
+        }
         
-        .movie-title-header { font-size: 22px; font-weight: 600; color: #333; margin: 0; }
+        .spoiler-overlay:hover { 
+            background: rgba(255, 255, 255, 1);
+            transform: translate(-50%, -50%) scale(1.05); 
+        }
+        
+        .spoiler-text { 
+            font-weight: 600; 
+            color: #333; 
+        }
+        
+        .spoiler-badge { 
+            background: #ff6b6b;
+            color: white; 
+            padding: 2px 8px; 
+            border-radius: 5px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            vertical-align: middle; 
+        }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid #f0f0f0; 
+        }
+        
+        .user-details { display: flex; flex-direction: column; }
+        
+        .user-name { 
+            font-weight: 700; 
+            font-size: 15px; 
+            color: #333; 
+            text-decoration: none; 
+        }
+        
+        .user-name:hover { 
+            text-decoration: underline; 
+            color: #8B7355; 
+        }
+        
+        .review-date { font-size: 13px; color: #999; }
+ 
+        .follow-btn { 
+            background: transparent; 
+            border: 2px solid #8B7355; 
+            color: #8B7355; 
+            border-radius: 15px; 
+            padding: 2px 10px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            margin-left: 10px; 
+        }
+        
+        .follow-btn:hover { background: #8B7355; color: white; }
+        .follow-btn.following { background: #8B7355; color: white; border-color: #8B7355; }
+        .follow-btn.following:hover { background: #6b5840; border-color: #6b5840; }
+
+        .movie-title-header { 
+            font-size: 22px; 
+            font-weight: 600; 
+            color: #333; 
+            margin: 0; 
+            transition: color 0.2s ease; 
+            cursor: pointer; 
+        }
+        
+        .movie-title-header:hover { color: #666; }
+        
         .rating-date { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .rating { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 600; color: #8B7355; }
-        .review-text { font-size: 15px; line-height: 1.6; color: #555; margin: 0; }
+        
+        .rating { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #8B7355; 
+        }
+        
+        .review-text { 
+            font-size: 15px; 
+            line-height: 1.6; 
+            color: #555; 
+            margin: 0; 
+        }
 
         .loading-sentinel { display: flex; justify-content: center; padding: 30px 0; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #8B7355; border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { 
+            width: 40px; 
+            height: 40px; 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #8B7355; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .no-more-data { text-align: center; color: #888; padding: 20px; display: none; font-weight: 500;}
+        .no-more-data { 
+            text-align: center; 
+            color: #888; 
+            padding: 20px; 
+            display: none; 
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -127,6 +327,9 @@
 </div>
 
 <script>
+	if ('scrollRestoration' in history) {
+	    history.scrollRestoration = 'manual';
+	}
 	function escapeHTML(str) {
 	    if (!str) return '';
 	    return String(str)
@@ -161,7 +364,7 @@
             users.forEach(user => {
                 let safeImage = escapeHTML(user.profileImage);
                 let safeUsername = escapeHTML(user.username);
-                let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/\${safeImage}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+                let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/\${safeImage}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
                 
                 html += `<a href="${pageContext.request.contextPath}/profile?id=\${user.id}" class="user-result-item">
                             <img src="\${avatarUrl}" class="result-avatar" alt="\${safeUsername}">
@@ -184,6 +387,7 @@
     const feedContainer = document.getElementById('feed-container');
     const sentinel = document.getElementById('loading-sentinel');
     const noMoreDataMsg = document.getElementById('no-more-data');
+    const currentUserId = ${empty usuarioLogueado ? 'null' : usuarioLogueado.id};
 
     const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && !isFetching && hasMoreData) {
@@ -222,6 +426,12 @@
                 });
                 offset += data.length;
                 isFetching = false;
+                
+                if (data.length < 10) {
+                    hasMoreData = false;
+                    sentinel.style.display = 'none';
+                    noMoreDataMsg.style.display = 'block';
+                }
             })
             .catch(error => {
                 console.error("Error cargando el feed:", error);
@@ -231,34 +441,91 @@
     }
 
     function createReviewCard(review) {
-    	let safeUsername = escapeHTML(review.username);
+        let safeUsername = escapeHTML(review.username);
         let safeMovieTitle = escapeHTML(review.movieTitle);
         let safeText = escapeHTML(review.text);
-        
-        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+
+        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
         let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500\${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
+
+        const isSpoiler = review.moderation_status === 'SPOILER';
+        const spoilerCheckboxId = `spoiler-toggle-\${review.reviewId}`;
+        const spoilerTextClass = isSpoiler ? 'review-spoiler-text' : '';
         
+        const spoilerBadgeHtml = isSpoiler ? '<span class="spoiler-badge">SPOILER</span>' : '';
+        let followBtnHtml = '';
+        if (currentUserId !== null && currentUserId !== review.userId) {
+            const btnClass = review.isFollowing ? 'following' : '';
+            const btnText = review.isFollowing ? 'Siguiendo' : 'Seguir';
+            followBtnHtml = `<button class="follow-btn \${btnClass}" data-user-id="\${review.userId}" onclick="event.stopPropagation(); toggleFollow(\${review.userId}, this)">\${btnText}</button>`;
+        }
         return `
-        <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
-            <img src="\${posterUrl}" class="movie-poster" alt="\${safeMovieTitle}" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
-            <div class="review-content">
-                <div class="user-info">
-                    <img src="\${avatarUrl}" class="user-avatar" alt="\${safeUsername}">
-                    <div class="user-details">
-                        <a href="${pageContext.request.contextPath}/profile?id=\${review.userId}" class="user-name" onclick="event.stopPropagation()">\${safeUsername}</a>
-                        <span class="review-date">\${escapeHTML(review.dateFormatted)}</span>
+            <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
+                
+                \${isSpoiler ? `<input type="checkbox" id="\${spoilerCheckboxId}" class="spoiler-checkbox" onclick="event.stopPropagation()">` : ''}
+
+                <img src="\${posterUrl}" class="movie-poster" alt="\${safeMovieTitle}" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
+
+                <div class="review-content">
+                    <div class="user-info">
+                        <img src="\${avatarUrl}" class="user-avatar" alt="\${safeUsername}">
+                        <div class="user-details">
+                            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <a href="${pageContext.request.contextPath}/profile?id=\${review.userId}" class="user-name" onclick="event.stopPropagation()">\${safeUsername}</a>
+                                \${spoilerBadgeHtml}
+                                \${followBtnHtml}
+                            </div>
+                            <span class="review-date">\${escapeHTML(review.dateFormatted)}</span>
+                        </div>
+                    </div>
+                    <h3 class="movie-title-header">\${safeMovieTitle}</h3>
+                    <div class="rating-date">
+                        <div class="rating">🍿 \${parseFloat(review.rating).toFixed(1)} / 5.0 Kcals</div>
+                    </div>
+
+                    <div class="review-text \${spoilerTextClass}">
+                        \${safeText}
                     </div>
                 </div>
-                <h3 class="movie-title-header">\${safeMovieTitle}</h3>
-                <div class="rating-date">
-                    <div class="rating">🍿 \${parseFloat(review.rating).toFixed(1)} / 5.0 Kcals</div>
-                </div>
-                <div class="review-text">
-                    \${safeText}
-                </div>
+
+                \${isSpoiler ? `
+                    <label for="\${spoilerCheckboxId}" class="spoiler-overlay" onclick="event.stopPropagation()">
+                        <div class="spoiler-text">Mostrar reseña</div>
+                    </label>` : ''}
             </div>
-        </div>
-    `;
+        `;
+    }
+    
+    function toggleFollow(targetUserId, btnElement) {
+        if (currentUserId === null) {
+            alert('Debes iniciar sesión para seguir usuarios');
+            return;
+        }
+
+        const isFollowing = btnElement.classList.contains('following');
+        
+        fetch('${pageContext.request.contextPath}/follow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'idUsuario=' + targetUserId + '&ajax=true'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.success) {
+                const allButtons = document.querySelectorAll(`.follow-btn[data-user-id="\${targetUserId}"]`);
+                
+                allButtons.forEach(btn => {
+                    if (isFollowing) {
+                        btn.classList.remove('following');
+                        btn.textContent = 'Seguir';
+                    } else {
+                        btn.classList.add('following');
+                        btn.textContent = 'Siguiendo';
+                    }
+                });
+            }
+        })
+        .catch(err => console.error('Error en follow:', err));
     }
 </script>
 
