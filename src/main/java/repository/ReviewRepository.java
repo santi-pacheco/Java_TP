@@ -12,6 +12,9 @@ import entity.ModerationStatus;
 import entity.Review;
 import exception.ErrorFactory;
 import util.DataSourceProvider;
+import entity.FeedReviewDTO;
+import java.text.SimpleDateFormat;
+
 
 public class ReviewRepository {
 
@@ -287,4 +290,112 @@ public class ReviewRepository {
         }
         return reviews;
     }
+
+        public List<FeedReviewDTO> getFriendsFeedPaginated(int idUsuarioLogueado, int offset, int limit) {
+            List<FeedReviewDTO> feed = new ArrayList<>();
+            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, " +
+                         "u.id_user, u.username, u.profile_image, " +
+                         "p.poster_path, p.name AS movie_title " +
+                         "FROM reviews r " +
+                         "INNER JOIN seguidores s ON r.id_user = s.id_seguido " +
+                         "INNER JOIN usuarios u ON r.id_user = u.id_user " +
+                         "INNER JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                         "WHERE s.id_seguidor = ? " +
+                         "ORDER BY r.created_at DESC " +
+                         "LIMIT ? OFFSET ?";
+                         
+            try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setInt(1, idUsuarioLogueado);
+                stmt.setInt(2, limit);
+                stmt.setInt(3, offset);
+                
+                ResultSet rs = stmt.executeQuery();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                
+                while (rs.next()) {
+                    entity.FeedReviewDTO dto = new entity.FeedReviewDTO();
+                    dto.setReviewId(rs.getInt("id_review"));
+                    dto.setMovieId(rs.getInt("id_movie"));
+                    dto.setUserId(rs.getInt("id_user"));
+                    dto.setPosterPath(rs.getString("poster_path"));
+                    dto.setUsername(rs.getString("username"));
+                    dto.setUserAvatar(rs.getString("profile_image"));
+                    if (rs.getTimestamp("created_at") != null) {
+                        dto.setDateFormatted(sdf.format(rs.getTimestamp("created_at")));
+                    } else {
+                        dto.setDateFormatted("Reciente");
+                    }
+                    dto.setRating(rs.getDouble("rating"));
+                    dto.setMovieTitle(rs.getString("movie_title"));
+                    dto.setText(rs.getString("review_text"));
+                    
+                    feed.add(dto);
+                }
+            } catch (SQLException e) {
+                throw ErrorFactory.internal("Error fetching paginated friends' feed");
+            }
+            return feed;
+        }
+    
+
+        public int countFriendsReviews(int idUsuarioLogueado) {
+            String sql = "SELECT COUNT(*) FROM reviews r INNER JOIN seguidores s ON r.id_user = s.id_seguido WHERE s.id_seguidor = ?";
+            try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, idUsuarioLogueado);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            } catch (SQLException e) {
+                throw ErrorFactory.internal("Error counting friends' reviews");
+            }
+            return 0;
+        }
+
+        public List<FeedReviewDTO> getPopularFeedPaginated(int idUsuarioLogueado, int offset, int limit) {
+            List<FeedReviewDTO> feed = new ArrayList<>();
+
+            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.likes_count, " +
+                         "u.id_user, u.username, u.profile_image, p.poster_path, p.name AS movie_title " +
+                         "FROM reviews r " +
+                         "INNER JOIN usuarios u ON r.id_user = u.id_user " +
+                         "INNER JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                         "WHERE r.id_user != ? " + 
+                         "AND r.id_user NOT IN (SELECT id_seguido FROM seguidores WHERE id_seguidor = ?) " + // Que no sean mis amigos
+                         "ORDER BY r.likes_count DESC, r.created_at DESC " +
+                         "LIMIT ? OFFSET ?";
+                         
+            try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setInt(1, idUsuarioLogueado);
+                stmt.setInt(2, idUsuarioLogueado);
+                stmt.setInt(3, limit);
+                stmt.setInt(4, offset);
+                
+                ResultSet rs = stmt.executeQuery();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                
+                while (rs.next()) {
+                    FeedReviewDTO dto = new FeedReviewDTO();
+                    dto.setReviewId(rs.getInt("id_review"));
+                    dto.setMovieId(rs.getInt("id_movie"));
+                    dto.setUserId(rs.getInt("id_user"));
+                    dto.setUsername(rs.getString("username"));
+                    dto.setUserAvatar(rs.getString("profile_image"));
+                    dto.setPosterPath(rs.getString("poster_path"));
+                    dto.setDateFormatted(rs.getTimestamp("created_at") != null ? sdf.format(rs.getTimestamp("created_at")) : "Reciente");
+                    dto.setRating(rs.getDouble("rating"));
+                    dto.setMovieTitle(rs.getString("movie_title"));
+                    dto.setText(rs.getString("review_text"));
+                    feed.add(dto);
+                }
+            } catch (SQLException e) {
+                throw ErrorFactory.internal("Error fetching paginated popular feed");
+            }
+            return feed;
+        }
+    
 }

@@ -65,4 +65,8 @@ public class UserController {
         userService.removeProfileImage(userId, uploadDir);
     }
     
+    public List<User> searchUsers(String query) {
+		return userService.searchUsers(query);
+	}
+    
 }
