@@ -118,7 +118,7 @@
 
     <div class="sidebar-section">
         <div class="search-section">
-            <h3>🔍 Buscar Cinéfilos</h3>
+            <h3>🔍 Buscar Usuarios</h3>
             <input type="text" id="communitySearchInput" class="user-search-input" placeholder="Escribe un nombre (ej. mariano)..." autocomplete="off">
             <div id="communitySearchResults" class="user-results"></div>
         </div>

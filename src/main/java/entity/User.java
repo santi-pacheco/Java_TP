@@ -1,6 +1,7 @@
 package entity;
 
 import java.sql.Date;
+import java.time.LocalDateTime; // AGREGADO
 import jakarta.validation.constraints.*;
 import java.util.LinkedList;
 import validations.OnCreate;
@@ -35,100 +36,110 @@ public class User {
     
     private java.sql.Timestamp bannedUntil;
     
-    public boolean isEsUsuarioActivo() {
-		return esUsuarioActivo;
-	}
 
-	public void setEsUsuarioActivo(boolean esUsuarioActivo) {
-		this.esUsuarioActivo = esUsuarioActivo;
-	}
+    private LocalDateTime ultimaRevisionNotificaciones;
 
-	private LinkedList<String> watchList;
+    public LocalDateTime getUltimaRevisionNotificaciones() {
+        return ultimaRevisionNotificaciones;
+    }
+
+    public void setUltimaRevisionNotificaciones(LocalDateTime ultimaRevisionNotificaciones) {
+        this.ultimaRevisionNotificaciones = ultimaRevisionNotificaciones;
+    }
+
     
-	public LinkedList<String> getWatchList() {
-		return watchList;
-	}
+    public boolean isEsUsuarioActivo() {
+        return esUsuarioActivo;
+    }
 
-	public void setWatchList(LinkedList<String> watchList) {
-		this.watchList = watchList;
-	}
+    public void setEsUsuarioActivo(boolean esUsuarioActivo) {
+        this.esUsuarioActivo = esUsuarioActivo;
+    }
 
-	public void addToWatchList(String movie) {
-		if (this.watchList == null) {
-			this.watchList = new LinkedList<>();
-		}
-		this.watchList.add(movie);
-	}
-	
-	public int getId() {
-		return id;
-	}
-	
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	public String getUsername() {
-		return username;
-	}
-	
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	
-	public String getPassword() {
-		return password;
-	}
-	
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
-	public String getRole() {
-		return role;
-	}
-	
-	public void setRole(String role) {
-		this.role = role;
-	}
-	
-	public String getEmail() {
-		return email;
-	}
-	
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	
-	public Date getBirthDate() {
-		return birthDate;
-	}
-	
-	public void setBirthDate(Date b) {
-		birthDate = b;
-	}
-	
-	public String getProfileImage() {
+    private LinkedList<String> watchList;
+    
+    public LinkedList<String> getWatchList() {
+        return watchList;
+    }
+
+    public void setWatchList(LinkedList<String> watchList) {
+        this.watchList = watchList;
+    }
+
+    public void addToWatchList(String movie) {
+        if (this.watchList == null) {
+            this.watchList = new LinkedList<>();
+        }
+        this.watchList.add(movie);
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public String getRole() {
+        return role;
+    }
+    
+    public void setRole(String role) {
+        this.role = role;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public Date getBirthDate() {
+        return birthDate;
+    }
+    
+    public void setBirthDate(Date b) {
+        birthDate = b;
+    }
+    
+    public String getProfileImage() {
         return profileImage;
     }
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
-	public java.sql.Timestamp getBannedUntil() { 
-		return bannedUntil; 
-		}
-	
-	public void setBannedUntil(java.sql.Timestamp bannedUntil) {
-		this.bannedUntil = bannedUntil; 
-		}
+    
+    public java.sql.Timestamp getBannedUntil() { 
+        return bannedUntil; 
+    }
+    
+    public void setBannedUntil(java.sql.Timestamp bannedUntil) {
+        this.bannedUntil = bannedUntil; 
+    }
 
-	// Helper para ver si el usuario esta baneado
-	public boolean isBanned() {
-	    if (bannedUntil == null) return false;
-	    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
-	}
-	
-	
-	
+    // Helper para ver si el usuario esta baneado
+    public boolean isBanned() {
+        if (bannedUntil == null) return false;
+        return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
+    }
 }

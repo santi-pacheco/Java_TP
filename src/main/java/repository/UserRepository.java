@@ -18,7 +18,7 @@ public class UserRepository {
 
     public List<User> findAll() {
         List<User> Users = new ArrayList<>();
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios ORDER BY id_user";
+        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios ORDER BY id_user";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -35,6 +35,12 @@ public class UserRepository {
                 user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
                 user.setProfileImage(rs.getString("profile_image"));
                 user.setBannedUntil(rs.getTimestamp("banned_until")); 
+                
+                java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                if (ultimaRevTs != null) {
+                    user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                }
+                
                 Users.add(user);
             }
         } catch (SQLException e) {
@@ -46,7 +52,8 @@ public class UserRepository {
 
     public User findOne(int id) {
         User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE id_user = ?";
+
+        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE id_user = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -63,7 +70,12 @@ public class UserRepository {
                     user.setBirthDate(rs.getDate("birthdate"));
                     user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
                     user.setProfileImage(rs.getString("profile_image"));
-                    user.setBannedUntil(rs.getTimestamp("banned_until")); // AGREGADO
+                    user.setBannedUntil(rs.getTimestamp("banned_until"));
+                    
+                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                    if (ultimaRevTs != null) {
+                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -164,7 +176,8 @@ public class UserRepository {
 
     public User findByUsername(String username) {
         User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE username = ?";
+
+        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE username = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -182,6 +195,11 @@ public class UserRepository {
                     user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
                     user.setProfileImage(rs.getString("profile_image"));
                     user.setBannedUntil(rs.getTimestamp("banned_until")); 
+                    
+                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                    if (ultimaRevTs != null) {
+                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -191,81 +209,94 @@ public class UserRepository {
         return user;
     }
     
-	public void updateActiveStatus(int userId, boolean isActive) {
-		String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		     PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			stmt.setBoolean(1, isActive);
-			stmt.setInt(2, userId);
-			stmt.executeUpdate();
-			
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating user active status");
-		}
-	}
+    public void updateActiveStatus(int userId, boolean isActive) {
+        String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setBoolean(1, isActive);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error updating user active status");
+        }
+    }
 
-	public void banUser(int userId, int daysToban) {
-	    String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
-	    
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        
-	        stmt.setInt(1, daysToban);
-	        stmt.setInt(2, userId);
-	        stmt.executeUpdate();
-	        
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error banning user");
-	    }
-	}
+    public void banUser(int userId, int daysToban) {
+        String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, daysToban);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error banning user");
+        }
+    }
 
-	public java.sql.Timestamp getBannedUntil(int userId) {
-	    String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
-	    
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        
-	        stmt.setInt(1, userId);
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                return rs.getTimestamp("banned_until");
-	            }
-	        }
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error checking user ban status");
-	    }
-	    return null;
-	}
+    public java.sql.Timestamp getBannedUntil(int userId) {
+        String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getTimestamp("banned_until");
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error checking user ban status");
+        }
+        return null;
+    }
 
-	public boolean isUserBanned(int userId) {
-	    java.sql.Timestamp bannedUntil = getBannedUntil(userId);
-	    if (bannedUntil == null) return false;
-	    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
-	}
+    public boolean isUserBanned(int userId) {
+        java.sql.Timestamp bannedUntil = getBannedUntil(userId);
+        if (bannedUntil == null) return false;
+        return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
+    }
 
-	public List<User> searchUsersByUsername(String query) {
-	    List<User> users = new ArrayList<>();
-	    String sql = "SELECT id_user, username, profile_image FROM usuarios WHERE username LIKE ? LIMIT 10";
-	    
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, "%" + query + "%");
-	        
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            while (rs.next()) {
-	                User user = new User();
-	                user.setId(rs.getInt("id_user"));
-	                user.setUsername(rs.getString("username"));
-	                user.setProfileImage(rs.getString("profile_image"));
-	                users.add(user);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error buscando usuarios por nombre");
-	    }
-	    return users;
-	}
+    public List<User> searchUsersByUsername(String query) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT id_user, username, profile_image FROM usuarios WHERE username LIKE ? LIMIT 10";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + query + "%");
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id_user"));
+                    user.setUsername(rs.getString("username"));
+                    user.setProfileImage(rs.getString("profile_image"));
+                    users.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error buscando usuarios por nombre");
+        }
+        return users;
+    }
 
+
+    public void updateNotificacionesLeidas(int userId) {
+        String sql = "UPDATE usuarios SET ultima_revision_notificaciones = NOW() WHERE id_user = ?";
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error al actualizar la revisión de notificaciones");
+        }
+    }
 }
