@@ -84,9 +84,58 @@
         .overlay-btn-danger:hover {
             color: #ff6b6b;
         }
+
+        /* --- NUEVOS ESTILOS PARA EL LOADER --- */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(250, 248, 243, 0.9); /* Fondo semi-transparente que combina con tu tema */
+            z-index: 1050; /* Debe estar por encima del modal de Bootstrap */
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(139, 115, 85, 0.3); /* Color secundario */
+            border-radius: 50%;
+            border-top-color: #8B7355; /* Color principal */
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .loading-subtext {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
+
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Subiendo y analizando imagen...</div>
+    <div class="loading-subtext">Nuestra IA está verificando que el contenido sea apropiado.<br>Esto puede tardar unos segundos, por favor no cierres la página.</div>
+</div>
+
 <div class="container profile-container">
 
     <c:if test="${not empty sessionScope.flashMessage}">
@@ -312,7 +361,7 @@
                     <h4 class="modal-title">Cambiar Foto de Perfil</h4>
                 </div>
                 
-                <form action="<%= request.getContextPath() %>/profile-image?accion=subir" method="post" enctype="multipart/form-data">
+                <form id="uploadPhotoForm" action="<%= request.getContextPath() %>/profile-image?accion=subir" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Selecciona una imagen (Máx 10MB)</label>
@@ -321,7 +370,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border:none;">Guardar Foto</button>
+                        <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border:none;" id="btnSubmitUpload">Guardar Foto</button>
                     </div>
                 </form>
             </div>
@@ -332,6 +381,33 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+    // --- SCRIPT PARA MOSTRAR EL LOADER AL SUBIR LA IMAGEN ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadForm = document.getElementById('uploadPhotoForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const btnSubmit = document.getElementById('btnSubmitUpload');
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(event) {
+                // Verificamos que haya un archivo seleccionado antes de bloquear la pantalla
+                const fileInput = uploadForm.querySelector('input[type="file"]');
+                if (fileInput && fileInput.files.length > 0) {
+                    
+                    // 1. Ocultar el modal de Bootstrap (opcional, pero queda más limpio)
+                    $('#uploadPhotoModal').modal('hide');
+
+                    // 2. Mostrar la pantalla de carga
+                    loadingOverlay.style.display = 'flex';
+                    
+                    // 3. Deshabilitar el botón para evitar dobles envíos
+                    btnSubmit.disabled = true;
+                }
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

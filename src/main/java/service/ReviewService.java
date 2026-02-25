@@ -155,11 +155,12 @@ public class ReviewService {
     }
 
     public Review createOrUpdateReview(Review review) {
-        Review existingReview = reviewRepository.findByUserAndMovie(review.getId_user(), review.getId_movie());
+
+        Review existingReview = reviewRepository.findAnyByUserAndMovie(review.getId_user(), review.getId_movie());
         
         if (existingReview != null) {
             review.setId(existingReview.getId());
-            return updateReview(review);
+            return updateReview(review); 
         } else {
             return createReview(review);
         }
@@ -225,17 +226,6 @@ public class ReviewService {
         }
     }
     
-
-    public void applyModerationResult(int reviewId, int userId, ModerationResult result) {
-        if (result.hasOffensiveContent()) {
-            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.REJECTED, result.getReason());
-            userRepository.banUser(userId, BAN_DAYS);
-        } else if (result.hasSpoilers()) {
-            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.SPOILER, result.getReason());
-        } else {
-            reviewRepository.updateModerationStatus(reviewId, ModerationStatus.APPROVED, null);
-        }
-    }
     
     public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
         return reviewRepository.findByMovieSortedByLikes(movieId);

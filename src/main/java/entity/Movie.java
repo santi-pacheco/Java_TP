@@ -2,6 +2,8 @@ package entity;
 
 import jakarta.validation.constraints.*;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Movie {
@@ -13,6 +15,8 @@ public class Movie {
     @Min(value = 1888, message = "El año de estreno debe ser 1888 o posterior")
     @Max(value = 2030, message = "El año de estreno no puede ser tan a futuro")
     private int estrenoYear; //
+    
+    private LocalDate FechaEstreno; 
     
     @NotNull(message = "La duración no puede ser nula")
     private Time duracion;
@@ -181,6 +185,14 @@ public class Movie {
 	}
 	public void setGenerosTemporales(List<Integer> generosTemporales) {
 		this.generosTemporales = generosTemporales;
+	}
+	
+	public LocalDate getFechaEstreno() {
+		return FechaEstreno;
+	}
+	
+	public void setFechaEstreno(LocalDate fechaEstreno) {
+		FechaEstreno = fechaEstreno;
 	}
 	
 	@Override

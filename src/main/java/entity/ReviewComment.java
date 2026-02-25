@@ -12,6 +12,8 @@ public class ReviewComment {
     private String moderationReason;
     private String username;
 
+    private String profileImage;
+
     public ReviewComment() {
         this.moderationStatus = ModerationStatus.PENDING_MODERATION;
     }
@@ -25,7 +27,7 @@ public class ReviewComment {
     public int getIdUsuario() { return idUsuario; }
     public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
     
-    // Alias para compatibilidad con JSON
+
     public int getUserId() { return idUsuario; }
 
     public String getCommentText() { return commentText; }
@@ -42,4 +44,14 @@ public class ReviewComment {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+    
 }

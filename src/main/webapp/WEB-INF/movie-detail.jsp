@@ -69,11 +69,21 @@
         
         .reviews-list { display: flex; flex-direction: column; gap: 20px; }
         .review-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
-        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .review-text { color: #444; line-height: 1.6; margin-bottom: 10px; }
         .review-meta { font-size: 0.9rem; color: #888; display: flex; align-items: center; justify-content: space-between; width: 100%; }
         
-        .user-profile-link { text-decoration: none; color: #333; transition: color 0.2s; }
+        .author-container { display: flex; align-items: center; gap: 12px; }
+        .author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; background-color: #f5f5f5; }
+        .author-details { display: flex; flex-direction: column; }
+        .author-name-row { display: flex; align-items: center; gap: 8px; }
+        
+        .follow-btn { background: transparent; border: 2px solid #8B7355; color: #8B7355; border-radius: 15px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .follow-btn:hover { background: #8B7355; color: white; }
+        .follow-btn.following { background: #8B7355; color: white; border-color: #8B7355; }
+        .follow-btn.following:hover { background: #6b5840; border-color: #6b5840; }
+
+        .user-profile-link { text-decoration: none; color: #333; transition: color 0.2s; font-size: 1rem; }
         .user-profile-link:hover { color: #8B7355; text-decoration: underline; }
 
         .spoiler-checkbox { display: none; }
@@ -83,7 +93,7 @@
         .spoiler-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s; z-index: 10; text-align: center; }
         .spoiler-overlay:hover { background: rgba(255, 255, 255, 1); transform: translate(-50%, -50%) scale(1.05); }
         .spoiler-text { font-weight: 600; color: #333; text-align: center; }
-        .spoiler-badge { background: #ff6b6b; color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; margin-left: 10px; }
+        .spoiler-badge { background: #ff6b6b; color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; margin-left: 5px; vertical-align: middle; }
         
         .star-rating { display: inline-flex; cursor: pointer; gap: 8px; margin: 15px 0; }
         .star-container { position: relative; display: inline-block; width: 60px; height: 60px; }
@@ -120,9 +130,8 @@
         
         .comment-item { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; animation: fadeIn 0.3s ease; position: relative; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
-        .comment-author { font-weight: 700; color: #333; }
-        .comment-date { font-size: 0.8rem; color: #888; margin-left: 10px; }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
+        .comment-author-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
         .comment-text { color: #555; line-height: 1.4; word-wrap: break-word; }
         
         .comment-actions { display: flex; gap: 5px; margin-left: auto; }
@@ -148,9 +157,89 @@
         .toast.error { background: #d32f2f; }
         @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutToast { to { opacity: 0; visibility: hidden; margin-top: -50px; } }
+
+
+        #aiLoadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(250, 248, 243, 0.95);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .spinner-ai {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(139, 115, 85, 0.3);
+            border-radius: 50%;
+            border-top-color: #8B7355;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #resultOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideInToast 0.3s ease;
+        }
+
+        .result-icon { font-size: 4rem; margin-bottom: 15px; }
+        .result-title { color: #333; margin-bottom: 15px; font-weight: 700; font-size: 1.5rem; }
+        .result-message { color: #666; margin-bottom: 25px; line-height: 1.6; font-size: 1.05rem; }
+        .result-btn {
+            background: #8B7355; color: white; border: none; padding: 12px 30px; 
+            border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .result-btn:hover { background: #6b5840; }
     </style>
 </head>
 <body>
+    <div id="aiLoadingOverlay">
+        <div class="spinner-ai"></div>
+        <h3 style="color:#333; margin-top:20px;">Nuestra IA está analizando tu reseña...</h3>
+        <p style="color:#666;">Verificando normas de la comunidad y posibles spoilers.</p>
+    </div>
+
+    <div id="resultOverlay">
+        <div class="result-card">
+            <div id="resultIcon" class="result-icon"></div>
+            <div id="resultTitle" class="result-title"></div>
+            <div id="resultMessage" class="result-message"></div>
+            <button class="result-btn" onclick="window.location.reload()">Entendido</button>
+        </div>
+    </div>
+
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div id="toast-container"></div>
@@ -160,6 +249,9 @@
         @SuppressWarnings("unchecked")
         List<Integer> likedReviewIds = (List<Integer>) request.getAttribute("likedReviewIds");
         if (likedReviewIds == null) likedReviewIds = new ArrayList<>();
+        
+        User loggedUser = (User) session.getAttribute("usuarioLogueado");
+        Integer currentUserId = loggedUser != null ? loggedUser.getId() : null;
         
         if (movie != null) {
     %>
@@ -213,7 +305,7 @@
                 
                 <div style="margin-top: auto; padding-top: auto;">
                     <% 
-                        if (session.getAttribute("usuarioLogueado") != null) {
+                        if (loggedUser != null) {
                             Boolean isInWatchlist = (Boolean) request.getAttribute("isInWatchlist");
                             Boolean canAddToWatchlist = (Boolean) request.getAttribute("canAddToWatchlist");
                             if (isInWatchlist != null && isInWatchlist) {
@@ -235,42 +327,29 @@
         </div>
     </div>
     
-    <% if (session.getAttribute("usuarioLogueado") != null) { %>
+    <% if (loggedUser != null) { %>
         <a href="#review-form" class="btn-write-review">Escribir Reseña</a>
     <% } %>
     
-    <% if (session.getAttribute("usuarioLogueado") != null) {
+    <% if (loggedUser != null) {
         Review userReview = (Review) request.getAttribute("userReview");
     %>
     <div class="section-container" id="review-form">
         <div class="review-form">
             <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
-            <% 
-                String reviewError = (String) session.getAttribute("reviewError");
-                if (reviewError != null) {
-                    session.removeAttribute("reviewError");
-            %>
-                <div style="background:#FFE5E5; color:#D32F2F; padding:12px 20px; border-radius:8px; margin-bottom:15px; font-weight:600; border-left:4px solid #D32F2F;">⚠️ <%= reviewError %></div>
-            <% } %>
-            <form method="post" action="${pageContext.request.contextPath}/reviews">
-                <input type="hidden" name="action" value="create">
-                <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+            
+
+            <form id="ajaxReviewForm">
+                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getId() %>">
                 <% 
-                    Map<String, String[]> reviewData = (Map<String, String[]>) session.getAttribute("reviewData");
                     String savedReviewText = "", savedRating = "0", savedWatchedOn = "";
-                    if (reviewData != null) {
-                        savedReviewText = reviewData.get("reviewText") != null ? reviewData.get("reviewText")[0] : "";
-                        savedRating = reviewData.get("rating") != null ? reviewData.get("rating")[0] : "0";
-                        savedWatchedOn = reviewData.get("watchedOn") != null ? reviewData.get("watchedOn")[0] : "";
-                        session.removeAttribute("reviewData");
-                    }
-                    if (userReview != null && savedReviewText.isEmpty()) {
+                    if (userReview != null) {
                         savedReviewText = userReview.getReview_text();
                         savedRating = String.valueOf(userReview.getRating());
                         savedWatchedOn = userReview.getWatched_on().toString();
                     }
                 %>
-                <textarea name="reviewText" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
+                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Rating:</label>
@@ -284,7 +363,15 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Visto el:</label>
-                        <input type="date" name="watchedOn" value="<%= savedWatchedOn %>" max="<%= java.time.LocalDate.now() %>" required>
+                        <% 
+                            String minDate = "";
+                            if (movie.getFechaEstreno() != null) {
+                                minDate = movie.getFechaEstreno().toString(); 
+                            } else if (movie.getEstrenoYear() > 0) {
+                                minDate = movie.getEstrenoYear() + "-01-01";
+                            }
+                        %>
+                        <input type="date" id="watchedOnInput" name="watchedOn" value="<%= savedWatchedOn %>" min="<%= minDate %>" max="<%= java.time.LocalDate.now() %>" required>
                     </div>
                     <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
                 </div>
@@ -362,25 +449,45 @@
                 Map<Integer, Integer> likesCountMap = (Map<Integer, Integer>) request.getAttribute("likesCountMap");
                 @SuppressWarnings("unchecked")
                 Map<Integer, Boolean> userLikesMap = (Map<Integer, Boolean>) request.getAttribute("userLikesMap");
+                @SuppressWarnings("unchecked")
+                Map<Integer, Boolean> followedUsersMap = (Map<Integer, Boolean>) request.getAttribute("followedUsersMap");
         
                 if (reviews != null && !reviews.isEmpty()) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
+                        boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
+                        
+                        String userAvatarPath = request.getContextPath() + "/utils/default_profile.png"; 
+                        if (review.getProfileImage() != null && !review.getProfileImage().trim().isEmpty()) {
+                            userAvatarPath = "/fatmovies_uploads/" + review.getProfileImage();
+                        }
             %>
             <div class="review-card" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
                 <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>"><% } %>
                 <div class="review-content">
                     <div class="review-header">
-                        <div>
-                            <strong>
-                                <a href="${pageContext.request.contextPath}/profile?id=<%= review.getId_user() %>" class="user-profile-link">
-                                    <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %>
-                                </a>
-                            </strong>
-                            <span style="color: #888; font-size: 0.9rem; margin-left: 8px;"> • Visto el <%= review.getWatched_on().format(formatter) %></span>
-                            <% if (isSpoiler) { %><span class="spoiler-badge">SPOILER</span><% } %>
+                        <div class="author-container">
+                            <img src="<%= userAvatarPath %>" alt="Avatar" class="author-avatar" onerror="this.src='<%= request.getContextPath() %>/utils/default_profile.png'">
+                            <div class="author-details">
+                                <div class="author-name-row">
+                                    <strong>
+                                        <a href="${pageContext.request.contextPath}/profile?id=<%= review.getId_user() %>" class="user-profile-link">
+                                            <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %>
+                                        </a>
+                                    </strong>
+                                    <% if (isSpoiler) { %><span class="spoiler-badge">SPOILER</span><% } %>
+                                    
+                                    <% if (currentUserId != null && currentUserId != review.getId_user()) { %>
+                                        <button class="follow-btn <%= isFollowing ? "following" : "" %>" data-user-id="<%= review.getId_user() %>" onclick="toggleFollow(<%= review.getId_user() %>, this)">
+                                            <%= isFollowing ? "Siguiendo" : "Seguir" %>
+                                        </button>
+                                    <% } %>
+                                </div>
+                                <span style="color: #888; font-size: 0.8rem;">Visto el <%= review.getWatched_on().format(formatter) %></span>
+                            </div>
                         </div>
+
                         <div class="review-stars" style="display: inline-flex; gap: 5px;">
                             <% 
                                 double rating = review.getRating();
@@ -422,7 +529,7 @@
                         </button>
                         <div class="comments-container" id="comments-panel-<%= review.getId() %>">
                             <div class="comment-list" id="comment-list-<%= review.getId() %>"></div>
-                            <% if (session.getAttribute("usuarioLogueado") != null) { %>
+                            <% if (loggedUser != null) { %>
                                 <div class="comment-form">
                                     <input type="text" class="comment-input" id="comment-input-<%= review.getId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500">
                                     <button class="btn-submit-comment" onclick="submitComment(<%= review.getId() %>)">Enviar</button>
@@ -453,7 +560,7 @@
     <% } %>
     
     <script>
-    const currentUserId = <%= session.getAttribute("usuarioLogueado") != null ? ((User)session.getAttribute("usuarioLogueado")).getId() : "null" %>;
+    const currentUserId = <%= currentUserId != null ? currentUserId : "null" %>;
     const contextPath = '${pageContext.request.contextPath}';
 
     function showToast(message, type = 'success') {
@@ -463,6 +570,147 @@
         toast.textContent = message;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 4000);
+    }
+
+
+    const ajaxForm = document.getElementById('ajaxReviewForm');
+    if (ajaxForm) {
+        ajaxForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitamos que la página recargue
+
+            // Mostramos el telón de carga
+            document.getElementById('aiLoadingOverlay').style.display = 'flex';
+
+            // Armamos el JSON con los datos
+            const payload = {
+                id_movie: parseInt(document.getElementById('movieIdInput').value),
+                review_text: document.getElementById('reviewTextInput').value,
+                rating: parseFloat(document.getElementById('ratingInput').value),
+                watched_on: document.getElementById('watchedOnInput').value
+            };
+
+            // Enviamos la petición POST para crear/actualizar la reseña
+            fetch(contextPath + '/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if(res.status === 403) {
+                    // Si ya estaba baneado antes de mandar esto
+                    return res.json().then(data => { throw data; });
+                }
+                return res.json();
+            })
+            .then(data => {
+                // La reseña se guardó como PENDING_MODERATION. Iniciamos el sondeo!
+                if(data.id) {
+                    pollReviewStatus(data.id);
+                }
+            })
+            .catch(err => {
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                if(err.error) {
+                    showModerationResult('🚫', 'Acción Denegada', err.error);
+                } else {
+                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.');
+                }
+            });
+        });
+    }
+
+    function pollReviewStatus(reviewId) {
+        let attempts = 0;
+        
+        // Cada 1.5 segundos le preguntamos al servidor cómo va todo
+        const pollInterval = setInterval(() => {
+            attempts++;
+            
+            fetch(contextPath + '/reviews?id=' + reviewId)
+            .then(res => res.json())
+            .then(review => {
+                // Si el status ya no es pendiente, significa que la IA terminó
+                if (review && review.moderationStatus && review.moderationStatus !== 'PENDING_MODERATION') {
+                    clearInterval(pollInterval);
+                    document.getElementById('aiLoadingOverlay').style.display = 'none';
+                    
+                    if (review.moderationStatus === 'APPROVED') {
+                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.');
+                    } else if (review.moderationStatus === 'SPOILER') {
+                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.');
+                    } else if (review.moderationStatus === 'REJECTED') {
+                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'));
+                    }
+                }
+            })
+            .catch(err => {
+                // Si la consulta falla 
+                clearInterval(pollInterval);
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.');
+            });
+
+            // Si por alguna razón la IA tarda más de 30 segundos, cortamos para no dejarlo trabado
+            if(attempts >= 20) {
+                clearInterval(pollInterval);
+                document.getElementById('aiLoadingOverlay').style.display = 'none';
+                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.');
+            }
+
+        }, 1500); 
+    }
+
+    function showModerationResult(icon, title, message) {
+        document.getElementById('resultIcon').textContent = icon;
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultMessage').innerHTML = message;
+        document.getElementById('resultOverlay').style.display = 'flex';
+    }
+
+
+    function toggleFollow(targetUserId, btnElement) {
+        if (currentUserId === null) {
+            showToast('Debes iniciar sesión para seguir usuarios', 'error');
+            return;
+        }
+
+        const isFollowing = btnElement.classList.contains('following');
+
+        fetch(contextPath + '/follow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'idUsuario=' + targetUserId + '&ajax=true'
+        })
+        .then(async res => {
+            const text = await res.text();
+            try { return JSON.parse(text); } 
+            catch(e) { throw new Error("Respuesta inválida del servidor"); }
+        })
+        .then(data => {
+            if (data && data.success) {
+                if (isFollowing) {
+                    btnElement.classList.remove('following');
+                    btnElement.textContent = 'Seguir';
+                } else {
+                    btnElement.classList.add('following');
+                    btnElement.textContent = 'Siguiendo';
+                }
+                
+                const otherButtons = document.querySelectorAll('.follow-btn[data-user-id="' + targetUserId + '"]');
+                otherButtons.forEach(btn => {
+                    btn.className = btnElement.className;
+                    btn.textContent = btnElement.textContent;
+                });
+
+                showToast(isFollowing ? 'Dejaste de seguir al usuario' : 'Comenzaste a seguir al usuario');
+            } else {
+                showToast('Error: ' + (data ? data.error : 'Desconocido'), 'error');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Error al procesar la acción', 'error');
+        });
     }
 
     function sortReviews(criterion) {
@@ -479,15 +727,13 @@
                 const dateB = parseInt(b.getAttribute('data-timestamp')) || 0;
                 return dateB - dateA;
             } else if (criterion === 'rating_desc') {
-                // AQUI AGREGAMOS LA LOGICA PARA MEJOR CALIFICADAS (De mayor a menor)
                 const ratingA = parseFloat(a.getAttribute('data-rating')) || 0;
                 const ratingB = parseFloat(b.getAttribute('data-rating')) || 0;
                 if (ratingB !== ratingA) return ratingB - ratingA;
                 const dateA = parseInt(a.getAttribute('data-timestamp')) || 0;
                 const dateB = parseInt(b.getAttribute('data-timestamp')) || 0;
-                return dateB - dateA; // En caso de empate, muestra la más nueva primero
+                return dateB - dateA;
             } else if (criterion === 'rating_asc') {
-                // AQUI AGREGAMOS LA LOGICA PARA PEOR CALIFICADAS (De menor a mayor)
                 const ratingA = parseFloat(a.getAttribute('data-rating')) || 0;
                 const ratingB = parseFloat(b.getAttribute('data-rating')) || 0;
                 if (ratingB !== ratingA) return ratingA - ratingB; 
@@ -513,11 +759,9 @@
         const starContainers = document.querySelectorAll('.star-container');
         const ratingInput = document.getElementById('ratingInput');
         const ratingDisplay = document.getElementById('ratingDisplay');
-        
         if (starContainers.length > 0 && ratingInput) {
             const currentValue = parseFloat(ratingInput.value);
             if (currentValue > 0) updateStars(currentValue);
-            
             starContainers.forEach(container => {
                 const index = parseInt(container.getAttribute('data-index'));
                 container.addEventListener('click', e => {
@@ -534,10 +778,7 @@
                     highlightStars(value);
                 });
             });
-            
-            document.getElementById('starRating').addEventListener('mouseleave', () => {
-                updateStars(parseFloat(ratingInput.value));
-            });
+            document.getElementById('starRating').addEventListener('mouseleave', () => { updateStars(parseFloat(ratingInput.value)); });
             
             function highlightStars(value) {
                 starContainers.forEach(container => {
@@ -548,9 +789,7 @@
                     else { full.classList.remove('active'); full.classList.remove('half-hidden'); half.classList.remove('active'); }
                 });
             }
-            
             function updateStars(value) { updateIconType(value); highlightStars(value); }
-            
             function updateIconType(value) {
                 const path = contextPath + (value <= 2 ? '/utils/bad_movie.svg' : value <= 4 ? '/utils/good_movie.svg' : '/utils/great_movie.svg');
                 starContainers.forEach(c => { c.querySelector('.popcorn-full').src = path; c.querySelector('.popcorn-half').src = path; });
@@ -559,16 +798,11 @@
     });
 
     function toggleLike(reviewId, button) {
-        if (currentUserId === null) {
-            showToast('Debes iniciar sesión para dar like', 'error'); return;
-        }
+        if (currentUserId === null) { showToast('Debes iniciar sesión para dar like', 'error'); return; }
         button.classList.add('animating'); setTimeout(() => button.classList.remove('animating'), 300);
         fetch('<%= request.getContextPath() %>/review-likes', {
-            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=like&reviewId=' + reviewId
-        })
-        .then(res => res.json())
-        .then(data => {
+            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'action=like&reviewId=' + reviewId
+        }).then(res => res.json()).then(data => {
             if (data.success) {
                 const countSpan = button.querySelector('.like-count'), labelSpan = button.querySelector('.like-label');
                 countSpan.style.opacity = '0';
@@ -581,12 +815,8 @@
 
     function toggleComments(reviewId) {
         const panel = document.getElementById('comments-panel-' + reviewId);
-        if (panel.style.display === 'block') {
-            panel.style.display = 'none';
-        } else {
-            panel.style.display = 'block';
-            loadComments(reviewId); 
-        }
+        if (panel.style.display === 'block') { panel.style.display = 'none'; } 
+        else { panel.style.display = 'block'; loadComments(reviewId); }
     }
 
     function loadComments(reviewId) {
@@ -597,18 +827,13 @@
             .then(response => response.text())
             .then(text => {
                 let data;
-                try { data = JSON.parse(text); } 
-                catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor.</div>'; return; }
-
+                try { data = JSON.parse(text); } catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor.</div>'; return; }
                 listContainer.innerHTML = ''; 
                 if (data.error) { listContainer.innerHTML = '<div style="color:red; text-align:center;">' + data.error + '</div>'; return; }
-                if (!Array.isArray(data) || data.length === 0) {
-                    listContainer.innerHTML = '<div style="text-align:center; color:#888; padding: 10px;">Sin comentarios.</div>';
-                    return;
-                }
+                if (!Array.isArray(data) || data.length === 0) { listContainer.innerHTML = '<div style="text-align:center; color:#888; padding: 10px;">Sin comentarios.</div>'; return; }
                 
                 data.forEach(comment => {
-                    appendCommentToDOM(reviewId, comment.idComment, comment.idUsuario, comment.username, comment.createdAt, comment.commentText, comment.status);
+                    appendCommentToDOM(reviewId, comment.idComment, comment.idUsuario, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
                 });
             });
     }
@@ -625,9 +850,7 @@
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=create&reviewId=' + reviewId + '&commentText=' + encodeURIComponent(commentText)
-        })
-        .then(res => res.json())
-        .then(data => {
+        }).then(res => res.json()).then(data => {
             inputField.disabled = false; submitBtn.disabled = false; submitBtn.textContent = origText;
             if (data.success) {
                 inputField.value = '';
@@ -635,9 +858,7 @@
                 loadComments(reviewId); 
             } else if (data.bannedUntil) {
                 showToast('Baneado hasta: ' + data.bannedUntil, 'error');
-            } else {
-                showToast('Error: ' + data.error, 'error');
-            }
+            } else { showToast('Error: ' + data.error, 'error'); }
         });
     }
 
@@ -646,13 +867,11 @@
         const currentText = commentItem.getAttribute('data-text'); 
         const safeText = currentText.replace(/"/g, '&quot;');
         const textContainer = commentItem.querySelector('.comment-text-container');
-        
         textContainer.innerHTML = '<input type="text" class="comment-input edit-input" value="' + safeText + '" style="width: 100%; margin-top: 5px;">' +
                             '<div style="margin-top: 5px; text-align: right;">' +
                                 '<button onclick="saveEditComment(' + commentId + ', this)" class="btn-submit-comment" style="padding: 4px 10px; font-size: 0.8rem;">Guardar</button>' +
                                 '<button onclick="cancelEditComment(this)" class="btn-submit-comment" style="background: #999; padding: 4px 10px; font-size: 0.8rem; margin-left: 5px;">Cancelar</button>' +
                             '</div>';
-        
         commentItem.querySelector('.comment-actions').style.display = 'none';
     }
 
@@ -665,17 +884,13 @@
         const commentItem = btnElement.closest('.comment-item');
         const newText = commentItem.querySelector('.edit-input').value.trim();
         const reviewId = btnElement.closest('.comments-container').id.split('-')[2];
-        
         if (!newText) { showToast('Comentario vacío', 'error'); return; }
-
         const btn = btnElement; btn.textContent = '...'; btn.disabled = true;
 
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=edit&commentId=' + commentId + '&commentText=' + encodeURIComponent(newText)
-        })
-        .then(r => r.json())
-        .then(data => {
+        }).then(r => r.json()).then(data => {
             if (data.success) {
                 showToast('Comentario editado');
                 loadComments(reviewId); 
@@ -691,29 +906,23 @@
 
     function deleteComment(commentId, reviewId) {
         if (!confirm("¿Eliminar comentario permanentemente?")) return;
-        
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=delete&commentId=' + commentId
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Eliminado');
-                loadComments(reviewId); 
-            } else {
-                showToast('Error al eliminar', 'error');
-            }
+        }).then(r => r.json()).then(data => {
+            if (data.success) { showToast('Eliminado'); loadComments(reviewId); } 
+            else { showToast('Error al eliminar', 'error'); }
         });
     }
 
-    function appendCommentToDOM(reviewId, commentId, commentUserId, username, date, text, status) {
+    function appendCommentToDOM(reviewId, commentId, commentUserId, username, date, text, status, isFollowing, profilePicture) {
         const list = document.getElementById('comment-list-' + reviewId);
         if (!list) return;
         
         const safeUser = username || 'Usuario';
         const safeDate = date || '';
         const safeText = text ? text.replace(/"/g, '&quot;') : ''; 
+        const safeAvatar = profilePicture ? profilePicture : contextPath + '/utils/default_profile.png';
 
         let actionsHtml = '';
         if (currentUserId !== null && currentUserId === commentUserId) {
@@ -727,7 +936,7 @@
         let contentHtml = '';
 
         if (status === 'SPOILER') {
-            badgeHtml = '<span class="spoiler-badge" style="font-size: 0.6rem; padding: 2px 5px; margin-left: 5px; background: #ff6b6b; color: white; border-radius: 4px;">SPOILER</span>';
+            badgeHtml = '<span class="spoiler-badge">SPOILER</span>';
             contentHtml = '<input type="checkbox" class="comment-spoiler-checkbox" id="spoiler-comment-' + commentId + '">' +
                           '<div class="comment-text comment-spoiler-text">' + text + '</div>' +
                           '<label for="spoiler-comment-' + commentId + '" class="comment-spoiler-overlay">' +
@@ -739,16 +948,29 @@
 
         const userLinkHtml = '<a href="' + contextPath + '/profile?id=' + commentUserId + '" class="user-profile-link">' + safeUser + '</a>';
 
+        let followBtnHtml = '';
+        if (currentUserId !== null && currentUserId !== commentUserId) {
+            const btnClass = isFollowing ? 'following' : '';
+            const btnText = isFollowing ? 'Siguiendo' : 'Seguir';
+            followBtnHtml = '<button class="follow-btn ' + btnClass + '" data-user-id="' + commentUserId + '" onclick="toggleFollow(' + commentUserId + ', this)">' + btnText + '</button>';
+        }
+
         const html = '<div class="comment-item" data-text="' + safeText + '">' +
                         '<div class="comment-header">' +
-                            '<div>' +
-                                '<span class="comment-author">' + userLinkHtml + '</span>' +
-                                badgeHtml +
-                                '<span class="comment-date">' + safeDate + '</span>' +
+                            '<div style="display: flex; align-items: center; gap: 10px;">' +
+                                '<img src="' + safeAvatar + '" class="comment-author-avatar" onerror="this.src=\'' + contextPath + '/utils/default_profile.png\'">' +
+                                '<div>' +
+                                    '<div style="display: flex; align-items: center; gap: 8px;">' +
+                                        '<strong>' + userLinkHtml + '</strong>' +
+                                        badgeHtml +
+                                        followBtnHtml +
+                                    '</div>' +
+                                    '<div class="comment-date" style="margin-left: 0;">' + safeDate + '</div>' +
+                                '</div>' +
                             '</div>' +
                             actionsHtml +
                         '</div>' +
-                        '<div class="comment-text-container" style="position: relative;">' + contentHtml + '</div>' +
+                        '<div class="comment-text-container" style="position: relative; margin-top: 8px;">' + contentHtml + '</div>' +
                       '</div>';
                       
         list.insertAdjacentHTML('beforeend', html);
