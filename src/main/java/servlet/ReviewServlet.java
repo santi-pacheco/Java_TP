@@ -140,7 +140,6 @@ public class ReviewServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().write("{\"success\":false,\"message\":\"Reseña no encontrada\"}");
             }
-            response.getWriter().write(gson.toJson(review));
             
         } else if (userIdParam != null && movieIdParam != null) {
             // GET /reviews?userId=123&movieId=456 - Obtener reseña específica de usuario para película

@@ -123,9 +123,13 @@ public class UserService {
 	}
 	
 	public void toggleFollow(int currentUserId, int targetUserId) {
-        if (currentUserId == targetUserId) {
-            throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
-        }
+		if (currentUserId == targetUserId) {
+	        throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
+	    }
+	    if (blockRepository.isBlocking(currentUserId, targetUserId) || 
+	        blockRepository.isBlocking(targetUserId, currentUserId)) {
+	        throw ErrorFactory.badRequest("No puedes seguir a este usuario debido a un bloqueo mutuo.");
+	    }
         boolean isFollowing = followRepository.isFollowing(currentUserId, targetUserId);
 
         if (isFollowing) {
