@@ -293,7 +293,7 @@ public class ReviewRepository {
 
         public List<FeedReviewDTO> getFriendsFeedPaginated(int idUsuarioLogueado, int offset, int limit) {
             List<FeedReviewDTO> feed = new ArrayList<>();
-            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, " +
+            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.moderation_status, " +
                          "u.id_user, u.username, u.profile_image, " +
                          "p.poster_path, p.name AS movie_title " +
                          "FROM reviews r " +
@@ -301,6 +301,7 @@ public class ReviewRepository {
                          "INNER JOIN usuarios u ON r.id_user = u.id_user " +
                          "INNER JOIN peliculas p ON r.id_movie = p.id_pelicula " +
                          "WHERE s.id_seguidor = ? " +
+                         "AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
                          "ORDER BY r.created_at DESC " +
                          "LIMIT ? OFFSET ?";
                          
@@ -330,6 +331,8 @@ public class ReviewRepository {
                     dto.setRating(rs.getDouble("rating"));
                     dto.setMovieTitle(rs.getString("movie_title"));
                     dto.setText(rs.getString("review_text"));
+                    dto.setModeration_status(rs.getString("moderation_status"));
+                    dto.setFollowing(true);
                     
                     feed.add(dto);
                 }
@@ -357,13 +360,14 @@ public class ReviewRepository {
         public List<FeedReviewDTO> getPopularFeedPaginated(int idUsuarioLogueado, int offset, int limit) {
             List<FeedReviewDTO> feed = new ArrayList<>();
 
-            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.likes_count, " +
+            String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.likes_count, r.moderation_status, " +
                          "u.id_user, u.username, u.profile_image, p.poster_path, p.name AS movie_title " +
                          "FROM reviews r " +
                          "INNER JOIN usuarios u ON r.id_user = u.id_user " +
                          "INNER JOIN peliculas p ON r.id_movie = p.id_pelicula " +
                          "WHERE r.id_user != ? " + 
-                         "AND r.id_user NOT IN (SELECT id_seguido FROM seguidores WHERE id_seguidor = ?) " + // Que no sean mis amigos
+                         "AND r.id_user NOT IN (SELECT id_seguido FROM seguidores WHERE id_seguidor = ?) " +
+                         "AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
                          "ORDER BY r.likes_count DESC, r.created_at DESC " +
                          "LIMIT ? OFFSET ?";
                          
@@ -390,6 +394,8 @@ public class ReviewRepository {
                     dto.setRating(rs.getDouble("rating"));
                     dto.setMovieTitle(rs.getString("movie_title"));
                     dto.setText(rs.getString("review_text"));
+                    dto.setModeration_status(rs.getString("moderation_status"));
+                    dto.setFollowing(false);
                     feed.add(dto);
                 }
             } catch (SQLException e) {

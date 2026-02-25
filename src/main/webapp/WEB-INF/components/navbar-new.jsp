@@ -159,7 +159,7 @@
             if (usuarioLogueado != null) {
                 entity.User user = (entity.User) usuarioLogueado;
                 
-                String navAvatar = request.getContextPath() + "/utils/no-user.png";
+                String navAvatar = request.getContextPath() + "/utils/default_profile.png";
                 if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
                     navAvatar = request.getContextPath() + "/uploads/" + user.getProfileImage();
                 }

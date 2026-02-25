@@ -69,4 +69,16 @@ public class UserController {
 		return userService.searchUsers(query);
 	}
     
+    public String generatePasswordResetToken(String email) {
+        return userService.generatePasswordResetToken(email);
+    }
+    
+    public boolean validateResetToken(String token) {
+        return userService.validateResetToken(token);
+    }
+    
+    public void resetPasswordWithToken(String token, String newPassword) {
+        userService.resetPasswordWithToken(token, newPassword);
+    }
+    
 }

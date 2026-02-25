@@ -1,5 +1,6 @@
 package service;
 import java.util.List;
+import java.util.UUID;
 
 import entity.User;
 import repository.FollowRepository;
@@ -172,5 +173,32 @@ public class UserService {
     public List<User> searchUsers(String query) {
 		return userRepository.searchUsersByUsername(query);
 	}
+
+    public String generatePasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email);
+        System.out.println("Usuario encontrado para email " + email + ": " + (user != null ? user.getUsername() : "null"));
+        if (user == null) {
+            return null; 
+        }
+        String token = UUID.randomUUID().toString();
+        userRepository.savePasswordResetToken(user.getId(), token);
+        return token;
+    }
+    
+    public boolean validateResetToken(String token) {
+        if (token == null || token.isEmpty()) return false;
+        return userRepository.getUserIdByValidToken(token) != null;
+    }
+    
+    public void resetPasswordWithToken(String token, String newPassword) {
+        Integer userId = userRepository.getUserIdByValidToken(token);
+        
+        if (userId == null) {
+            throw ErrorFactory.badRequest("El enlace de recuperación es inválido o ha expirado.");
+        }
+        
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        userRepository.updatePasswordAndClearToken(userId, hashedPassword, token);
+    }
 	
 }

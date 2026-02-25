@@ -26,6 +26,8 @@ public class AuthenticationFilter implements Filter {
         boolean isLoginServlet = requestURI.endsWith("/login");
         boolean isRegisterServlet = requestURI.endsWith("/register");
         boolean isLandingServlet = requestURI.endsWith("/landing");
+        boolean isForgotPasswordServlet = requestURI.endsWith("/forgot-password");
+        boolean isResetPasswordServlet = requestURI.endsWith("/reset-password");
         boolean isPublicResource = requestURI.startsWith(httpRequest.getContextPath() + "/css/") ||
                                    requestURI.startsWith(httpRequest.getContextPath() + "/js/") ||
                                    requestURI.startsWith(httpRequest.getContextPath() + "/images/") ||
@@ -51,7 +53,7 @@ public class AuthenticationFilter implements Filter {
                               requestURI.contains("/configuracion-reglas") ||
                               requestURI.contains("/admin/data-load");;
         
-        if (isLoginServlet || isRegisterServlet || isLandingServlet || isPublicResource) {
+        if (isLoginServlet || isRegisterServlet || isLandingServlet || isForgotPasswordServlet || isResetPasswordServlet || isPublicResource) {
             chain.doFilter(request, response);
         } else if (isAdminRoute) {
             if (isAdmin) {

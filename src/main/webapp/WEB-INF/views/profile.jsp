@@ -147,9 +147,9 @@
         <c:remove var="flashType" scope="session"/>
     </c:if>
 
-    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin-bottom: 20px; background-color: #8B7355; border-color: #8B7355;">
+    <button onclick="volverInteligente()" class="btn btn-primary" style="margin-bottom: 20px; background-color: #8B7355; border-color: #8B7355; outline: none;">
         <i class="glyphicon glyphicon-arrow-left"></i> Volver
-    </a>
+    </button>
     
     <div class="profile-header">  
         <div class="profile-avatar-container">
@@ -158,7 +158,7 @@
                 String pImage = uProfile.getProfileImage();
                 String displayImg = (pImage != null && !pImage.isEmpty()) 
                         ? request.getContextPath() + "/uploads/" + pImage 
-                        : request.getContextPath() + "/utils/no-user.png";
+                        : request.getContextPath() + "/utils/default_profile.png";
                 
                 boolean hasPhoto = (pImage != null && !pImage.isEmpty());
             %>
@@ -383,7 +383,6 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <script>
-    // --- SCRIPT PARA MOSTRAR EL LOADER AL SUBIR LA IMAGEN ---
     document.addEventListener('DOMContentLoaded', function() {
         const uploadForm = document.getElementById('uploadPhotoForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
@@ -391,22 +390,36 @@
 
         if (uploadForm) {
             uploadForm.addEventListener('submit', function(event) {
-                // Verificamos que haya un archivo seleccionado antes de bloquear la pantalla
                 const fileInput = uploadForm.querySelector('input[type="file"]');
                 if (fileInput && fileInput.files.length > 0) {
-                    
-                    // 1. Ocultar el modal de Bootstrap (opcional, pero queda más limpio)
                     $('#uploadPhotoModal').modal('hide');
-
-                    // 2. Mostrar la pantalla de carga
                     loadingOverlay.style.display = 'flex';
-                    
-                    // 3. Deshabilitar el botón para evitar dobles envíos
                     btnSubmit.disabled = true;
                 }
             });
         }
     });
+    
+ // --- LÓGICA DEL BOTÓN VOLVER INTELIGENTE ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Miramos de dónde viene el usuario
+        let retrovisor = document.referrer;
+        
+        // Si hay una ruta previa, y NO contiene las palabras 'profile' ni 'profile-image'...
+        if (retrovisor && !retrovisor.includes('/profile') && !retrovisor.includes('/profile-image')) {
+            // Guardamos la ruta original (ej: /community) en la memoria de la pestaña
+            sessionStorage.setItem('rutaOriginal', retrovisor);
+        }
+    });
+
+    function volverInteligente() {
+        let rutaGuardada = sessionStorage.getItem('rutaOriginal');
+        if (rutaGuardada) {
+            window.location.href = rutaGuardada;
+        } else {
+            window.location.href = '<%= request.getContextPath() %>/home';
+        }
+    }
 </script>
 
 </body>

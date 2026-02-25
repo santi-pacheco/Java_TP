@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebListener;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import service.EmailService;
 import service.ReviewModerationService;
 import util.DataSourceProvider;
 
@@ -33,8 +34,15 @@ public class AppServletContextListener implements ServletContextListener {
         } catch (Exception e) {
             System.err.println("!!! Error fatal al inicializar el Validator: " + e.getMessage());
         }
-
-        // Inicializar el servicio de moderación (solo para crear el ExecutorService)
+        try {
+            System.out.println("Inicializando servicio de correos (EmailService)...");
+            EmailService emailService = new EmailService();
+            sce.getServletContext().setAttribute("emailService", emailService);
+            System.out.println("EmailService listo y guardado en el contexto.");
+        } catch (Exception e) {
+            System.err.println("!!! Error al inicializar EmailService: " + e.getMessage());
+        }
+        
         System.out.println("Inicializando servicio de moderación...");
         moderationService = ReviewModerationService.getInstance();
         System.out.println("Servicio de moderación listo (sin tareas programadas).");
@@ -50,7 +58,6 @@ public class AppServletContextListener implements ServletContextListener {
             System.out.println("ValidatorFactory cerrado.");
         }
 
-        // Cerrar el servicio de moderación
         if (moderationService != null) {
             System.out.println("Cerrando servicio de moderación...");
             ReviewModerationService.getInstance().shutdown();
