@@ -184,25 +184,37 @@
         <h1><i class="glyphicon glyphicon-user"></i> ${user.username}</h1>
         <p style="color: #666; margin: 0;">${user.email}</p>
 
-        <c:if test="${!isMyProfile}">
-            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <form action="<%= request.getContextPath() %>/follow" method="POST">
-                    <input type="hidden" name="idUsuario" value="${user.id}">
-                    <c:choose>
-                        <c:when test="${isFollowing}">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="glyphicon glyphicon-remove-circle"></i> Dejar de Seguir
-                            </button>
-                        </c:when>
-                        <c:otherwise>
-                            <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border-color: #8B7355;">
-                                <i class="glyphicon glyphicon-heart"></i> Seguir
-                            </button>
-                        </c:otherwise>
-                    </c:choose>
-                </form>
-            </div>
-        </c:if>
+        <c:choose>
+            <c:when test="${!isMyProfile}">
+                <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                    <form action="<%= request.getContextPath() %>/follow" method="POST" style="margin: 0;">
+                        <input type="hidden" name="idUsuario" value="${user.id}">
+                        <c:choose>
+                            <c:when test="${isFollowing}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="glyphicon glyphicon-remove-circle"></i> Dejar de Seguir
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border-color: #8B7355;">
+                                    <i class="glyphicon glyphicon-heart"></i> Seguir
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+                    </form>
+                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.id}, true)" style="color: #d9534f; border-color: #d4cfc7;">
+                        <i class="glyphicon glyphicon-ban-circle"></i> Bloquear
+                    </button>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div style="margin-top: 15px;">
+                    <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#blockedUsersModal" style="color: #666;">
+                        <i class="glyphicon glyphicon-ban-circle"></i> Usuarios Bloqueados
+                    </button>
+                </div>
+            </c:otherwise>
+        </c:choose>
     </div>
     
     <div class="stats-box">
@@ -214,12 +226,12 @@
             </div>
             
             <div class="col-xs-4 stat-item" style="cursor: pointer;" data-toggle="modal" data-target="#followersModal">
-                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${fn:length(followers)}</span>
+                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${realFollowersCount}</span>
                 <span style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Seguidores</span>
             </div>
             
             <div class="col-xs-4 stat-item" style="cursor: pointer;" data-toggle="modal" data-target="#followingModal">
-                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${fn:length(following)}</span>
+                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${realFollowingCount}</span>
                 <span style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Seguidos</span>
             </div>
         </div>
@@ -328,24 +340,23 @@
         </div>
     </div>
 
-    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog">
+    <div class="modal fade" id="blockedUsersModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Siguiendo</h4>
+                    <h4 class="modal-title">Usuarios Bloqueados</h4>
                 </div>
                 <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
                     <ul class="list-group">
-                        <c:forEach var="f" items="${following}">
-                            <li class="list-group-item">
-                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
-                                    <i class="glyphicon glyphicon-user"></i> ${f.username}
-                                </a>
+                        <c:forEach var="b" items="${blockedUsers}">
+                            <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="glyphicon glyphicon-user" style="color: #999;"></i> ${b.username}</span>
+                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.id}, false)">Desbloquear</button>
                             </li>
                         </c:forEach>
-                        <c:if test="${empty following}">
-                            <p class="text-center text-muted" style="padding: 10px;">No sigue a nadie aún.</p>
+                        <c:if test="${empty blockedUsers}">
+                            <p class="text-center text-muted" style="padding: 10px; margin:0;">No tienes usuarios bloqueados.</p>
                         </c:if>
                     </ul>
                 </div>
@@ -373,6 +384,31 @@
                         <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border:none;" id="btnSubmitUpload">Guardar Foto</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Siguiendo</h4>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group">
+                        <c:forEach var="f" items="${following}">
+                            <li class="list-group-item">
+                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
+                                    <i class="glyphicon glyphicon-user"></i> ${f.username}
+                                </a>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${empty following}">
+                            <p class="text-center text-muted" style="padding: 10px;">Aún no sigue a nadie.</p>
+                        </c:if>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -418,6 +454,30 @@
             window.location.href = rutaGuardada;
         } else {
             window.location.href = '<%= request.getContextPath() %>/home';
+        }
+    }
+    
+    function toggleBlock(targetId, isBlockingAction) {
+        let mensaje = isBlockingAction ? '¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus reseñas y él no podrá ver tu perfil.' : '¿Deseas desbloquear a este usuario?';
+        
+        if (confirm(mensaje)) {
+            $.ajax({
+                url: '<%= request.getContextPath() %>/block',
+                type: 'POST',
+                data: { targetId: targetId },
+                success: function(response) {
+                    if(response.success) {
+                        if (isBlockingAction) {
+                            window.location.href = '<%= request.getContextPath() %>/home';
+                        } else {
+                            location.reload();
+                        }
+                    }
+                },
+                error: function() {
+                    alert('Hubo un error al procesar la solicitud.');
+                }
+            });
         }
     }
 </script>

@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 
 import controller.ReviewController;
+import controller.UserController;
 import entity.Review;
 import entity.User;
 import repository.ReviewRepository;
@@ -48,6 +50,7 @@ public class ReviewServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private ReviewController reviewController;
+    private UserController userController;
     private Validator validator;
     private Gson gson;
 
@@ -64,7 +67,8 @@ public class ReviewServlet extends HttpServlet {
         // Inicializar servicios
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         MovieService movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
@@ -72,6 +76,7 @@ public class ReviewServlet extends HttpServlet {
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
         
         // Inicializar controller
+        this.userController = new UserController(userService);
         this.reviewController = new ReviewController(reviewService);
         
         // Inicializar validador
@@ -111,6 +116,10 @@ public class ReviewServlet extends HttpServlet {
         
         response.setContentType("application/json;charset=UTF-8");
         
+        HttpSession session = request.getSession(false);
+        User usuarioLogueado = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
+        int idLector = (usuarioLogueado != null) ? usuarioLogueado.getId() : -1;
+        
         String idParam = request.getParameter("id");
         String userIdParam = request.getParameter("userId");
         String movieIdParam = request.getParameter("movieId");
@@ -119,6 +128,18 @@ public class ReviewServlet extends HttpServlet {
             // GET /reviews?id=123 - Obtener reseña por ID
             int id = Integer.parseInt(idParam);
             Review review = reviewController.getReviewById(id);
+            if (review != null && idLector != -1 && idLector != review.getId_user()) {
+                int idAutor = review.getId_user();
+                if (userController.isBlocking(idLector, idAutor) || userController.isBlocking(idAutor, idLector)) {
+                    review = null;
+                }
+            }
+            if (review != null) {
+                response.getWriter().write(gson.toJson(review));
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write("{\"success\":false,\"message\":\"Reseña no encontrada\"}");
+            }
             response.getWriter().write(gson.toJson(review));
             
         } else if (userIdParam != null && movieIdParam != null) {
@@ -127,6 +148,12 @@ public class ReviewServlet extends HttpServlet {
             int movieId = Integer.parseInt(movieIdParam);
             Review review = reviewController.getReviewByUserAndMovie(userId, movieId);
             
+            if (review != null && idLector != -1 && idLector != review.getId_user()) {
+                int idAutor = review.getId_user();
+                if (userController.isBlocking(idLector, idAutor) || userController.isBlocking(idAutor, idLector)) {
+                    review = null;
+                }
+            }
             if (review != null) {
                 response.getWriter().write(gson.toJson(review));
             } else {
@@ -137,7 +164,7 @@ public class ReviewServlet extends HttpServlet {
         } else if (movieIdParam != null) {
             // GET /reviews?movieId=456 - Obtener todas las reseñas de una película
             int movieId = Integer.parseInt(movieIdParam);
-            List<Review> reviews = reviewController.getReviewsByMovie(movieId);
+            List<Review> reviews = reviewController.getReviewsByMovie(movieId, idLector);
             response.getWriter().write(gson.toJson(reviews));
             
         } else {

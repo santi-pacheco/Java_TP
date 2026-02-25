@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import entity.User;
 import jakarta.servlet.ServletException;
@@ -26,8 +27,8 @@ public class FollowServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         FollowRepository followRepository = new FollowRepository();
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        
-        UserService userService = new UserService(userRepository, encoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
     }
 

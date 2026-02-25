@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.File;
+import repository.BlockRepository;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.ParseException;
@@ -43,7 +44,8 @@ public class UserServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
         
         ServletContext context = getServletContext();

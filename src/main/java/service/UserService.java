@@ -1,5 +1,6 @@
 package service;
 import java.util.List;
+import repository.BlockRepository;
 import java.util.UUID;
 
 import entity.User;
@@ -14,11 +15,13 @@ public class UserService {
 	private UserRepository userRepository;
 	private BCryptPasswordEncoder passwordEncoder;
 	private FollowRepository followRepository;
+	private BlockRepository blockRepository;
 	
-	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository) {
+	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository, BlockRepository blockRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.followRepository = followRepository;
+		this.blockRepository = blockRepository;
 	}
 
 	public List<User> getAllUsers() {
@@ -170,8 +173,8 @@ public class UserService {
         }
     }
     
-    public List<User> searchUsers(String query) {
-		return userRepository.searchUsersByUsername(query);
+    public List<User> searchUsers(String query, int loggedUserId) {
+		return userRepository.searchUsersByUsername(query, loggedUserId);
 	}
 
     public String generatePasswordResetToken(String email) {
@@ -200,5 +203,32 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(newPassword);
         userRepository.updatePasswordAndClearToken(userId, hashedPassword, token);
     }
+    
+    public void toggleBlock(int blockerId, int blockedId) {
+        if (blockerId == blockedId) {
+            throw ErrorFactory.badRequest("No puedes bloquearte a ti mismo.");
+        }
+        
+        boolean isBlocked = blockRepository.isBlocking(blockerId, blockedId);
+        if (isBlocked) {
+            blockRepository.removeBlock(blockerId, blockedId);
+        } else {
+            blockRepository.addBlock(blockerId, blockedId);
+            if (followRepository.isFollowing(blockerId, blockedId)) {
+                followRepository.removeFollow(blockerId, blockedId);
+            }
+            if (followRepository.isFollowing(blockedId, blockerId)) {
+                followRepository.removeFollow(blockedId, blockerId);
+            }
+        }
+    }
+	
+	public boolean isBlocking(int blockerId, int blockedId) {
+        return blockRepository.isBlocking(blockerId, blockedId);
+    }
+	
+	public List<User> getBlockedUsers(int blockerId) {
+	    return blockRepository.getBlockedUsers(blockerId);
+	}
 	
 }

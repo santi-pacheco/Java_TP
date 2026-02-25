@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +38,8 @@ public class UserReviewsServlet extends HttpServlet {
         MovieRepository movieRepository = new MovieRepository();
         ConfiguracionReglasRepository configuracionRepository = new ConfiguracionReglasRepository();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository, blockRepository);
         movieService = new MovieService(movieRepository);
         ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);

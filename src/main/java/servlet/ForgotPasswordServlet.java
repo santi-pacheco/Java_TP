@@ -17,6 +17,7 @@ import repository.FollowRepository;
 import repository.UserRepository;
 import service.EmailService;
 import service.UserService;
+import repository.BlockRepository;
 
 @WebServlet("/forgot-password")
 public class ForgotPasswordServlet extends HttpServlet {
@@ -30,7 +31,8 @@ public class ForgotPasswordServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         FollowRepository followRepository = new FollowRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
 
         this.emailService = (EmailService) getServletContext().getAttribute("emailService");

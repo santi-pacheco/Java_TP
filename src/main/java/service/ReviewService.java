@@ -138,8 +138,8 @@ public class ReviewService {
         validateUserActiveStatusOnDelete(existingReview.getId_user());
     }
 
-    public List<Review> getReviewsByMovie(int movieId) {
-        return reviewRepository.findByMovie(movieId);
+    public List<Review> getReviewsByMovie(int movieId, int idLector) {
+        return reviewRepository.findByMovie(movieId, idLector);
     }
 
     public List<Review> getAllReviews() {
@@ -227,8 +227,8 @@ public class ReviewService {
     }
     
     
-    public List<Review> getReviewsByMovieSortedByLikes(int movieId) {
-        return reviewRepository.findByMovieSortedByLikes(movieId);
+    public List<Review> getReviewsByMovieSortedByLikes(int movieId, int idLector) {
+        return reviewRepository.findByMovieSortedByLikes(movieId, idLector);
     }
     
     public List<FeedReviewDTO> getGlobalFeedPaginated(int userId, int offset, int limit) {

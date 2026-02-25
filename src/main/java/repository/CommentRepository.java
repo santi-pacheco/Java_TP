@@ -50,13 +50,19 @@ public class CommentRepository {
         return null;
     }
 
-    public List<ReviewComment> findByReviewId(int reviewId) {
+    public List<ReviewComment> findByReviewId(int reviewId, int loggedUserId) {
         List<ReviewComment> comments = new ArrayList<>();
-        // MODIFICADO: Se agregó u.profile_image al SELECT
-        String sql = "SELECT c.*, u.username, u.profile_image FROM reviews_comments c INNER JOIN usuarios u ON c.id_usuario = u.id_user WHERE c.id_review = ? AND c.moderation_status IN ('APPROVED', 'SPOILER') ORDER BY c.created_at ASC"; 
+        String sql = "SELECT c.*, u.username, u.profile_image FROM reviews_comments c " +
+                     "INNER JOIN usuarios u ON c.id_usuario = u.id_user " +
+                     "WHERE c.id_review = ? AND c.moderation_status IN ('APPROVED', 'SPOILER') " +
+                     "AND c.id_usuario NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
+                     "AND c.id_usuario NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
+                     "ORDER BY c.created_at ASC"; 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, reviewId);
+            stmt.setInt(2, loggedUserId);
+            stmt.setInt(3, loggedUserId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) comments.add(mapResultSetToComment(rs));
             }

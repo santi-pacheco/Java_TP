@@ -106,8 +106,8 @@ public class CommentService {
         }
     }
 
-    public List<ReviewComment> getCommentsByReview(int reviewId) {
-        return commentRepository.findByReviewId(reviewId);
+    public List<ReviewComment> getCommentsByReview(int reviewId, int loggedUserId) {
+        return commentRepository.findByReviewId(reviewId, loggedUserId);
     }
 
     private void checkUserBanStatus(int userId) {
