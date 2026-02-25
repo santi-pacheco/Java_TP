@@ -161,7 +161,7 @@
             users.forEach(user => {
                 let safeImage = escapeHTML(user.profileImage);
                 let safeUsername = escapeHTML(user.username);
-                let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/${safeImage}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+                let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/\${safeImage}` : `${pageContext.request.contextPath}/utils/no-user.png`;
                 
                 html += `<a href="${pageContext.request.contextPath}/profile?id=\${user.id}" class="user-result-item">
                             <img src="\${avatarUrl}" class="result-avatar" alt="\${safeUsername}">
@@ -235,8 +235,8 @@
         let safeMovieTitle = escapeHTML(review.movieTitle);
         let safeText = escapeHTML(review.text);
         
-        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/no-user.png`;
-        let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
+        let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/no-user.png`;
+        let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500\${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
         
         return `
         <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
