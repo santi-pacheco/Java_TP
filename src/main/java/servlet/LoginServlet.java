@@ -1,6 +1,7 @@
 package servlet;
 
 import jakarta.servlet.ServletException;
+import repository.BlockRepository;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,8 @@ public class LoginServlet extends HttpServlet {
 	 UserRepository userRepository = new UserRepository();
 	 FollowRepository followRepository = new FollowRepository();
      BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-     UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+     BlockRepository blockRepository = new BlockRepository();
+     UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
      this.userController = new UserController(userService);
  }
 

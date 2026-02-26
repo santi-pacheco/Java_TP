@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -35,20 +36,18 @@ public class CommentServlet extends HttpServlet {
             if (reviewIdParam == null) {
                 sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "reviewId is required"); return;
             }
-
+            
             int reviewId = Integer.parseInt(reviewIdParam);
+            HttpSession session = req.getSession(false);
+            User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
+            int loggedUserId = (loggedUser != null) ? loggedUser.getId() : -1;
             CommentService commentService = new CommentService();
-            List<ReviewComment> comments = commentService.getCommentsByReview(reviewId);
+            List<ReviewComment> comments = commentService.getCommentsByReview(reviewId, loggedUserId);
 
             StringBuilder json = new StringBuilder("[");
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            
-           
-            HttpSession session = req.getSession(false);
-            User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
-            
-          
-            UserService userService = new UserService(new UserRepository(), new BCryptPasswordEncoder(), new FollowRepository());
+
+            UserService userService = new UserService(new UserRepository(), new BCryptPasswordEncoder(), new FollowRepository(), new BlockRepository());
             
             for (int i = 0; i < comments.size(); i++) {
                 ReviewComment c = comments.get(i);

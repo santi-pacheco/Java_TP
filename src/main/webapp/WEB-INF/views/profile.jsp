@@ -55,8 +55,7 @@
         /* --- AVATAR NIVEL 3/4: LA HAMBURGUESA INFALIBLE (SIN EMOJI) --- */
         .burger-avatar-border {
             border-radius: 50% !important;
-            padding: 8px; /* Un poco más de padding porque esta foto es más grande */
-            /* Degradados que forman pan, lechuga, carne y pan */
+            padding: 8px;
             background: linear-gradient(180deg, 
                 #F5B041 0%, #F5B041 30%,   
                 #58D68D 30%, #58D68D 40%,   
@@ -73,7 +72,7 @@
 
         .burger-avatar-border .profile-avatar {
             border-radius: 50% !important;
-            border: 4px solid #FFF !important; /* Borde más grueso para separar de la hamburguesa */
+            border: 4px solid #FFF !important; 
             position: relative;
             z-index: 2;
         }
@@ -182,9 +181,9 @@
         <c:remove var="flashType" scope="session"/>
     </c:if>
 
-    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin-bottom: 20px; background-color: #8B7355; border-color: #8B7355;">
+    <button onclick="volverInteligente()" class="btn btn-primary" style="margin-bottom: 20px; background-color: #8B7355; border-color: #8B7355; outline: none;">
         <i class="glyphicon glyphicon-arrow-left"></i> Volver
-    </a>
+    </button>
     
     <div class="profile-header">  
         <div class="profile-avatar-container ${userLevel >= 3 ? 'burger-avatar-border' : ''}">
@@ -193,7 +192,7 @@
                 String pImage = uProfile.getProfileImage();
                 String displayImg = (pImage != null && !pImage.isEmpty()) 
                         ? request.getContextPath() + "/uploads/" + pImage 
-                        : request.getContextPath() + "/utils/no-user.png";
+                        : request.getContextPath() + "/utils/default_profile.png";
                 
                 boolean hasPhoto = (pImage != null && !pImage.isEmpty());
             %>
@@ -219,25 +218,37 @@
         <h1><i class="glyphicon glyphicon-user"></i> ${user.username}</h1>
         <p style="color: #666; margin: 0;">${user.email}</p>
 
-        <c:if test="${!isMyProfile}">
-            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <form action="<%= request.getContextPath() %>/follow" method="POST">
-                    <input type="hidden" name="idUsuario" value="${user.id}">
-                    <c:choose>
-                        <c:when test="${isFollowing}">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="glyphicon glyphicon-remove-circle"></i> Dejar de Seguir
-                            </button>
-                        </c:when>
-                        <c:otherwise>
-                            <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border-color: #8B7355;">
-                                <i class="glyphicon glyphicon-heart"></i> Seguir
-                            </button>
-                        </c:otherwise>
-                    </c:choose>
-                </form>
-            </div>
-        </c:if>
+        <c:choose>
+            <c:when test="${!isMyProfile}">
+                <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                    <form action="<%= request.getContextPath() %>/follow" method="POST" style="margin: 0;">
+                        <input type="hidden" name="idUsuario" value="${user.id}">
+                        <c:choose>
+                            <c:when test="${isFollowing}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="glyphicon glyphicon-remove-circle"></i> Dejar de Seguir
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button type="submit" class="btn btn-primary" style="background-color: #8B7355; border-color: #8B7355;">
+                                    <i class="glyphicon glyphicon-heart"></i> Seguir
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+                    </form>
+                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.id}, true)" style="color: #d9534f; border-color: #d4cfc7;">
+                        <i class="glyphicon glyphicon-ban-circle"></i> Bloquear
+                    </button>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div style="margin-top: 15px;">
+                    <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#blockedUsersModal" style="color: #666;">
+                        <i class="glyphicon glyphicon-ban-circle"></i> Usuarios Bloqueados
+                    </button>
+                </div>
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <div class="stats-box" style="text-align: center; position: relative;">
@@ -310,12 +321,12 @@
             </div>
             
             <div class="col-xs-4 stat-item" style="cursor: pointer;" data-toggle="modal" data-target="#followersModal">
-                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${fn:length(followers)}</span>
+                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${realFollowersCount}</span>
                 <span style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Seguidores</span>
             </div>
             
             <div class="col-xs-4 stat-item" style="cursor: pointer;" data-toggle="modal" data-target="#followingModal">
-                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${fn:length(following)}</span>
+                <span style="font-size: 24px; font-weight: bold; display: block; color: #8B7355;">${realFollowingCount}</span>
                 <span style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Seguidos</span>
             </div>
         </div>
@@ -423,6 +434,30 @@
             </div>
         </div>
     </div>
+    
+    <div class="modal fade" id="blockedUsersModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Usuarios Bloqueados</h4>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group">
+                        <c:forEach var="b" items="${blockedUsers}">
+                            <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="glyphicon glyphicon-user" style="color: #999;"></i> ${b.username}</span>
+                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.id}, false)">Desbloquear</button>
+                            </li>
+                        </c:forEach>
+                        <c:if test="${empty blockedUsers}">
+                            <p class="text-center text-muted" style="padding: 10px; margin:0;">No tienes usuarios bloqueados.</p>
+                        </c:if>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="followingModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
@@ -441,7 +476,7 @@
                             </li>
                         </c:forEach>
                         <c:if test="${empty following}">
-                            <p class="text-center text-muted" style="padding: 10px;">No sigue a nadie aún.</p>
+                            <p class="text-center text-muted" style="padding: 10px;">Aún no sigue a nadie.</p>
                         </c:if>
                     </ul>
                 </div>
@@ -564,6 +599,48 @@
     function selectPlatoPrincipal(id) {
         document.getElementById('platoMovieId').value = id;
         document.getElementById('setPlatoForm').submit();
+    }
+    
+    // --- LÓGICA DEL BOTÓN VOLVER INTELIGENTE ---
+    document.addEventListener('DOMContentLoaded', function() {
+        let retrovisor = document.referrer;
+        if (retrovisor && !retrovisor.includes('/profile') && !retrovisor.includes('/profile-image')) {
+            sessionStorage.setItem('rutaOriginal', retrovisor);
+        }
+    });
+
+    function volverInteligente() {
+        let rutaGuardada = sessionStorage.getItem('rutaOriginal');
+        if (rutaGuardada) {
+            window.location.href = rutaGuardada;
+        } else {
+            window.location.href = '<%= request.getContextPath() %>/home';
+        }
+    }
+    
+    // --- LÓGICA DE BLOQUEAR USUARIO ---
+    function toggleBlock(targetId, isBlockingAction) {
+        let mensaje = isBlockingAction ? '¿Estás seguro de que deseas bloquear a este usuario? Dejarás de ver sus reseñas y él no podrá ver tu perfil.' : '¿Deseas desbloquear a este usuario?';
+        
+        if (confirm(mensaje)) {
+            $.ajax({
+                url: '<%= request.getContextPath() %>/block',
+                type: 'POST',
+                data: { targetId: targetId },
+                success: function(response) {
+                    if(response.success) {
+                        if (isBlockingAction) {
+                            window.location.href = '<%= request.getContextPath() %>/home';
+                        } else {
+                            location.reload();
+                        }
+                    }
+                },
+                error: function() {
+                    alert('Hubo un error al procesar la solicitud.');
+                }
+            });
+        }
     }
 </script>
 

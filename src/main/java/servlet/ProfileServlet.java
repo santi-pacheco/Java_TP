@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,8 @@ public class ProfileServlet extends HttpServlet {
         ConfiguracionReglasRepository configuracionReglasRepository = new ConfiguracionReglasRepository();
         this.configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
         this.movieService = new MovieService(movieRepository);
-        UserService userService = new UserService(userRepository, encoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionReglasService, watchlistService);
@@ -93,6 +95,14 @@ public class ProfileServlet extends HttpServlet {
             boolean isFollowing = false;
 
             if (!isMyProfile) {
+                boolean loBloquee = userController.isBlocking(loggedUser.getId(), profileUser.getId());
+                boolean meBloqueo = userController.isBlocking(profileUser.getId(), loggedUser.getId());
+                if (loBloquee || meBloqueo) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Usuario no encontrado");
+                    return;
+                }
+            }
+            if (!isMyProfile) {
                 isFollowing = userController.checkFollowStatus(loggedUser.getId(), profileUser.getId());
             }
 
@@ -100,9 +110,26 @@ public class ProfileServlet extends HttpServlet {
             
             List<User> followersList = userController.getFollowers(profileUser.getId());
             List<User> followingList = userController.getFollowing(profileUser.getId());
+            int realFollowersCount = followersList.size();
+            int realFollowingCount = followingList.size();
+            if (loggedUser != null) {
+                followersList.removeIf(u -> 
+                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
+                    userController.isBlocking(u.getId(), loggedUser.getId())
+                );
+                followingList.removeIf(u -> 
+                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
+                    userController.isBlocking(u.getId(), loggedUser.getId())
+                );
+            }
             request.setAttribute("followers", followersList);
             request.setAttribute("following", followingList);
-            
+            request.setAttribute("realFollowersCount", realFollowersCount);
+            request.setAttribute("realFollowingCount", realFollowingCount);
+            if (isMyProfile) {
+                List<User> blockedList = userController.getBlockedUsers(loggedUser.getId());
+                request.setAttribute("blockedUsers", blockedList);
+            }
             Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
 
             ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();

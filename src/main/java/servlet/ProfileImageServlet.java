@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.File;
+import repository.BlockRepository;
 import okhttp3.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -28,6 +29,7 @@ import java.util.Set;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import net.coobird.thumbnailator.Thumbnails;
 
 @WebServlet("/profile-image")
 @MultipartConfig(
@@ -56,7 +58,8 @@ public class ProfileImageServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        UserService userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         this.userController = new UserController(userService);
         this.httpClient = new OkHttpClient.Builder()
         	    .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
@@ -106,10 +109,18 @@ public class ProfileImageServlet extends HttpServlet {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
 	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
-                    String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
-                    File archivoFisico = new File(uploadPath, safeFileName);
-                    
-                    filePart.write(archivoFisico.getAbsolutePath());
+	                String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
+	                File archivoFisico = new File(uploadPath, safeFileName);
+
+	                try (InputStream input = filePart.getInputStream()) {
+	                    Thumbnails.of(input)
+	                        .size(400, 400)
+	                        .outputQuality(0.8)
+	                        .toFile(archivoFisico);
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    throw ErrorFactory.internal("No pudimos procesar la imagen.");
+	                }
                     
                     try {
                         RequestBody requestBody = new MultipartBody.Builder()

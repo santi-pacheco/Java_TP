@@ -65,8 +65,32 @@ public class UserController {
         userService.removeProfileImage(userId, uploadDir);
     }
     
-    public List<User> searchUsers(String query) {
-		return userService.searchUsers(query);
+    public List<User> searchUsers(String query, int loggedUserId) {
+		return userService.searchUsers(query, loggedUserId);
 	}
+    
+    public String generatePasswordResetToken(String email) {
+        return userService.generatePasswordResetToken(email);
+    }
+    
+    public boolean validateResetToken(String token) {
+        return userService.validateResetToken(token);
+    }
+    
+    public void resetPasswordWithToken(String token, String newPassword) {
+        userService.resetPasswordWithToken(token, newPassword);
+    }
+    
+    public void toggleBlock(int blockerId, int blockedId) {
+        userService.toggleBlock(blockerId, blockedId);
+    }
+    
+    public boolean isBlocking(int blockerId, int blockedId) {
+        return userService.isBlocking(blockerId, blockedId);
+    }
+    
+    public List<User> getBlockedUsers(int blockerId) {
+        return userService.getBlockedUsers(blockerId);
+    }
     
 }

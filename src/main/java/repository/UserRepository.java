@@ -297,28 +297,128 @@ public class UserRepository {
         return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
     }
 
-    public List<User> searchUsersByUsername(String query) {
-        List<User> users = new ArrayList<>();
-        String sql = "SELECT id_user, username, profile_image FROM usuarios WHERE username LIKE ? LIMIT 10";
+	public List<User> searchUsersByUsername(String query, int loggedUserId) {
+	    List<User> users = new ArrayList<>();
+	    String sql = "SELECT id_user, username, profile_image FROM usuarios " +
+	                 "WHERE username LIKE ? AND id_user != ? " +
+	                 "AND id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
+	                 "AND id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
+	                 "LIMIT 10";
+	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setString(1, "%" + query + "%");
+	        stmt.setInt(2, loggedUserId);
+	        stmt.setInt(3, loggedUserId);
+	        stmt.setInt(4, loggedUserId);
+	        
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                User user = new User();
+	                user.setId(rs.getInt("id_user"));
+	                user.setUsername(rs.getString("username"));
+	                user.setProfileImage(rs.getString("profile_image"));
+	                users.add(user);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        throw ErrorFactory.internal("Error buscando usuarios por nombre");
+	    }
+	    return users;
+	}
+	
+	public User findByEmail(String email) {
+        User user = null;
+        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE email = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, "%" + query + "%");
             
+            stmt.setString(1, email);
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    User user = new User();
+                if (rs.next()) {
+                    user = new User();
                     user.setId(rs.getInt("id_user"));
+                    user.setPassword(rs.getString("password"));
                     user.setUsername(rs.getString("username"));
+                    user.setRole(rs.getString("role"));
+                    user.setEmail(rs.getString("email"));
+                    user.setBirthDate(rs.getDate("birthdate"));
+                    user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
                     user.setProfileImage(rs.getString("profile_image"));
-                    users.add(user);
+                    user.setBannedUntil(rs.getTimestamp("banned_until")); 
                 }
             }
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error buscando usuarios por nombre");
+            throw ErrorFactory.internal("Error buscando usuario por email");
         }
-        return users;
+        return user;
     }
+	
+	public void savePasswordResetToken(int userId, String token) {
+        String deleteOldSql = "DELETE FROM password_resets WHERE id_user = ?";
+        String insertSql = "INSERT INTO password_resets (id_user, token, expiry_date) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection()) {
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOldSql)) {
+                deleteStmt.setInt(1, userId);
+                deleteStmt.executeUpdate();
+            }
+            
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                insertStmt.setInt(1, userId);
+                insertStmt.setString(2, token);
+                insertStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error guardando el token de recuperación");
+        }
+    }
+	
+	public Integer getUserIdByValidToken(String token) {
+        String sql = "SELECT id_user FROM password_resets WHERE token = ? AND expiry_date > NOW()";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, token);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_user");
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error validando el token");
+        }
+        return null;
+    }
+
+	public void updatePasswordAndClearToken(int userId, String hashedPassword, String token) {
+        String updateSql = "UPDATE usuarios SET password = ? WHERE id_user = ?";
+        String deleteTokenSql = "DELETE FROM password_resets WHERE token = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection()) {
+            conn.setAutoCommit(false);
+            
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                 PreparedStatement deleteStmt = conn.prepareStatement(deleteTokenSql)) {
+                
+                updateStmt.setString(1, hashedPassword);
+                updateStmt.setInt(2, userId);
+                updateStmt.executeUpdate();
+                
+                deleteStmt.setString(1, token);
+                deleteStmt.executeUpdate();
+                
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error actualizando la contraseña");
+        }
+    }
+	
 
     public void updateNotificacionesLeidas(int userId) {
         String sql = "UPDATE usuarios SET ultima_revision_notificaciones = NOW() WHERE id_user = ?";

@@ -1,6 +1,9 @@
 package service;
 
 import java.util.List;
+import repository.BlockRepository;
+import java.util.UUID;
+
 import entity.User;
 import repository.FollowRepository;
 import repository.UserRepository;
@@ -10,15 +13,17 @@ import java.io.File;
 
 public class UserService {
 
-    private UserRepository userRepository;
-    private BCryptPasswordEncoder passwordEncoder;
-    private FollowRepository followRepository;
-    
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.followRepository = followRepository;
-    }
+	private UserRepository userRepository;
+	private BCryptPasswordEncoder passwordEncoder;
+	private FollowRepository followRepository;
+	private BlockRepository blockRepository;
+	
+	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository, BlockRepository blockRepository) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.followRepository = followRepository;
+		this.blockRepository = blockRepository;
+	}
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -67,18 +72,57 @@ public class UserService {
             throw ErrorFactory.unauthorized("Invalid username or password");
         }
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw ErrorFactory.unauthorized("Invalid username or password");
-        }
-        
-        user.setPassword(null);    
-        return user;
-    }
-    
-    public void toggleFollow(int currentUserId, int targetUserId) {
-        if (currentUserId == targetUserId) {
-            throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
-        }
+	    // --- 3. Validar la contraseña ---
+	    // Usamos el passwordEncoder (como en createUser) para comparar
+	    // la clave plana (password) con la hasheada (user.getPassword())
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+	        // ERROR RECUPERABLE (401)
+	        // Usamos el *mismo* mensaje para no dar pistas
+			throw ErrorFactory.unauthorized("Invalid username or password");
+		}
+	    // --- 4. ÉXITO: Preparar el retorno ---
+	    // Siguiendo el patrón de getUserById, quitamos la contraseña
+	    // antes de devolver el objeto.
+		user.setPassword(null);	
+		return user;
+	}
+	
+	public void checkAndUpdateActiveStatus(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && !user.isEsUsuarioActivo()) {
+			// Solo verificar si no es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount >= umbralResenas) {
+				userRepository.updateActiveStatus(userId, true);
+			}
+		}
+	}
+	
+	public void validateActiveStatusOnDelete(int userId, int umbralResenas) {
+		User user = userRepository.findOne(userId);
+		if (user != null && user.isEsUsuarioActivo()) {
+			// Solo verificar si es activo actualmente
+			int reviewCount = getReviewCountForUser(userId);
+			if (reviewCount < umbralResenas) {
+				userRepository.updateActiveStatus(userId, false);
+			}
+		}
+	}
+	
+	private int getReviewCountForUser(int userId) {
+		// Este método necesita acceso al ReviewRepository
+		// Se implementará en ReviewService
+		return 0;
+	}
+	
+	public void toggleFollow(int currentUserId, int targetUserId) {
+		if (currentUserId == targetUserId) {
+	        throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
+	    }
+	    if (blockRepository.isBlocking(currentUserId, targetUserId) || 
+	        blockRepository.isBlocking(targetUserId, currentUserId)) {
+	        throw ErrorFactory.badRequest("No puedes seguir a este usuario debido a un bloqueo mutuo.");
+	    }
         boolean isFollowing = followRepository.isFollowing(currentUserId, targetUserId);
 
         if (isFollowing) {
@@ -126,8 +170,62 @@ public class UserService {
         }
     }
     
-    public List<User> searchUsers(String query) {
-        return userRepository.searchUsersByUsername(query);
+    public List<User> searchUsers(String query, int loggedUserId) {
+        return userRepository.searchUsersByUsername(query, loggedUserId);
+	}
+
+    public String generatePasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email);
+        System.out.println("Usuario encontrado para email " + email + ": " + (user != null ? user.getUsername() : "null"));
+        if (user == null) {
+            return null; 
+        }
+        String token = UUID.randomUUID().toString();
+        userRepository.savePasswordResetToken(user.getId(), token);
+        return token;
+    }
+    
+    public boolean validateResetToken(String token) {
+        if (token == null || token.isEmpty()) return false;
+        return userRepository.getUserIdByValidToken(token) != null;
+    }
+    
+    public void resetPasswordWithToken(String token, String newPassword) {
+        Integer userId = userRepository.getUserIdByValidToken(token);
+        
+        if (userId == null) {
+            throw ErrorFactory.badRequest("El enlace de recuperación es inválido o ha expirado.");
+        }
+        
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        userRepository.updatePasswordAndClearToken(userId, hashedPassword, token);
+    }
+    
+    public void toggleBlock(int blockerId, int blockedId) {
+        if (blockerId == blockedId) {
+            throw ErrorFactory.badRequest("No puedes bloquearte a ti mismo.");
+        }
+        
+        boolean isBlocked = blockRepository.isBlocking(blockerId, blockedId);
+        if (isBlocked) {
+            blockRepository.removeBlock(blockerId, blockedId);
+        } else {
+            blockRepository.addBlock(blockerId, blockedId);
+            if (followRepository.isFollowing(blockerId, blockedId)) {
+                followRepository.removeFollow(blockerId, blockedId);
+            }
+            if (followRepository.isFollowing(blockedId, blockerId)) {
+                followRepository.removeFollow(blockedId, blockerId);
+            }
+        }
+    }
+	
+	public boolean isBlocking(int blockerId, int blockedId) {
+        return blockRepository.isBlocking(blockerId, blockedId);
+    }
+	
+	public List<User> getBlockedUsers(int blockerId) {
+	    return blockRepository.getBlockedUsers(blockerId);
     }
 
     public void updatePlatoPrincipal(int userId, Integer movieId) {

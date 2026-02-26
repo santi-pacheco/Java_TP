@@ -50,6 +50,10 @@
       <c:if test="${not empty error}">
         <div class="err">${error}</div>
       </c:if>
+      
+      <c:if test="${param.success == 'password_reset'}">
+        <div class="ok">✔️ Contraseña actualizada correctamente. Ya puedes ingresar.</div>
+      </c:if>
 
       <form method="post" action="${pageContext.request.contextPath}/login">
         <div class="field">
@@ -59,7 +63,24 @@
 
         <div class="field">
           <label for="password">Contraseña</label>
-          <input id="password" name="password" type="password" required />
+          <div style="position: relative;">
+              <input id="password" name="password" type="password" required style="padding-right: 40px; width: 100%; box-sizing: border-box;" />
+              
+              <span id="toggleBtn" onclick="togglePassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; transition: color 0.3s; display: flex; align-items: center;">
+                  <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                  <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+              </span>
+          </div>
+          
+          <div style="text-align: right; margin-top: 5px;">
+              <a href="${pageContext.request.contextPath}/forgot-password" style="font-size: 12px; color: #8B7355; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+          </div>
         </div>
 
         <button class="btn" type="submit">Entrar</button>
@@ -70,5 +91,22 @@
       </div>
     </div>
   </div>
+  	<script>
+            function togglePassword() {
+                const pwd = document.getElementById('password');
+                const eyeOpen = document.getElementById('eyeOpen');
+                const eyeClosed = document.getElementById('eyeClosed');
+
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    eyeClosed.style.display = 'none';
+                    eyeOpen.style.display = 'block';
+                } else {
+                    pwd.type = 'password';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
+                }
+            }
+	</script>
 </body>
 </html>

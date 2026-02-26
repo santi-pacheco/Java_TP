@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import repository.BlockRepository;
 import java.sql.SQLException;
 import java.util.List;
 import jakarta.servlet.ServletException;
@@ -31,8 +32,9 @@ public class ReviewAdminServlet extends HttpServlet {
 		repository.MovieRepository movieRepository = new repository.MovieRepository();
 		repository.ConfiguracionReglasRepository configRepository = new repository.ConfiguracionReglasRepository();
 		FollowRepository followRepository = new FollowRepository();
+		BlockRepository blockRepository = new BlockRepository();
 		org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository);
+		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository, blockRepository);
 		service.MovieService movieService = new service.MovieService(movieRepository);
 		service.ConfiguracionReglasService configService = new service.ConfiguracionReglasService(configRepository);
 		WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
