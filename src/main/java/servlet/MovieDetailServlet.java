@@ -126,12 +126,14 @@ public class MovieDetailServlet extends HttpServlet {
             
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
+                User updatedUser = userService.getUserById(user.getId()); 
+                
                 List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
                 isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
                 userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
                 
                 int cantidadPeliculas = watchlistMovies.size();
-                int limite = user.isEsUsuarioActivo() 
+                int limite = updatedUser.getNivelUsuario() >= 2 
                     ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
                     : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
                 canAddToWatchlist = cantidadPeliculas < limite;
@@ -161,6 +163,7 @@ public class MovieDetailServlet extends HttpServlet {
             Map<Integer, Integer> likesCountMap = new HashMap<>();
             Map<Integer, Boolean> userLikesMap = new HashMap<>();
             Map<Integer, Boolean> followedUsersMap = new HashMap<>(); 
+            Map<Integer, Integer> userLevelsMap = new HashMap<>();
             
             for (Review review : reviews) {
                 int likesCount = likeService.getLikesCount(review.getId());
@@ -172,16 +175,25 @@ public class MovieDetailServlet extends HttpServlet {
                     userLikesMap.put(review.getId(), hasLiked);
                 }
                 
-                
                 if (!followedUsersMap.containsKey(review.getId_user())) {
                     followedUsersMap.put(review.getId_user(), followingIds.contains(review.getId_user()));
+                }
+                
+                if (!userLevelsMap.containsKey(review.getId_user())) {
+                    User reviewAuthor = userService.getUserById(review.getId_user());
+                    if (reviewAuthor != null) {
+                        userLevelsMap.put(review.getId_user(), reviewAuthor.getNivelUsuario());
+                    } else {
+                        userLevelsMap.put(review.getId_user(), 1); 
+                    }
                 }
             }
             
             request.setAttribute("movie", movie);
             request.setAttribute("likesCountMap", likesCountMap);
             request.setAttribute("userLikesMap", userLikesMap);
-            request.setAttribute("followedUsersMap", followedUsersMap); // ENVIAMOS EL MAPA AL JSP
+            request.setAttribute("followedUsersMap", followedUsersMap); 
+            request.setAttribute("userLevelsMap", userLevelsMap);
             request.setAttribute("currentSort", sortBy != null ? sortBy : "date");
             request.setAttribute("actors", actors);
             request.setAttribute("directors", directors);

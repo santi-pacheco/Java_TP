@@ -40,7 +40,7 @@
             color: #666;
         }
 
-        /* --- NUEVO: ESTILOS DEL PANEL DE FILTROS --- */
+
         .controls-panel {
             background: white;
             padding: 15px 25px;
@@ -93,6 +93,7 @@
             display: flex;
             gap: 20px;
             transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s ease;
+            cursor: pointer; /* AÑADIDO PARA QUE PAREZCA CLICKEABLE */
         }
         .review-card:hover {
             transform: translateY(-2px);
@@ -104,7 +105,7 @@
             border-radius: 8px;
             object-fit: cover;
             flex-shrink: 0;
-            cursor: pointer;
+
         }
         .review-content {
             flex: 1;
@@ -116,8 +117,8 @@
             font-size: 22px;
             font-weight: 600;
             color: #333;
-            cursor: pointer;
             text-decoration: none;
+
         }
         .movie-title:hover {
             color: #666;
@@ -255,21 +256,23 @@
 
                             long timestamp = review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0;
                 %>
+
                     <div class="review-card" 
-                         data-rating="<%= review.getRating() %>" 
-                         data-timestamp="<%= timestamp %>"
-                         data-status="<%= status %>">
+					     data-rating="<%= review.getRating() %>" 
+					     data-timestamp="<%= timestamp %>"
+					     data-status="<%= status %>"
+					     onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'"> 
                          
                         <img src="<%= posterUrl %>" 
                              alt="<%= movie.getTitulo() %>" 
                              class="movie-poster"
-                             onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'"
                              onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
                         
                         <div class="review-content">
-                            <a href="${pageContext.request.contextPath}/movie/<%= movie.getId() %>" class="movie-title">
-                                <%= movie.getTitulo() %>
-                            </a>
+
+                            <span class="movie-title">
+						    	<%= movie.getTitulo() %>
+							</span>
                             
                             <div class="rating-date">
                                 <div class="rating">

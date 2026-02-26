@@ -8,6 +8,8 @@ import java.util.Map;
 
 import entity.Review;
 import entity.User;
+import entity.Movie;
+import entity.ConfiguracionReglas;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -33,14 +35,15 @@ import exception.ErrorFactory;
 
 @WebServlet("/profile")
 public class ProfileServlet extends HttpServlet {
-	
-	private UserController userController;
-    private ReviewController reviewController;
     
-	@Override
+    private UserController userController;
+    private ReviewController reviewController;
+    private ConfiguracionReglasService configuracionReglasService;
+    private MovieService movieService;
+    
+    @Override
     public void init() throws ServletException {
         super.init();
-        
         
         UserRepository userRepository = new UserRepository();
         ReviewRepository reviewRepository = new ReviewRepository();
@@ -48,8 +51,8 @@ public class ProfileServlet extends HttpServlet {
         FollowRepository followRepository = new FollowRepository();
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         ConfiguracionReglasRepository configuracionReglasRepository = new ConfiguracionReglasRepository();
-        ConfiguracionReglasService configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
-        MovieService movieService = new MovieService(movieRepository);
+        this.configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
+        this.movieService = new MovieService(movieRepository);
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
@@ -59,7 +62,7 @@ public class ProfileServlet extends HttpServlet {
         this.userController = new UserController(userService);
         this.reviewController = new ReviewController(reviewService);
     }
-	
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -128,6 +131,44 @@ public class ProfileServlet extends HttpServlet {
                 request.setAttribute("blockedUsers", blockedList);
             }
             Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
+
+            ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();
+            int userKcals = profileUser.getTotalKcals();
+            int userLevel = profileUser.getNivelUsuario();
+            int nextLevelMax = config.getUmbralKcalsNivel2();
+            int currentLevelMin = 0;
+
+            if (userLevel == 2) {
+                currentLevelMin = config.getUmbralKcalsNivel2();
+                nextLevelMax = config.getUmbralKcalsNivel3();
+            } else if (userLevel == 3) {
+                currentLevelMin = config.getUmbralKcalsNivel3();
+                nextLevelMax = config.getUmbralKcalsNivel4();
+            } else if (userLevel >= 4) {
+                currentLevelMin = config.getUmbralKcalsNivel4();
+                nextLevelMax = config.getUmbralKcalsNivel4();
+            }
+
+            int progressPercentage = 100;
+            if (userLevel < 4) {
+                progressPercentage = (int) (((float) (userKcals - currentLevelMin) / (nextLevelMax - currentLevelMin)) * 100);
+            }
+            progressPercentage = Math.max(0, Math.min(100, progressPercentage));
+
+            Movie platoPrincipalMovie = null;
+            if (profileUser.getPlatoPrincipalMovieId() != null) {
+                try {
+                    platoPrincipalMovie = movieService.getMovieById(profileUser.getPlatoPrincipalMovieId());
+                } catch (Exception e) {
+                    System.err.println("Error fetching plato principal: " + e.getMessage());
+                }
+            }
+
+            request.setAttribute("userLevel", userLevel);
+            request.setAttribute("userKcals", userKcals);
+            request.setAttribute("nextLevelMax", nextLevelMax);
+            request.setAttribute("progressPercentage", progressPercentage);
+            request.setAttribute("platoPrincipalMovie", platoPrincipalMovie);
 
             request.setAttribute("user", profileUser);
             request.setAttribute("loggedUser", loggedUser);

@@ -18,7 +18,7 @@ public class UserRepository {
 
     public List<User> findAll() {
         List<User> Users = new ArrayList<>();
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios ORDER BY id_user";
+        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios ORDER BY id_user";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -32,9 +32,23 @@ public class UserRepository {
                 user.setRole(rs.getString("role"));
                 user.setEmail(rs.getString("email"));
                 user.setBirthDate(rs.getDate("birthdate"));
-                user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
+                user.setTotalKcals(rs.getInt("total_kcals"));
+                user.setNivelUsuario(rs.getInt("nivel_usuario"));
+                user.setNivelNotificado(rs.getInt("nivel_notificado"));
+                
+                Object platoObj = rs.getObject("plato_principal_movie_id");
+                if (platoObj != null) {
+                    user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
+                }
+                
                 user.setProfileImage(rs.getString("profile_image"));
                 user.setBannedUntil(rs.getTimestamp("banned_until")); 
+                
+                java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                if (ultimaRevTs != null) {
+                    user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                }
+                
                 Users.add(user);
             }
         } catch (SQLException e) {
@@ -46,7 +60,8 @@ public class UserRepository {
 
     public User findOne(int id) {
         User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE id_user = ?";
+
+        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE id_user = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -61,9 +76,22 @@ public class UserRepository {
                     user.setRole(rs.getString("role"));
                     user.setEmail(rs.getString("email"));
                     user.setBirthDate(rs.getDate("birthdate"));
-                    user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
+                    user.setTotalKcals(rs.getInt("total_kcals"));
+                    user.setNivelUsuario(rs.getInt("nivel_usuario"));
+                    user.setNivelNotificado(rs.getInt("nivel_notificado"));
+                    
+                    Object platoObj = rs.getObject("plato_principal_movie_id");
+                    if (platoObj != null) {
+                        user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
+                    }
+                    
                     user.setProfileImage(rs.getString("profile_image"));
-                    user.setBannedUntil(rs.getTimestamp("banned_until")); // AGREGADO
+                    user.setBannedUntil(rs.getTimestamp("banned_until"));
+                    
+                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                    if (ultimaRevTs != null) {
+                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -105,7 +133,7 @@ public class UserRepository {
     }
 
     public User update(User u) {
-        String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ?, esUsuarioActivo = ?, profile_image = ? WHERE id_user = ?";
+        String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ?, total_kcals = ?, nivel_usuario = ?, nivel_notificado = ?, plato_principal_movie_id = ?, profile_image = ? WHERE id_user = ?";
         
         try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -115,9 +143,18 @@ public class UserRepository {
             stmt.setString(3, u.getRole());
             stmt.setString(4, u.getEmail());
             stmt.setDate(5, u.getBirthDate());
-            stmt.setBoolean(6, u.isEsUsuarioActivo());
-            stmt.setString(7, u.getProfileImage());
-            stmt.setInt(8, u.getId());
+            stmt.setInt(6, u.getTotalKcals());
+            stmt.setInt(7, u.getNivelUsuario());
+            stmt.setInt(8, u.getNivelNotificado());
+            
+            if (u.getPlatoPrincipalMovieId() != null) {
+                stmt.setInt(9, u.getPlatoPrincipalMovieId());
+            } else {
+                stmt.setNull(9, java.sql.Types.INTEGER);
+            }
+            
+            stmt.setString(10, u.getProfileImage());
+            stmt.setInt(11, u.getId());
             
             stmt.executeUpdate();
             
@@ -164,7 +201,8 @@ public class UserRepository {
 
     public User findByUsername(String username) {
         User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE username = ?";
+
+        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE username = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -179,9 +217,22 @@ public class UserRepository {
                     user.setRole(rs.getString("role"));
                     user.setEmail(rs.getString("email"));
                     user.setBirthDate(rs.getDate("birthdate"));
-                    user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
+                    user.setTotalKcals(rs.getInt("total_kcals"));
+                    user.setNivelUsuario(rs.getInt("nivel_usuario"));
+                    user.setNivelNotificado(rs.getInt("nivel_notificado"));
+                    
+                    Object platoObj = rs.getObject("plato_principal_movie_id");
+                    if (platoObj != null) {
+                        user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
+                    }
+                    
                     user.setProfileImage(rs.getString("profile_image"));
                     user.setBannedUntil(rs.getTimestamp("banned_until")); 
+                    
+                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
+                    if (ultimaRevTs != null) {
+                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -191,59 +242,60 @@ public class UserRepository {
         return user;
     }
     
-	public void updateActiveStatus(int userId, boolean isActive) {
-		String sql = "UPDATE usuarios SET esUsuarioActivo = ? WHERE id_user = ?";
-		
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-		     PreparedStatement stmt = conn.prepareStatement(sql)) {
-			
-			stmt.setBoolean(1, isActive);
-			stmt.setInt(2, userId);
-			stmt.executeUpdate();
-			
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error updating user active status");
-		}
-	}
+    public void updateUserVolume(int userId, int totalKcals, int nivelUsuario) {
+        String sql = "UPDATE usuarios SET total_kcals = ?, nivel_usuario = ? WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, totalKcals);
+            stmt.setInt(2, nivelUsuario);
+            stmt.setInt(3, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error updating user volume");
+        }
+    }
 
-	public void banUser(int userId, int daysToban) {
-	    String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
-	    
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        
-	        stmt.setInt(1, daysToban);
-	        stmt.setInt(2, userId);
-	        stmt.executeUpdate();
-	        
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error banning user");
-	    }
-	}
+    public void banUser(int userId, int daysToban) {
+        String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, daysToban);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error banning user");
+        }
+    }
 
-	public java.sql.Timestamp getBannedUntil(int userId) {
-	    String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
-	    
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        
-	        stmt.setInt(1, userId);
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                return rs.getTimestamp("banned_until");
-	            }
-	        }
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error checking user ban status");
-	    }
-	    return null;
-	}
+    public java.sql.Timestamp getBannedUntil(int userId) {
+        String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getTimestamp("banned_until");
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error checking user ban status");
+        }
+        return null;
+    }
 
-	public boolean isUserBanned(int userId) {
-	    java.sql.Timestamp bannedUntil = getBannedUntil(userId);
-	    if (bannedUntil == null) return false;
-	    return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
-	}
+    public boolean isUserBanned(int userId) {
+        java.sql.Timestamp bannedUntil = getBannedUntil(userId);
+        if (bannedUntil == null) return false;
+        return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
+    }
 
 	public List<User> searchUsersByUsername(String query, int loggedUserId) {
 	    List<User> users = new ArrayList<>();
@@ -367,4 +419,47 @@ public class UserRepository {
         }
     }
 	
+
+    public void updateNotificacionesLeidas(int userId) {
+        String sql = "UPDATE usuarios SET ultima_revision_notificaciones = NOW() WHERE id_user = ?";
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error al actualizar la revisión de notificaciones");
+        }
+    }
+
+    public void markLevelAsNotified(int userId, int level) {
+        String sql = "UPDATE usuarios SET nivel_notificado = ? WHERE id_user = ?";
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, level);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error actualizando nivel notificado");
+        }
+    }
+
+    public void updatePlatoPrincipal(int userId, Integer movieId) {
+        String sql = "UPDATE usuarios SET plato_principal_movie_id = ? WHERE id_user = ?";
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            if (movieId != null) {
+                stmt.setInt(1, movieId);
+            } else {
+                stmt.setNull(1, java.sql.Types.INTEGER);
+            }
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error actualizando el plato principal");
+        }
+    }
 }

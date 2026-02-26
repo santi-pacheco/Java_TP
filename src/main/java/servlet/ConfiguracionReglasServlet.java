@@ -21,33 +21,32 @@ import exception.AppException;
 import exception.ErrorFactory;
 import entity.User;
 
-
 @WebServlet("/configuracion-reglas")
 public class ConfiguracionReglasServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private ConfiguracionReglasController controller;
-	private Validator validator;
+    private static final long serialVersionUID = 1L;
+    private ConfiguracionReglasController controller;
+    private Validator validator;
 
-	@Override
-	public void init() throws ServletException {
-		super.init();
-		ConfiguracionReglasRepository repository = new ConfiguracionReglasRepository();
-		ConfiguracionReglasService service = new ConfiguracionReglasService(repository);
-		this.controller = new ConfiguracionReglasController(service);
-		
-		ServletContext context = getServletContext();
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        ConfiguracionReglasRepository repository = new ConfiguracionReglasRepository();
+        ConfiguracionReglasService service = new ConfiguracionReglasService(repository);
+        this.controller = new ConfiguracionReglasController(service);
+        
+        ServletContext context = getServletContext();
         this.validator = (Validator) context.getAttribute("miValidador");
-	}
+    }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		List<ConfiguracionReglas> configuraciones = controller.getAllConfiguraciones();
-		request.setAttribute("configuraciones", configuraciones);
-		request.getRequestDispatcher("/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp").forward(request, response);
-	}
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<ConfiguracionReglas> configuraciones = controller.getAllConfiguraciones();
+        request.setAttribute("configuraciones", configuraciones);
+        request.getRequestDispatcher("/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp").forward(request, response);
+    }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		String jspTarget = "/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp";
+        String jspTarget = "/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp";
         ConfiguracionReglas configFromForm = null;
         
         try {
@@ -76,10 +75,12 @@ public class ConfiguracionReglasServlet extends HttpServlet {
             System.err.println("Error no esperado en ConfiguracionReglasServlet: " + e.getMessage());
             throw e;
         }
-	}
-	private void populateConfigFromRequest(ConfiguracionReglas config, HttpServletRequest request) {
+    }
+    private void populateConfigFromRequest(ConfiguracionReglas config, HttpServletRequest request) {
         
-        config.setUmbralResenasActivo(parseIntParam(request.getParameter("umbralResenasActivo"), "Umbral Reseñas"));
+        config.setUmbralKcalsNivel2(parseIntParam(request.getParameter("umbralKcalsNivel2"), "Umbral Nivel 2"));
+        config.setUmbralKcalsNivel3(parseIntParam(request.getParameter("umbralKcalsNivel3"), "Umbral Nivel 3"));
+        config.setUmbralKcalsNivel4(parseIntParam(request.getParameter("umbralKcalsNivel4"), "Umbral Nivel 4"));
         config.setLimiteWatchlistNormal(parseIntParam(request.getParameter("limiteWatchlistNormal"), "Límite Watchlist Normal"));
         config.setLimiteWatchlistActivo(parseIntParam(request.getParameter("limiteWatchlistActivo"), "Límite Watchlist Activo"));
         
