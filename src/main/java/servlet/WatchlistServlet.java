@@ -99,33 +99,27 @@ public class WatchlistServlet extends HttpServlet {
         User userAct = userController.getUserById(user.getId());
 
         if ("add".equals(action)) {
-        	List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
-        	int cantidadPeliculas = movieIds.size();
-        	
-        	if (userAct.isEsUsuarioActivo() == true) {
-        		//Usuario Activo
-				//Traer configuración de reglas
-				int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
-				
-				if (cantidadPeliculas >= limiteActivo) {
-					//No puede agregar más películas
-					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
-					response.sendRedirect(request.getHeader("Referer"));
-					return;
-				}
-				
-			} else {
-				//Usuario Normal
-				//Traer configuración de reglas
-				int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistNormal();
-				
-				if (cantidadPeliculas >= limiteNormal) {
-					//No puede agregar más películas
-					session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
-					response.sendRedirect(request.getHeader("Referer"));
-					return;
-				}
-			}	
+            List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+            int cantidadPeliculas = movieIds.size();
+            
+            if (userAct.getNivelUsuario() >= 2) {
+                int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+                
+                if (cantidadPeliculas >= limiteActivo) {
+                    session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+                    response.sendRedirect(request.getHeader("Referer"));
+                    return;
+                }
+                
+            } else {
+                int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+                
+                if (cantidadPeliculas >= limiteNormal) {
+                    session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
+                    response.sendRedirect(request.getHeader("Referer"));
+                    return;
+                }
+            }    
             watchlistController.addMovie(user.getId(), movieId);
         } else if ("remove".equals(action)) {
             watchlistController.removeMovie(user.getId(), movieId);

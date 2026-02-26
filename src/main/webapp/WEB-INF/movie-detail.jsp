@@ -69,12 +69,90 @@
         
         .reviews-list { display: flex; flex-direction: column; gap: 20px; }
         .review-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+
+       /* --- RESEÑA NIVEL 4: CHEDDAR CHORREANDO POR ARRIBA --- */
+        .cheddar-review-card {
+            position: relative;
+            border: 3px solid #FFB800 !important;
+            border-radius: 15px !important;
+            background: #FFFdf5 !important;
+            margin-top: 30px !important; /* Espacio para el badge de arriba */
+            margin-bottom: 20px !important;
+            padding: 25px !important; 
+            padding-top: 40px !important; /* Espacio para que el queso no tape la foto */
+            overflow: visible !important; 
+        }
+
+        /* El badge de Crítico Supremo (ESTO FALTABA) */
+        .cheddar-review-card::before {
+            content: '👑 Crítico Michelin';
+            position: absolute;
+            top: -16px;
+            right: 20px;
+            background: #222;
+            color: #FFB800;
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 11;
+            border: 2px solid #FFB800;
+        }
+        
+        /* Queso derretido cayendo desde el borde SUPERIOR (Más orgánico y asimétrico) */
+        .cheddar-review-card::after {
+            content: '';
+            position: absolute;
+            top: -3px; 
+            left: -3px; 
+            right: -3px; 
+            height: 35px; /* Un poco más alto para darle lugar a las gotas largas */
+            /* SVG de queso asimétrico, con gotas de distintos tamaños y curvas orgánicas */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 50' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1000,0 L1000,10 C960,10 950,45 920,45 C890,45 880,15 840,15 C810,15 800,35 770,35 C740,35 730,5 690,5 C660,5 650,50 620,50 C590,50 580,20 540,20 C510,20 500,40 470,40 C440,40 430,10 390,10 C360,10 350,35 320,35 C290,35 280,15 240,15 C210,15 200,45 170,45 C140,45 130,20 90,20 C60,20 50,35 20,35 C10,35 5,15 0,15 Z' fill='%23FFB800'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: 100% 100%; /* Estira el diseño a lo ancho en vez de repetirlo como baldosas */
+            z-index: 10;
+            pointer-events: none; 
+            border-top-left-radius: 15px; 
+            border-top-right-radius: 15px; 
+        }
+
         .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .review-text { color: #444; line-height: 1.6; margin-bottom: 10px; }
         .review-meta { font-size: 0.9rem; color: #888; display: flex; align-items: center; justify-content: space-between; width: 100%; }
         
         .author-container { display: flex; align-items: center; gap: 12px; }
+        
+        .author-avatar-wrapper { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; background-color: #f5f5f5; }
+
+        /* --- AVATAR NIVEL 3/4: LA HAMBURGUESA INFALIBLE (SIN EMOJI) --- */
+        .burger-avatar-border {
+            border-radius: 50% !important;
+            padding: 4px;
+            /* Degradados que forman pan, lechuga, carne y pan */
+            background: linear-gradient(180deg, 
+                #F5B041 0%, #F5B041 30%,   
+                #58D68D 30%, #58D68D 40%,   
+                #873600 40%, #873600 70%,   
+                #F4D03F 70%, #F4D03F 100%   
+            ) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none !important;
+        }
+
+        .burger-avatar-border .author-avatar {
+            border-radius: 50% !important;
+            border: 2px solid #FFF !important;
+            position: relative;
+            z-index: 2;
+        }
+
         .author-details { display: flex; flex-direction: column; }
         .author-name-row { display: flex; align-items: center; gap: 8px; }
         
@@ -108,19 +186,19 @@
         .btn-write-review { position: fixed; bottom: 30px; right: 30px; background: #333; color: white; border: none; padding: 15px 25px; border-radius: 50px; font-family: inherit; font-weight: 600; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s; z-index: 1000; text-decoration: none; display: flex; align-items: center; gap: 10px; }
         .btn-write-review:hover { background: #555; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
         
-		.like-section { display: inline-flex; align-items: center; margin-left: auto; }
-		.like-btn { background: transparent; border: 2px solid #e0e0e0; cursor: pointer; padding: 6px 16px; border-radius: 50px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 8px; position: relative; overflow: hidden; color: #555; }
-		.like-btn:hover { border-color: #333; background-color: #f5f5f5; transform: translateY(-2px); }
-		.like-btn.liked { background: #333; border-color: #333; color: #fff; }
-		.like-btn.liked .soda-stroke { stroke: #fff; }
-		.like-btn.liked .liquid-fill { fill: #fff; clip-path: inset(0 0 0 0); }
-		.like-btn.liked .like-label { font-weight: 600; }
-		.soda-svg { width: 22px; height: 22px; display: block; overflow: visible; }
-		.liquid-fill { fill: #333; clip-path: inset(100% 0 0 0); transition: clip-path 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-		.soda-stroke { fill: none; stroke: #333; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.3s; }
-		.like-count { font-weight: 700; font-size: 0.95rem; }
-		.like-label { font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-		@media (max-width: 400px) { .like-label { display: none; } }
+        .like-section { display: inline-flex; align-items: center; margin-left: auto; }
+        .like-btn { background: transparent; border: 2px solid #e0e0e0; cursor: pointer; padding: 6px 16px; border-radius: 50px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 8px; position: relative; overflow: hidden; color: #555; }
+        .like-btn:hover { border-color: #333; background-color: #f5f5f5; transform: translateY(-2px); }
+        .like-btn.liked { background: #333; border-color: #333; color: #fff; }
+        .like-btn.liked .soda-stroke { stroke: #fff; }
+        .like-btn.liked .liquid-fill { fill: #fff; clip-path: inset(0 0 0 0); }
+        .like-btn.liked .like-label { font-weight: 600; }
+        .soda-svg { width: 22px; height: 22px; display: block; overflow: visible; }
+        .liquid-fill { fill: #333; clip-path: inset(100% 0 0 0); transition: clip-path 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .soda-stroke { fill: none; stroke: #333; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.3s; }
+        .like-count { font-weight: 700; font-size: 0.95rem; }
+        .like-label { font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        @media (max-width: 400px) { .like-label { display: none; } }
         
         .comments-section { margin-top: 15px; width: 100%; }
         .comments-toggle { background: none; border: none; color: #666; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 5px 0; transition: color 0.2s; }
@@ -157,7 +235,6 @@
         .toast.error { background: #d32f2f; }
         @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutToast { to { opacity: 0; visibility: hidden; margin-top: -50px; } }
-
 
         #aiLoadingOverlay {
             position: fixed;
@@ -338,7 +415,6 @@
         <div class="review-form">
             <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
             
-
             <form id="ajaxReviewForm">
                 <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getId() %>">
                 <% 
@@ -451,6 +527,8 @@
                 Map<Integer, Boolean> userLikesMap = (Map<Integer, Boolean>) request.getAttribute("userLikesMap");
                 @SuppressWarnings("unchecked")
                 Map<Integer, Boolean> followedUsersMap = (Map<Integer, Boolean>) request.getAttribute("followedUsersMap");
+                @SuppressWarnings("unchecked")
+                Map<Integer, Integer> userLevelsMap = (Map<Integer, Integer>) request.getAttribute("userLevelsMap");
         
                 if (reviews != null && !reviews.isEmpty()) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -458,17 +536,24 @@
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
                         boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
                         
+                        // LÓGICA DE NIVELES
+                        int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getId_user())) ? userLevelsMap.get(review.getId_user()) : 1;
+                        String reviewCardClass = authorLevel == 4 ? "review-card cheddar-review-card" : "review-card";
+                        String avatarWrapperClass = authorLevel >= 3 ? "author-avatar-wrapper burger-avatar-border" : "author-avatar-wrapper";
+
                         String userAvatarPath = request.getContextPath() + "/utils/default_profile.png"; 
                         if (review.getProfileImage() != null && !review.getProfileImage().trim().isEmpty()) {
                             userAvatarPath = "/fatmovies_uploads/" + review.getProfileImage();
                         }
             %>
-            <div class="review-card" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
+            <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
                 <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>"><% } %>
                 <div class="review-content">
                     <div class="review-header">
                         <div class="author-container">
-                            <img src="<%= userAvatarPath %>" alt="Avatar" class="author-avatar" onerror="this.src='<%= request.getContextPath() %>/utils/default_profile.png'">
+                            <div class="<%= avatarWrapperClass %>">
+                                <img src="<%= userAvatarPath %>" alt="Avatar" class="author-avatar" onerror="this.src='<%= request.getContextPath() %>/utils/default_profile.png'">
+                            </div>
                             <div class="author-details">
                                 <div class="author-name-row">
                                     <strong>
@@ -572,16 +657,13 @@
         setTimeout(() => toast.remove(), 4000);
     }
 
-
     const ajaxForm = document.getElementById('ajaxReviewForm');
     if (ajaxForm) {
         ajaxForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Evitamos que la página recargue
+            e.preventDefault(); 
 
-            // Mostramos el telón de carga
             document.getElementById('aiLoadingOverlay').style.display = 'flex';
 
-            // Armamos el JSON con los datos
             const payload = {
                 id_movie: parseInt(document.getElementById('movieIdInput').value),
                 review_text: document.getElementById('reviewTextInput').value,
@@ -589,7 +671,6 @@
                 watched_on: document.getElementById('watchedOnInput').value
             };
 
-            // Enviamos la petición POST para crear/actualizar la reseña
             fetch(contextPath + '/reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -597,13 +678,11 @@
             })
             .then(res => {
                 if(res.status === 403) {
-                    // Si ya estaba baneado antes de mandar esto
                     return res.json().then(data => { throw data; });
                 }
                 return res.json();
             })
             .then(data => {
-                // La reseña se guardó como PENDING_MODERATION. Iniciamos el sondeo!
                 if(data.id) {
                     pollReviewStatus(data.id);
                 }
@@ -622,14 +701,12 @@
     function pollReviewStatus(reviewId) {
         let attempts = 0;
         
-        // Cada 1.5 segundos le preguntamos al servidor cómo va todo
         const pollInterval = setInterval(() => {
             attempts++;
             
             fetch(contextPath + '/reviews?id=' + reviewId)
             .then(res => res.json())
             .then(review => {
-                // Si el status ya no es pendiente, significa que la IA terminó
                 if (review && review.moderationStatus && review.moderationStatus !== 'PENDING_MODERATION') {
                     clearInterval(pollInterval);
                     document.getElementById('aiLoadingOverlay').style.display = 'none';
@@ -644,13 +721,11 @@
                 }
             })
             .catch(err => {
-                // Si la consulta falla 
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
                 showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.');
             });
 
-            // Si por alguna razón la IA tarda más de 30 segundos, cortamos para no dejarlo trabado
             if(attempts >= 20) {
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';

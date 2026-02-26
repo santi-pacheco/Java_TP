@@ -107,6 +107,15 @@
         background-color: #555;
     }
     
+    /* --- ESTILOS DEL AVATAR NAVBAR --- */
+    .navbar-avatar-wrapper {
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
     .navbar-avatar-img {
         width: 45px;
         height: 45px;
@@ -117,9 +126,29 @@
         transition: all 0.3s;
         vertical-align: middle;
     }
+
+    /* Borde de Hamburguesa Exclusivo para Navbar */
+    .burger-avatar-border {
+        border-radius: 50% !important;
+        padding: 3px;
+        background: linear-gradient(180deg, 
+            #F5B041 0%, #F5B041 30%,   
+            #58D68D 30%, #58D68D 40%,   
+            #873600 40%, #873600 70%,   
+            #F4D03F 70%, #F4D03F 100%   
+        ) !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        border: none !important;
+    }
+
+    .burger-avatar-border .navbar-avatar-img {
+        border-radius: 50% !important;
+        border: 2px solid #FFF !important; /* Separa el borde interno para que la hamburguesa respire */
+        position: relative;
+        z-index: 2;
+    }
     
-    .navbar-avatar-img:hover {
-        border-color: #999;
+    .navbar-avatar-wrapper:hover .navbar-avatar-img {
         transform: scale(1.05);
     }
 
@@ -169,7 +198,6 @@
         margin-left: 3px;
         margin-top: -2px;
     }
-    /* --------------------------------- */
 </style>
 
 <nav class="navbar">
@@ -238,7 +266,8 @@
                 </div>
             </div>
             
-            <a href="${pageContext.request.contextPath}/profile" title="<%= user.getUsername() %>">
+            <a href="${pageContext.request.contextPath}/profile" title="<%= user.getUsername() %>" 
+               class="navbar-avatar-wrapper <%= user.getNivelUsuario() >= 3 ? "burger-avatar-border" : "" %>">
                 <img src="<%= navAvatar %>" alt="Perfil" class="navbar-avatar-img" onerror="this.src='${pageContext.request.contextPath}/utils/default_profile.png'">
             </a>
             
@@ -251,6 +280,64 @@
             }
         %>
     </div>
+    <%-- LÓGICA DE CARTEL DE SUBIDA DE NIVEL --%>
+    <%
+        if (usuarioLogueado != null) {
+            entity.User userLvl = (entity.User) usuarioLogueado;
+            if (userLvl.getNivelUsuario() > userLvl.getNivelNotificado()) {
+                int newLevel = userLvl.getNivelUsuario();
+                String modalTitle = "";
+                String modalBody = "";
+                String modalIcon = request.getContextPath() + "/utils/level" + newLevel + ".svg";
+
+                if (newLevel == 2) {
+                    modalTitle = "¡Nivel 2: Cinefilo en Volumen!";
+                    modalBody = "¡Vemos que estás engordando a base de buenas críticas! Para saciar ese apetito, hemos expandido el límite de tu Watchlist.";
+                } else if (newLevel == 3) {
+                    modalTitle = "¡Nivel 3: Peso Pesado!";
+                    modalBody = "Tus opiniones están ganando peso en la comunidad. Literalmente. Ahora tu perfil tiene un marco exclusivo que demuestra tu nivel y podés elegir tu Plato Principal en tu perfil.";
+                } else if (newLevel >= 4) {
+                    modalTitle = "¡Nivel 4: Crítico Michelin!";
+                    modalBody = "Te has convertido en un catador de cine. Tu paladar es ley, tus reseñas tienen un diseño destacado y tu voto afecta más al promedio general.";
+                }
+    %>
+                <style>
+                    .levelup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center; animation: fadeInBg 0.5s; }
+                    .levelup-card { background: linear-gradient(145deg, #ffffff, #f0ede6); padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 3px solid #8B7355; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                    .levelup-img { width: 120px; height: 120px; margin-bottom: 20px; animation: pulseImg 2s infinite; }
+                    .levelup-title { color: #8B7355; font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+                    .levelup-body { color: #555; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; }
+                    .levelup-btn { background: #8B7355; color: white; border: none; padding: 12px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+                    .levelup-btn:hover { background: #6b5840; transform: scale(1.05); }
+                    @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+                    @keyframes pulseImg { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+                </style>
+
+                <div class="levelup-overlay" id="levelUpModal">
+                    <div class="levelup-card">
+                        <img src="<%= modalIcon %>" alt="Level Up" class="levelup-img" onerror="this.src='${pageContext.request.contextPath}/utils/export50.svg'">
+                        <div class="levelup-title">🚀 <%= modalTitle %></div>
+                        <div class="levelup-body"><%= modalBody %></div>
+                        <button class="levelup-btn" onclick="closeLevelUpModal(<%= newLevel %>)">¡A comer!</button>
+                    </div>
+                </div>
+
+                <script>
+                    function closeLevelUpModal(level) {
+                        document.getElementById('levelUpModal').style.display = 'none';
+                        // Llamamos al server para que no lo vuelva a mostrar
+                        fetch('${pageContext.request.contextPath}/api/level-notified', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'level=' + level
+                        }).catch(err => console.error(err));
+                    }
+                </script>
+    <%
+            }
+        }
+    %>
 </nav>
 
 <script>

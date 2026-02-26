@@ -36,6 +36,7 @@
         .spoiler-yes { background: #FFE5E5; color: #D32F2F; border: 1px solid #ffcccc; }
         .stat-item:hover { background-color: #f9f9f9; border-radius: 5px; }
         .modal-body ul { padding: 0; list-style: none; }
+        
         .profile-avatar-container {
             position: relative;
             width: 150px;
@@ -46,12 +47,44 @@
             border: 4px solid #fff;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        /* --- AVATAR NIVEL 3/4: LA HAMBURGUESA INFALIBLE (SIN EMOJI) --- */
+        .burger-avatar-border {
+            border-radius: 50% !important;
+            padding: 8px; /* Un poco más de padding porque esta foto es más grande */
+            /* Degradados que forman pan, lechuga, carne y pan */
+            background: linear-gradient(180deg, 
+                #F5B041 0%, #F5B041 30%,   
+                #58D68D 30%, #58D68D 40%,   
+                #873600 40%, #873600 70%,   
+                #F4D03F 70%, #F4D03F 100%   
+            ) !important;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2) !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none !important;
+        }
+
+        .burger-avatar-border .profile-avatar {
+            border-radius: 50% !important;
+            border: 4px solid #FFF !important; /* Borde más grueso para separar de la hamburguesa */
+            position: relative;
+            z-index: 2;
+        }
+
         .profile-avatar {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 50%;
         }
+        
         .avatar-overlay {
             position: absolute;
             bottom: 0;
@@ -65,6 +98,9 @@
             gap: 15px;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 3;
+            border-bottom-left-radius: 150px;
+            border-bottom-right-radius: 150px;
         }
         .profile-avatar-container:hover .avatar-overlay {
             opacity: 1;
@@ -85,16 +121,15 @@
             color: #ff6b6b;
         }
 
-        /* --- NUEVOS ESTILOS PARA EL LOADER --- */
         #loadingOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(250, 248, 243, 0.9); /* Fondo semi-transparente que combina con tu tema */
-            z-index: 1050; /* Debe estar por encima del modal de Bootstrap */
-            display: none; /* Oculto por defecto */
+            background: rgba(250, 248, 243, 0.9); 
+            z-index: 1050; 
+            display: none; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -104,9 +139,9 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(139, 115, 85, 0.3); /* Color secundario */
+            border: 5px solid rgba(139, 115, 85, 0.3); 
             border-radius: 50%;
-            border-top-color: #8B7355; /* Color principal */
+            border-top-color: #8B7355; 
             animation: spin 1s ease-in-out infinite;
             margin-bottom: 20px;
         }
@@ -152,7 +187,7 @@
     </a>
     
     <div class="profile-header">  
-        <div class="profile-avatar-container">
+        <div class="profile-avatar-container ${userLevel >= 3 ? 'burger-avatar-border' : ''}">
             <% 
                 entity.User uProfile = (entity.User) request.getAttribute("user");
                 String pImage = uProfile.getProfileImage();
@@ -204,6 +239,67 @@
             </div>
         </c:if>
     </div>
+
+    <div class="stats-box" style="text-align: center; position: relative;">
+        <h3 style="margin-bottom: 20px;">Nivel de Apetito: <span style="color: #8B7355;">Nivel ${userLevel}</span></h3>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 10px 0 20px 0;">
+            
+            <div style="height: 140px; width: 100%; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 15px;">
+                <img src="${pageContext.request.contextPath}/utils/level${userLevel}.svg" 
+                     alt="Personaje Nivel ${userLevel}" 
+                     style="max-height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));" 
+                     onerror="this.style.display='none'">
+            </div>
+
+            <div class="progress" style="height: 30px; border-radius: 20px; background-color: #e9ecef; width: 80%; box-shadow: inset 0 2px 5px rgba(0,0,0,.05);">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" 
+                     style="width: ${progressPercentage}%; background-color: #8B7355; line-height: 30px; font-size: 15px; font-weight: 600; transition: width 1s ease-in-out;">
+                    <c:choose>
+                        <c:when test="${userLevel == 4}">¡Apetito Máximo!</c:when>
+                        <c:otherwise>${userKcals} / ${nextLevelMax} Kcals</c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </div>
+        
+        <p style="font-size: 13px; color: #777;">
+            <i class="glyphicon glyphicon-info-sign"></i> ¡Cada Like que reciban tus reseñas te suma 500 Kcals!
+        </p>
+    </div>
+
+    <c:if test="${userLevel >= 2}">
+        <div class="stats-box" style="margin-top: 20px; text-align: center; border: 2px dashed #8B7355; background: #faf8f3; padding: 30px;">
+            <h3 style="color: #8B7355; margin-bottom: 15px;">🍽️ Plato Principal</h3>
+            
+            <c:choose>
+                <c:when test="${not empty platoPrincipalMovie}">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <a href="${pageContext.request.contextPath}/movie/${platoPrincipalMovie.id}">
+                            <img src="https://image.tmdb.org/t/p/w300${platoPrincipalMovie.posterPath}" alt="${platoPrincipalMovie.titulo}" style="width: 150px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
+                        </a>
+                        <h4 style="margin: 0; font-weight: 600; color: #333;">${platoPrincipalMovie.titulo}</h4>
+                        
+                        <c:if test="${isMyProfile}">
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                                <button class="btn btn-default" style="border-color: #8B7355; color: #8B7355; font-size: 0.85rem;" data-toggle="modal" data-target="#platoPrincipalModal">Cambiar Plato</button>
+                                <form action="${pageContext.request.contextPath}/plato-principal" method="post" style="display:inline;">
+                                    <input type="hidden" name="action" value="remove">
+                                    <button type="submit" class="btn btn-danger" style="font-size: 0.85rem;" onclick="return confirm('¿Seguro que quieres quitar tu Plato Principal?');">Quitar</button>
+                                </form>
+                            </div>
+                        </c:if>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">Espacio reservado para destacar tu película favorita de todos los tiempos.</p>
+                    <c:if test="${isMyProfile}">
+                        <button class="btn btn-primary" style="background-color: #8B7355; border-color: #8B7355; padding: 10px 25px; font-weight: 600;" data-toggle="modal" data-target="#platoPrincipalModal">Elegir Plato Principal</button>
+                    </c:if>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </c:if>
     
     <div class="stats-box">
         <h3>Estadísticas</h3>
@@ -377,13 +473,34 @@
         </div>
     </div>
 
+    <c:if test="${isMyProfile}">
+        <div class="modal fade" id="platoPrincipalModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Buscar Película</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="platoSearchInput" class="form-control" placeholder="Escribe el nombre de la película..." autocomplete="off">
+                        <div id="platoSearchResults" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                        </div>
+                        <form id="setPlatoForm" action="${pageContext.request.contextPath}/plato-principal" method="post" style="display:none;">
+                            <input type="hidden" name="action" value="set">
+                            <input type="hidden" name="movieId" id="platoMovieId">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
+
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <script>
-    // --- SCRIPT PARA MOSTRAR EL LOADER AL SUBIR LA IMAGEN ---
     document.addEventListener('DOMContentLoaded', function() {
         const uploadForm = document.getElementById('uploadPhotoForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
@@ -391,22 +508,63 @@
 
         if (uploadForm) {
             uploadForm.addEventListener('submit', function(event) {
-                // Verificamos que haya un archivo seleccionado antes de bloquear la pantalla
                 const fileInput = uploadForm.querySelector('input[type="file"]');
                 if (fileInput && fileInput.files.length > 0) {
-                    
-                    // 1. Ocultar el modal de Bootstrap (opcional, pero queda más limpio)
                     $('#uploadPhotoModal').modal('hide');
-
-                    // 2. Mostrar la pantalla de carga
                     loadingOverlay.style.display = 'flex';
-                    
-                    // 3. Deshabilitar el botón para evitar dobles envíos
                     btnSubmit.disabled = true;
                 }
             });
         }
+        
+        const platoInput = document.getElementById('platoSearchInput');
+        const platoResults = document.getElementById('platoSearchResults');
+        let platoTimeout;
+
+        if (platoInput) {
+            platoInput.addEventListener('input', function() {
+                clearTimeout(platoTimeout);
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    platoResults.innerHTML = '';
+                    return;
+                }
+                
+                platoTimeout = setTimeout(function() {
+                    fetch('${pageContext.request.contextPath}/search-api?q=' + encodeURIComponent(query))
+                        .then(res => res.json())
+                        .then(movies => {
+                            if (movies.length === 0) {
+                                platoResults.innerHTML = '<p class="text-center text-muted">No se encontraron películas.</p>';
+                                return;
+                            }
+                            
+                            let html = '<div class="list-group">';
+                            movies.forEach(m => {
+                                const poster = m.posterPath ? 'https://image.tmdb.org/t/p/w92' + m.posterPath : '${pageContext.request.contextPath}/utils/no-poster.png';
+                                const year = m.estrenoYear ? m.estrenoYear : '';
+                                html += '<a href="javascript:void(0)" class="list-group-item" onclick="selectPlatoPrincipal(' + m.id + ')" style="display:flex; align-items:center; gap:15px;">' +
+                                            '<img src="' + poster + '" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">' +
+                                            '<div>' +
+                                                '<h5 style="margin:0; font-weight:600;">' + m.titulo + '</h5>' +
+                                                '<small class="text-muted">' + year + '</small>' +
+                                            '</div>' +
+                                        '</a>';
+                            });
+                            html += '</div>';
+                            platoResults.innerHTML = html;
+                        })
+                        .catch(err => console.error(err));
+                }, 300);
+            });
+        }
     });
+
+    function selectPlatoPrincipal(id) {
+        document.getElementById('platoMovieId').value = id;
+        document.getElementById('setPlatoForm').submit();
+    }
 </script>
 
 </body>

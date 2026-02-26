@@ -30,7 +30,12 @@ public class User {
     @Past(message = "La fecha de nacimiento debe ser una fecha en el pasado.")
     private Date birthDate;
     
-    private boolean esUsuarioActivo;
+    private int totalKcals = 0;
+    private int nivelUsuario = 1;
+    private int nivelNotificado = 1;
+    private Integer platoPrincipalMovieId;
+
+    
     
     private String profileImage;
     
@@ -48,14 +53,22 @@ public class User {
     }
 
     
-    public boolean isEsUsuarioActivo() {
-        return esUsuarioActivo;
+    public int getTotalKcals() {
+        return totalKcals;
     }
 
-    public void setEsUsuarioActivo(boolean esUsuarioActivo) {
-        this.esUsuarioActivo = esUsuarioActivo;
+    public void setTotalKcals(int totalKcals) {
+        this.totalKcals = totalKcals;
     }
 
+    public int getNivelUsuario() {
+        return nivelUsuario;
+    }
+
+    public void setNivelUsuario(int nivelUsuario) {
+        this.nivelUsuario = nivelUsuario;
+    }
+    
     private LinkedList<String> watchList;
     
     public LinkedList<String> getWatchList() {
@@ -127,6 +140,22 @@ public class User {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+    
+    public int getNivelNotificado() {
+        return nivelNotificado;
+    }
+
+    public void setNivelNotificado(int nivelNotificado) {
+        this.nivelNotificado = nivelNotificado;
+    }
+    
+    public Integer getPlatoPrincipalMovieId() {
+        return platoPrincipalMovieId;
+    }
+
+    public void setPlatoPrincipalMovieId(Integer platoPrincipalMovieId) {
+        this.platoPrincipalMovieId = platoPrincipalMovieId;
     }
     
     public java.sql.Timestamp getBannedUntil() { 
