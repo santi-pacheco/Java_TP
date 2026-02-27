@@ -11,6 +11,8 @@ import entity.User;
 import service.UserService;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import repository.BlockRepository;
 import repository.FollowRepository;
 
 @WebServlet("/plato-principal")
@@ -24,7 +26,8 @@ public class PlatoPrincipalServlet extends HttpServlet {
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
-        this.userService = new UserService(userRepository, passwordEncoder, followRepository);
+        BlockRepository blockRepository = new BlockRepository();
+        this.userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
     }
 
     @Override

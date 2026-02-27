@@ -328,7 +328,7 @@ public class UserRepository {
 	
 	public User findByEmail(String email) {
         User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, esUsuarioActivo, profile_image, banned_until FROM usuarios WHERE email = ?";
+        String sql = "SELECT id_user, password, username, role, email, birthdate, profile_image, banned_until FROM usuarios WHERE email = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -343,7 +343,6 @@ public class UserRepository {
                     user.setRole(rs.getString("role"));
                     user.setEmail(rs.getString("email"));
                     user.setBirthDate(rs.getDate("birthdate"));
-                    user.setEsUsuarioActivo(rs.getBoolean("esUsuarioActivo"));
                     user.setProfileImage(rs.getString("profile_image"));
                     user.setBannedUntil(rs.getTimestamp("banned_until")); 
                 }
