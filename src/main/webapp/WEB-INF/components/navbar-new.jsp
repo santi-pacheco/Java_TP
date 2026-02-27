@@ -237,7 +237,7 @@
                 
                 String navAvatar = request.getContextPath() + "/utils/default_profile.png";
                 if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
-                    navAvatar = "/fatmovies_uploads/" + user.getProfileImage();
+                	navAvatar = request.getContextPath() + "/uploads/" + user.getProfileImage();
                 }
         %>
             <% if ("admin".equals(user.getRole())) { %>
@@ -474,7 +474,7 @@
 
         let html = '';
         filtered.forEach(n => {
-            const avatarPath = n.actorProfileImage ? ('/fatmovies_uploads/' + n.actorProfileImage) : '${pageContext.request.contextPath}/utils/default_profile.png';
+        	const avatarPath = n.actorProfileImage ? ('${pageContext.request.contextPath}/uploads/' + n.actorProfileImage) : '${pageContext.request.contextPath}/utils/default_profile.png';
             
             const unreadClass = n.unread ? 'unread' : '';
             const indicator = n.unread ? '<div class="notif-indicator"></div>' : ''; 
@@ -484,7 +484,7 @@
             let icon = '';
 
             if (n.tipo === 'LIKE') {
-                link = '${pageContext.request.contextPath}/movie/' + n.reviewId;
+                link = '${pageContext.request.contextPath}/movie/' + n.movieId;
                 icon = '❤️';
                 if (n.extraCount > 0) {
                     text = 'A <strong>' + n.actorUsername + '</strong> y <strong>' + n.extraCount + ' personas más</strong> les gustó tu reseña de ' + n.movieTitle + '.';
@@ -493,7 +493,7 @@
                 }
             } 
             else if (n.tipo === 'COMMENT') {
-                link = '${pageContext.request.contextPath}/movie/' + n.reviewId;
+                link = '${pageContext.request.contextPath}/movie/' + n.movieId;
                 icon = '💬';
                 const snippet = n.commentText.length > 30 ? n.commentText.substring(0,30) + '...' : n.commentText;
                 text = '<strong>' + n.actorUsername + '</strong> comentó en tu reseña de ' + n.movieTitle + ': "' + snippet + '"';

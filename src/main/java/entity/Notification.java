@@ -5,12 +5,13 @@ import java.time.LocalDateTime;
 public class Notification {
     private String tipo; // "LIKE", "COMMENT", "FOLLOW"
     private int actorId; 
+    private Integer movieId;
     private String actorUsername;
     private String actorProfileImage;
     
     // Datos opcionales según el tipo
     private Integer reviewId; 
-    private String movieTitle; 
+    private String movieTitle;
     private String commentText; 
     
     private int extraCount; 
@@ -49,4 +50,14 @@ public class Notification {
 
     public boolean isUnread() { return unread; }
     public void setUnread(boolean unread) { this.unread = unread; }
+
+	public Integer getMovieId() {
+		return movieId;
+	}
+
+	public void setMovieId(Integer movieId) {
+		this.movieId = movieId;
+	}
+
+	
 }

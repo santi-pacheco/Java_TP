@@ -279,7 +279,7 @@
         </p>
     </div>
 
-    <c:if test="${userLevel >= 2}">
+    <c:if test="${userLevel >= 3}">
         <div class="stats-box" style="margin-top: 20px; text-align: center; border: 2px dashed #8B7355; background: #faf8f3; padding: 30px;">
             <h3 style="color: #8B7355; margin-bottom: 15px;">🍽️ Plato Principal</h3>
             

@@ -61,7 +61,7 @@ public class CommentServlet extends HttpServlet {
                 
               
                 String profilePicture = (avatarName != null && !avatarName.trim().isEmpty()) 
-                        ? "/fatmovies_uploads/" + avatarName 
+                        ? req.getContextPath() + "/uploads/" + avatarName 
                         : req.getContextPath() + "/utils/default_profile.png";
 
             

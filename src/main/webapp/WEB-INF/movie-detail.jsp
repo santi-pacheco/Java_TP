@@ -543,7 +543,7 @@
 
                         String userAvatarPath = request.getContextPath() + "/utils/default_profile.png"; 
                         if (review.getProfileImage() != null && !review.getProfileImage().trim().isEmpty()) {
-                            userAvatarPath = "/fatmovies_uploads/" + review.getProfileImage();
+                            userAvatarPath = request.getContextPath() + "/uploads/" + review.getProfileImage();
                         }
             %>
             <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">

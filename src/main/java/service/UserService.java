@@ -202,6 +202,11 @@ public class UserService {
     }
 
     public void updatePlatoPrincipal(int userId, Integer movieId) {
-        userRepository.updatePlatoPrincipal(userId, movieId);
+    	User u = userRepository.findOne(userId);
+    	if (u != null && u.getNivelUsuario() > 2) {
+    		userRepository.updatePlatoPrincipal(userId, movieId);
+    	} else {
+			throw ErrorFactory.unauthorized("No tienes permiso para actualizar el plato principal.");
+		}  
     }
 }
