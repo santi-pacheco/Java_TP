@@ -30,7 +30,7 @@
       const pwd = document.getElementById('password').value;
       const pwd2 = document.getElementById('confirmPassword').value; // Usamos camelCase aquí también
       const clientErr = document.getElementById('clientError');
-      const pwdRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$/;
+      const pwdRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–\[{}\]:;',?\/*~$^+=<>]).*$/;
       
       let msg = '';
       if (pwd.length < 8) msg = 'La contraseña debe tener al menos 8 caracteres.';
