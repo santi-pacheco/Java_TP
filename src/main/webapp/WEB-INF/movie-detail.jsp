@@ -100,7 +100,7 @@
         }
 
         .cheddar-review-card::before {
-            content: '👑 Crítico Supremo';
+            content: '👑 Crítico Michelin';
             position: absolute;
             top: -15px;
             right: 20px;

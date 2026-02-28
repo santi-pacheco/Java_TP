@@ -313,7 +313,7 @@
                         <img src="<%= modalIcon %>" alt="Level Up" class="levelup-img" onerror="this.src='${pageContext.request.contextPath}/utils/export50.svg'">
                         <div class="levelup-title">🚀 <%= modalTitle %></div>
                         <div class="levelup-body"><%= modalBody %></div>
-                        <button class="levelup-btn" onclick="closeLevelUpModal(<%= newLevel %>)">¡A comer!</button>
+                        <button class="levelup-btn" onclick="closeLevelUpModal(<%= newLevel %>)">¡A devorar más pelis!</button>
                     </div>
                 </div>
 

@@ -24,7 +24,8 @@ public class LevelUpServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+    	String origen = request.getHeader("Referer");
+        System.out.println("El Servlet LevelUp fue llamado desde: " + origen);
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("usuarioLogueado") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

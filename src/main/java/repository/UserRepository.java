@@ -299,7 +299,7 @@ public class UserRepository {
 
 	public List<User> searchUsersByUsername(String query, int loggedUserId) {
 	    List<User> users = new ArrayList<>();
-	    String sql = "SELECT id_user, username, profile_image FROM usuarios " +
+	    String sql = "SELECT id_user, username, profile_image, nivel_usuario FROM usuarios " +
 	                 "WHERE username LIKE ? AND id_user != ? " +
 	                 "AND id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
 	                 "AND id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
@@ -317,6 +317,7 @@ public class UserRepository {
 	                user.setId(rs.getInt("id_user"));
 	                user.setUsername(rs.getString("username"));
 	                user.setProfileImage(rs.getString("profile_image"));
+	                user.setNivelUsuario(rs.getInt("nivel_usuario"));
 	                users.add(user);
 	            }
 	        }

@@ -13,7 +13,7 @@ public class FeedReviewDTO {
     private String movieTitle;
     private String text;
     private String moderation_status;
-    private int UserLevel;
+    private int userLevel;
 
     
     public int getReviewId() {
@@ -106,11 +106,13 @@ public class FeedReviewDTO {
 	public void setModeration_status(String moderation_status) {
 		this.moderation_status = moderation_status;
 	}
-	public int getUserLevel() { 
-		return UserLevel; 
+	
+	public int getUserLevel() {
+		return userLevel;
 	}
-    public void setUserLevel(int nivelUsuario) { 
-    	this.UserLevel = nivelUsuario; 
-    }
+	public void setUserLevel(int userLevel) {
+		this.userLevel = userLevel;
+	}
+	
     
 }

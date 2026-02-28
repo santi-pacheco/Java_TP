@@ -242,9 +242,13 @@
                 </div>
             </c:when>
             <c:otherwise>
-                <div style="margin-top: 15px;">
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                     <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#blockedUsersModal" style="color: #666;">
                         <i class="glyphicon glyphicon-ban-circle"></i> Usuarios Bloqueados
+                    </button>
+                    
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href='${pageContext.request.contextPath}/logout'">
+                        <i class="glyphicon glyphicon-log-out"></i> Cerrar Sesión
                     </button>
                 </div>
             </c:otherwise>

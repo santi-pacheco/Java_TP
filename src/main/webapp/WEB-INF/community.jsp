@@ -144,6 +144,50 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
+        .cheddar-review-card {
+            position: relative;
+            border: 3px solid #FFB800 !important;
+            border-radius: 15px !important;
+            background: #FFFdf5 !important;
+            margin-top: 30px !important;
+            margin-bottom: 40px !important;
+            padding: 25px !important; 
+            overflow: visible !important; 
+        }
+
+        .cheddar-review-card::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            height: 40px;
+            background-image: url('${pageContext.request.contextPath}/utils/cheddar.png');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+            background-position: top left;
+
+            z-index: 10;
+            pointer-events: none; 
+            border-top-left-radius: 15px; 
+            border-top-right-radius: 15px; 
+        }
+
+        .cheddar-review-card::before {
+            content: '👑 Crítico Michelin';
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: #222;
+            color: #FFB800;
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 11;
+            border: 2px solid #FFB800;
+        }
         
         .movie-poster {
             width: 120px;
@@ -492,6 +536,7 @@
 
         let level = parseInt(review.userLevel || review.nivelUsuario || review.nivel || review.user_level || 1, 10);
         let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
+        let cheddarClass = level >= 4 ? 'cheddar-review-card' : '';
 
         const isSpoiler = review.moderation_status === 'SPOILER';
         const spoilerCheckboxId = `spoiler-toggle-\${review.reviewId}`;
@@ -505,8 +550,7 @@
             followBtnHtml = `<button class="follow-btn \${btnClass}" data-user-id="\${review.userId}" onclick="event.stopPropagation(); toggleFollow(\${review.userId}, this)">\${btnText}</button>`;
         }
         return `
-            <div class="review-card" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'">
-                
+        	<div class="review-card \${cheddarClass}" style="cursor: pointer;" onclick="window.location.href='${pageContext.request.contextPath}/movie/\${review.movieId}'"> 
                 \${isSpoiler ? `<input type="checkbox" id="\${spoilerCheckboxId}" class="spoiler-checkbox" onclick="event.stopPropagation()">` : ''}
 
                 <img src="\${posterUrl}" class="movie-poster" alt="\${safeMovieTitle}" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
