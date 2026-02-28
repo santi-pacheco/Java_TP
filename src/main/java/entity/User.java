@@ -18,8 +18,6 @@ public class User {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).*$", message = "La contraseña debe contener mayúscula, minúscula, número y un carácter especial.")
     private String password;
     
-    @NotBlank(message = "El rol no puede estar vacío.")
-    @Pattern(regexp = "^(admin|user)$", message = "El rol debe ser 'admin' o 'user'.")
     private String role;
     
     @NotBlank(message = "El email no puede estar vacío.")

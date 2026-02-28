@@ -51,7 +51,6 @@ public class UserService {
         }
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
-        existingUser.setRole(user.getRole());
         existingUser.setBirthDate(user.getBirthDate());
         
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {

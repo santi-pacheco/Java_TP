@@ -76,10 +76,10 @@
             <div class="text-center" style="margin-bottom: 25px;">
                 <c:choose>
                     <c:when test="${not empty user.profileImage}">
-                        <img src="/fatmovies_uploads/${user.profileImage}" class="avatar-preview" alt="Foto actual">
+                        <img src="${pageContext.request.contextPath}/uploads/${user.profileImage}" class="avatar-preview" alt="Foto actual">
                     </c:when>
                     <c:otherwise>
-                        <img src="${pageContext.request.contextPath}/utils/no-user.png" class="avatar-preview" alt="Sin foto" style="opacity: 0.5;">
+                        <img src="${pageContext.request.contextPath}/utils/default_user.png" class="avatar-preview" alt="Sin foto" style="opacity: 0.5;">
                     </c:otherwise>
                 </c:choose>
                 <p class="text-muted small">ID: ${user.id} - ${user.username}</p>
@@ -95,33 +95,48 @@
                 <input type="email" name="email" class="form-control" value="${user.email}" required>
             </div>
             
-            <div class="password-section">
+          <div class="password-section">
                 <label style="color: #d9534f;">Cambiar Contraseña (Opcional)</label>
                 <input type="password" name="password" class="form-control" 
                        placeholder="Dejar vacío para mantener la actual">
-                <small class="text-muted">
+                <small class="text-muted" style="display: block; margin-bottom: 10px;">
                     Si escribes aquí, la contraseña del usuario será reemplazada por esta nueva.
                 </small>
             </div>
             
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>Rol</label>
-                        <select name="role" class="form-control" required>
-                            <option value="admin" ${user.role == 'admin' ? 'selected' : ''}>Admin</option>
-                            <option value="user" ${user.role == 'user' ? 'selected' : ''}>User</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <label>Fecha de Nacimiento</label>
-                        <input type="date" name="birthDate" class="form-control" value="${user.birthDate}" required>
-                    </div>
-                </div>
+            <div class="password-section" style="border-color: #d9534f; background: #fff4f4;">
+                <label style="color: #d9534f;"><span class="glyphicon glyphicon-ban-circle"></span> Suspensión de Cuenta (Regla de 7 Días)</label>
+                
+                <c:choose>
+                    <c:when test="${user.banned}">
+                        <p style="color: #a94442; margin-bottom: 10px; margin-top: 10px;">
+                            <strong>Estado actual:</strong> 🚫 Baneado hasta el ${user.bannedUntil}
+                        </p>
+                        <div class="checkbox">
+                            <label style="color: #3c763d; font-weight: bold; cursor: pointer;">
+                                <input type="checkbox" name="unbanUser" value="true"> 
+                                Levantar castigo (Desbanear inmediatamente)
+                            </label>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <p style="color: #3c763d; margin-bottom: 10px; margin-top: 10px;">
+                            <strong>Estado actual:</strong> ✅ Activo
+                        </p>
+                        <div class="checkbox">
+                            <label style="color: #a94442; font-weight: bold; cursor: pointer;">
+                                <input type="checkbox" name="banUser7Days" value="true"> 
+                                Aplicar castigo (Banear por 7 días desde hoy)
+                            </label>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
-            
+            <div class="form-group">
+                <label>Fecha de Nacimiento</label>
+                <input type="date" name="birthDate" class="form-control" value="${user.birthDate}" required>
+            </div>
+            <p>Rol actual: <strong>${user.role}</strong></p>              
             <hr>
             
             <button type="submit" class="btn btn-primary btn-block">Guardar Cambios</button>

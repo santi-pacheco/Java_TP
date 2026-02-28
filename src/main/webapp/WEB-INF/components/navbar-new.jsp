@@ -241,7 +241,7 @@
                 }
         %>
             <% if ("admin".equals(user.getRole())) { %>
-                <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/admin'" style="background:#8B7355;">Admin</button>
+                <button class="btn-login" onclick="window.location.href='${pageContext.request.contextPath}/admin.jsp'" style="background:#8B7355;">Admin</button>
             <% } %>
             
             <div class="nav-icon-wrapper" id="notifTrigger">

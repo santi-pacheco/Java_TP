@@ -94,15 +94,6 @@
             </div>
             
             <div class="form-group">
-                <label>Rol</label>
-                <select name="role" class="form-control" required>
-                    <option value="" ${empty user.role ? 'selected' : ''} disabled>-- Selecciona un rol --</option>
-                    <option value="admin" ${user.role == 'admin' ? 'selected' : ''}>Admin</option>
-                    <option value="user" ${user.role == 'user' ? 'selected' : ''}>User</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
                 <label>Fecha de Nacimiento</label>
                 <input type="date" name="birthDate" class="form-control" 
                        value="${not empty user ? user.birthDate : ''}" required>

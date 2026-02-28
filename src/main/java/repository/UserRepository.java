@@ -272,7 +272,7 @@ public class UserRepository {
             throw ErrorFactory.internal("Error banning user");
         }
     }
-
+    
     public java.sql.Timestamp getBannedUntil(int userId) {
         String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
         

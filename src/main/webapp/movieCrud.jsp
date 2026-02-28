@@ -21,24 +21,35 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 8px; vert
 </head>
 <body>
 <div class="container">
-    <a href="<%= request.getContextPath() %>/home" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;">Volver</a>
+    <a href="<%= request.getContextPath() %>/admin.jsp" class="btn btn-primary" style="margin: 20px 0; background-color: #8B7355; border-color: #8B7355;">
+        <i class="glyphicon glyphicon-arrow-left"></i> Volver
+    </a>
     <div class="table-wrapper">
         <div class="table-title">
             <div class="row">
                 <div class="col-sm-6"><h2>Gestión de <b>Películas</b></h2></div>
                 <div class="col-sm-6">
                     <a href="<%= request.getContextPath() %>/movies?accion=mostrarFormCrear" class="btn btn-success" style="float: right;">
-                        <span class="glyphicon glyphicon-plus"></span> Añadir
+                        <span class="glyphicon glyphicon-plus"></span> Añadir Nueva
                     </a>
                 </div>
             </div>
+            <div class="row" style="margin-bottom: 15px; margin-top: 15px;">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <span class="input-group-addon" style="background-color: #8B7355; color: white; border-color: #8B7355;">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por ID, título, año...">
+                    </div>
+                </div>
+            </div>
         </div>
+        
         <% if ("true".equals(request.getParameter("exito"))) { %>
-        <div class="alert alert-success">¡Operación realizada con éxito!</div>
+            <div class="alert alert-success">¡Operación realizada con éxito!</div>
         <% } %>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Buscar películas..." class="form-control">
-        </div>
+
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -111,10 +122,9 @@ $(document).ready(function() {
     }
     
     $('#searchInput').on('keyup', function() {
-        var searchTerm = $(this).val().toLowerCase();
-        $('.movie-row').each(function() {
-            var title = $(this).data('title');
-            $(this).toggle(title.indexOf(searchTerm) > -1);
+        var value = $(this).val().toLowerCase();
+        $("#movieTableBody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
         });
     });
 });

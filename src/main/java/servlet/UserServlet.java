@@ -107,8 +107,8 @@ public class UserServlet extends HttpServlet {
                 	userFromForm.setUsername(request.getParameter("username"));
                 	userFromForm.setEmail(request.getParameter("email"));
                 	userFromForm.setPassword(request.getParameter("password"));
-                	userFromForm.setRole(request.getParameter("role"));
                 	userFromForm.setBirthDate(parseDate(request.getParameter("birthDate")));
+                	userFromForm.setRole("user");
                 	Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
                 	if (!violations.isEmpty()) {
                 		request.setAttribute("errors", getErrorMessages(violations));
@@ -132,7 +132,6 @@ public class UserServlet extends HttpServlet {
                     
                     userFromForm.setUsername(request.getParameter("username"));
                     userFromForm.setEmail(request.getParameter("email"));
-                    userFromForm.setRole(request.getParameter("role"));
                     userFromForm.setBirthDate(parseDate(request.getParameter("birthDate")));
                     String newPassword = request.getParameter("password");
                     
@@ -148,8 +147,15 @@ public class UserServlet extends HttpServlet {
                         request.getRequestDispatcher(jspTarget).forward(request, response);
                         return; 
                     }
-
                     userController.modifyUser(userFromForm);
+                    String banUser7Days = request.getParameter("banUser7Days");
+                    String unbanUser = request.getParameter("unbanUser");
+                    UserRepository userRepository = new UserRepository();
+                    if ("true".equals(banUser7Days)) {
+                    	userRepository.banUser(userFromForm.getId(), 7); 
+                    } else if ("true".equals(unbanUser)) {
+                    	userRepository.banUser(userFromForm.getId(), -1); 
+                    }
                     break;
                     
                 case "eliminar":

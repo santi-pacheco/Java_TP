@@ -40,7 +40,7 @@ public class AuthenticationFilter implements Filter {
         boolean isLoggedIn = (user != null);
         boolean isAdmin = (user != null && "admin".equals(user.getRole()));
         
-        boolean isAdminRoute = requestURI.endsWith("/index.html") ||
+        boolean isAdminRoute = requestURI.endsWith("/admin.jsp") ||
                               requestURI.endsWith("/index.jsp") ||
                               requestURI.endsWith("/index") ||
                               requestURI.endsWith("/admin") ||
