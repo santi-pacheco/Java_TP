@@ -2,19 +2,27 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %> 
+<%@ page import="java.util.Set" %> 
+<%@ page import="java.util.HashSet" %> 
 <%@ page import="entity.Movie" %>
 <%
     List<Movie> originalList = (List<Movie>) request.getAttribute("movies");
     List<String> fastLoadUrls = new ArrayList<>();
     
+    // Usamos un Set para asegurar que NO haya URLs duplicadas desde el origen
+    Set<String> uniqueUrls = new HashSet<>();
+    
     if (originalList != null && !originalList.isEmpty()) {
-       
-        int limit = Math.min(46, originalList.size()); 
-        for (int i = 0; i < limit; i++) {
-            String posterPath = originalList.get(i).getPosterPath();
+        for (Movie m : originalList) {
+            String posterPath = m.getPosterPath();
             if (posterPath != null && !posterPath.trim().isEmpty()) {
-                fastLoadUrls.add("https://image.tmdb.org/t/p/w185" + posterPath);
+                String fullUrl = "https://image.tmdb.org/t/p/w185" + posterPath;
+                if (uniqueUrls.add(fullUrl)) { // add devuelve true si no existía
+                    fastLoadUrls.add(fullUrl);
+                }
             }
+            // Mantenemos un límite saludable para no colapsar la memoria del navegador
+            if (fastLoadUrls.size() >= 50) break; 
         }
     }
 %>
@@ -220,31 +228,39 @@
     </div>
     
     <div class="poster-rows">
-        <%
-            if (!fastLoadUrls.isEmpty()) {
-                int totalMovies = fastLoadUrls.size();
-                
-                String[] wrapperClasses = {"intro-from-right", "intro-from-left", "intro-from-right-late"};
-                String[] rowClasses = {"scroll-left", "scroll-right", "scroll-left-slow"};
-                String[] topPositions = {"20%", "45%", "70%"};
-                
-                for (int i = 0; i < 3; i++) {
-                    out.print("<div class=\"row-wrapper " + wrapperClasses[i] + "\" style=\"top: " + topPositions[i] + ";\">");
-                    out.print("<div class=\"poster-row " + rowClasses[i] + "\">");
-                    
-                    
-                    Collections.shuffle(fastLoadUrls);
-                    
-                    for (int j = 0; j < 24; j++) {
-                        
-                        String bgUrl = fastLoadUrls.get(j % totalMovies);
-                        out.print("<div class=\"poster\" style=\"background-image: url('" + bgUrl + "');\"></div>");
-                    }
-                    
-                    out.print("</div></div>");
+    <%
+        if (!fastLoadUrls.isEmpty()) {
+            String[] wrapperClasses = {"intro-from-right", "intro-from-left", "intro-from-right-late"};
+            String[] rowClasses = {"scroll-left", "scroll-right", "scroll-left-slow"};
+            String[] topPositions = {"20%", "45%", "70%"};
+
+            // Dividimos las URLs únicas en 3 grupos, uno por fila
+            int totalMovies = fastLoadUrls.size();
+            int chunkSize = totalMovies / 3;
+
+            for (int i = 0; i < 3; i++) {
+                int from = i * chunkSize;
+                // La última fila toma el resto para no desperdiciar URLs
+                int to = (i == 2) ? totalMovies : from + chunkSize;
+                List<String> rowMovies = new ArrayList<>(fastLoadUrls.subList(from, to));
+                Collections.shuffle(rowMovies);
+
+                out.print("<div class=\"row-wrapper " + wrapperClasses[i] + "\" style=\"top: " + topPositions[i] + ";\">");
+                out.print("<div class=\"poster-row " + rowClasses[i] + "\">");
+
+                // Primera pasada: pósters únicos
+                for (String url : rowMovies) {
+                    out.print("<div class=\"poster\" style=\"background-image: url('" + url + "');\"></div>");
                 }
+                // Segunda pasada: clon exacto para el scroll infinito sin cortes
+                for (String url : rowMovies) {
+                    out.print("<div class=\"poster\" style=\"background-image: url('" + url + "');\"></div>");
+                }
+
+                out.print("</div></div>");
             }
-        %>
-    </div>
+        }
+    %>
+	</div>
 </body>
 </html>

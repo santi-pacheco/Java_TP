@@ -107,7 +107,6 @@
         background-color: #555;
     }
     
-    /* --- ESTILOS DEL AVATAR NAVBAR --- */
     .navbar-avatar-wrapper {
         border-radius: 50%;
         display: inline-flex;
@@ -127,32 +126,6 @@
         vertical-align: middle;
     }
 
-    /* Borde de Hamburguesa Exclusivo para Navbar */
-    .burger-avatar-border {
-        border-radius: 50% !important;
-        padding: 3px;
-        background: linear-gradient(180deg, 
-            #F5B041 0%, #F5B041 30%,   
-            #58D68D 30%, #58D68D 40%,   
-            #873600 40%, #873600 70%,   
-            #F4D03F 70%, #F4D03F 100%   
-        ) !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
-        border: none !important;
-    }
-
-    .burger-avatar-border .navbar-avatar-img {
-        border-radius: 50% !important;
-        border: 2px solid #FFF !important; /* Separa el borde interno para que la hamburguesa respire */
-        position: relative;
-        z-index: 2;
-    }
-    
-    .navbar-avatar-wrapper:hover .navbar-avatar-img {
-        transform: scale(1.05);
-    }
-
-    /* --- ESTILOS DE NOTIFICACIONES --- */
     .nav-icon-wrapper { position: relative; cursor: pointer; margin-right: 5px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s; }
     .nav-icon-wrapper:hover { background: #EAE5DB; }
     .nav-icon { width: 24px; height: 24px; color: #333; }
@@ -174,7 +147,29 @@
     .notif-item:hover { background: #fcfcfc; }
     .notif-item.unread { background: #F4F8FA; }
     
-    .notif-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
+    .notif-avatar-wrapper { flex-shrink: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+    .notif-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; margin: 0; }
+    
+    .burger-avatar-border {
+        border-radius: 50% !important;
+        padding: 4px;
+        background: linear-gradient(180deg, 
+            #F5B041 0%, #F5B041 30%,   
+            #58D68D 30%, #58D68D 40%,   
+            #873600 40%, #873600 70%,   
+            #F4D03F 70%, #F4D03F 100%   
+        ) !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        border: none !important;
+    }
+
+    .burger-avatar-border img {
+        border-radius: 50% !important;
+        border: 2px solid #FFF !important; 
+        position: relative;
+        z-index: 2;
+    }
+
     .notif-content { flex: 1; font-size: 0.9rem; line-height: 1.4; color: #444; }
     .notif-content strong { color: #111; }
     .notif-time { font-size: 0.75rem; color: #999; margin-top: 4px; }
@@ -245,10 +240,9 @@
             <% } %>
             
             <div class="nav-icon-wrapper" id="notifTrigger">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-                <div class="notification-badge" id="notifBadge"></div>
+    			<img src="${pageContext.request.contextPath}/utils/movie-ticket.svg" class="nav-icon" alt="Notificaciones">
+    
+    			<div class="notification-badge" id="notifBadge"></div>
                 
                 <div class="notif-dropdown" id="notifDropdown">
                     <div class="notif-header">
@@ -280,7 +274,7 @@
             }
         %>
     </div>
-    <%-- LÓGICA DE CARTEL DE SUBIDA DE NIVEL --%>
+
     <%
         if (usuarioLogueado != null) {
             entity.User userLvl = (entity.User) usuarioLogueado;
@@ -326,7 +320,6 @@
                 <script>
                     function closeLevelUpModal(level) {
                         document.getElementById('levelUpModal').style.display = 'none';
-                        // Llamamos al server para que no lo vuelva a mostrar
                         fetch('${pageContext.request.contextPath}/api/level-notified', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -341,7 +334,6 @@
 </nav>
 
 <script>
-    // --- LÓGICA DEL BUSCADOR ---
     var searchInput = document.getElementById('searchInput');
     var searchResults = document.getElementById('searchResults');
     var searchTimeout;
@@ -402,8 +394,6 @@
         window.location.href = '${pageContext.request.contextPath}/movie/' + movieId;
     }
 
-
- // --- LÓGICA DE NOTIFICACIONES ---
     const notifTrigger = document.getElementById('notifTrigger');
     const notifDropdown = document.getElementById('notifDropdown');
     const notifBadge = document.getElementById('notifBadge');
@@ -427,7 +417,6 @@
         if (interval > 1) return Math.floor(interval) + " min";
         return Math.floor(seconds) + " seg";
     }
-
 
     function updateTabIndicators() {
         const hasNewLikes = allNotifications.some(n => n.unread && n.tipo === 'LIKE');
@@ -479,13 +468,16 @@
             const unreadClass = n.unread ? 'unread' : '';
             const indicator = n.unread ? '<div class="notif-indicator"></div>' : ''; 
             
+            let level = parseInt(n.userLevel || n.actorLevel || n.nivelUsuario || n.nivel || n.user_level || 1, 10);
+            let avatarWrapperClass = level >= 3 ? 'burger-avatar-border' : '';
+            
             let text = '';
             let link = '#';
             let icon = '';
 
             if (n.tipo === 'LIKE') {
                 link = '${pageContext.request.contextPath}/movie/' + n.movieId;
-                icon = '❤️';
+                icon = '🍟';
                 if (n.extraCount > 0) {
                     text = 'A <strong>' + n.actorUsername + '</strong> y <strong>' + n.extraCount + ' personas más</strong> les gustó tu reseña de ' + n.movieTitle + '.';
                 } else {
@@ -505,7 +497,9 @@
             }
 
             html += '<a href="' + link + '" class="notif-item ' + unreadClass + '">' +
-                        '<img src="' + avatarPath + '" class="notif-avatar" onerror="this.src=\'${pageContext.request.contextPath}/utils/default_profile.png\'">' +
+                        '<div class="notif-avatar-wrapper ' + avatarWrapperClass + '">' +
+                            '<img src="' + avatarPath + '" class="notif-avatar" onerror="this.src=\'${pageContext.request.contextPath}/utils/default_profile.png\'">' +
+                        '</div>' +
                         '<div class="notif-content">' +
                             text +
                             '<div class="notif-time">' + icon + ' ' + timeAgo(n.fecha) + '</div>' +
@@ -519,10 +513,7 @@
     function filterNotifs(type) {
         currentFilter = type;
         document.querySelectorAll('.notif-tab').forEach(tab => tab.classList.remove('active'));
-        
-
         document.getElementById('tab-' + type).classList.add('active');
-        
         renderNotifs();
     }
 
@@ -533,15 +524,11 @@
             e.stopPropagation();
             
             if (isDropdownOpen) {
-
                 notifDropdown.style.display = 'none';
                 isDropdownOpen = false;
-                
-
                 allNotifications.forEach(n => n.unread = false); 
                 updateTabIndicators(); 
             } else {
-
                 if(searchResults) searchResults.style.display = 'none';
                 notifDropdown.style.display = 'flex';
                 isDropdownOpen = true;
@@ -549,7 +536,6 @@
                 const unreadCount = allNotifications.filter(n => n.unread).length;
                 if (unreadCount > 0) {
                     notifBadge.style.display = 'none'; 
-                    
                     fetch('${pageContext.request.contextPath}/notifications-api', { method: 'POST' })
                         .catch(err => console.error("Error al actualizar notificaciones", err));
                 }
@@ -567,7 +553,6 @@
         if (notifDropdown && isDropdownOpen && !e.target.closest('#notifTrigger')) {
             notifDropdown.style.display = 'none';
             isDropdownOpen = false;
-            
             allNotifications.forEach(n => n.unread = false);
             updateTabIndicators(); 
         }

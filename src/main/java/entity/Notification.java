@@ -18,6 +18,8 @@ public class Notification {
     
     private LocalDateTime fecha;
     private boolean unread;
+    private int UserLevel;
+
 
     public Notification() {}
 
@@ -58,6 +60,12 @@ public class Notification {
 	public void setMovieId(Integer movieId) {
 		this.movieId = movieId;
 	}
-
+	
+	public int getUserLevel() {
+		return UserLevel;
+	}
+	public void setUserLevel(int userLevel) {
+		UserLevel = userLevel;
+	}
 	
 }

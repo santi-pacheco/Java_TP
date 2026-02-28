@@ -98,13 +98,20 @@
             color: #8B7355; 
         }
         
+        .result-avatar-wrapper {
+            margin-right: 15px; 
+            flex-shrink: 0;
+            display: inline-flex;
+            border-radius: 50%;
+        }
+
         .result-avatar { 
             width: 45px; 
             height: 45px; 
             border-radius: 50%; 
             object-fit: cover; 
-            margin-right: 15px; 
             border: 2px solid #eee; 
+            margin: 0;
         }
         
         .result-username { font-weight: 600; font-size: 16px; }
@@ -203,6 +210,13 @@
         }
 
         .user-info { display: flex; align-items: center; gap: 12px; }
+
+        .user-avatar-wrapper {
+            flex-shrink: 0;
+            display: inline-flex;
+            border-radius: 50%;
+        }
+
         .user-avatar { 
             width: 42px; 
             height: 42px; 
@@ -211,6 +225,30 @@
             border: 2px solid #f0f0f0; 
         }
         
+        .burger-avatar-border {
+            border-radius: 50% !important;
+            padding: 4px;
+            background: linear-gradient(180deg, 
+                #F5B041 0%, #F5B041 30%,   
+                #58D68D 30%, #58D68D 40%,   
+                #873600 40%, #873600 70%,   
+                #F4D03F 70%, #F4D03F 100%   
+            ) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none !important;
+        }
+
+        .burger-avatar-border img {
+            border-radius: 50% !important;
+            border: 2px solid #FFF !important;
+            position: relative;
+            z-index: 2;
+        }
+
         .user-details { display: flex; flex-direction: column; }
         
         .user-name { 
@@ -366,8 +404,13 @@
                 let safeUsername = escapeHTML(user.username);
                 let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/\${safeImage}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
                 
+                let level = parseInt(user.userLevel || user.nivelUsuario || user.nivel || user.user_level || 1, 10);
+                let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
+                
                 html += `<a href="${pageContext.request.contextPath}/profile?id=\${user.id}" class="user-result-item">
-                            <img src="\${avatarUrl}" class="result-avatar" alt="\${safeUsername}">
+                            <div class="result-avatar-wrapper \${burgerClass}">
+                                <img src="\${avatarUrl}" class="result-avatar" alt="\${safeUsername}">
+                            </div>
                             <span class="result-username">\${safeUsername}</span>
                         </a>`;
             });
@@ -404,7 +447,6 @@
         fetch(`${pageContext.request.contextPath}/api/feed?offset=\${offset}`)
             .then(response => response.json())
             .then(data => {
-                
                 if (data.length === 0) {
                     hasMoreData = false;
                     sentinel.style.display = 'none';
@@ -448,6 +490,9 @@
         let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
         let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500\${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
 
+        let level = parseInt(review.userLevel || review.nivelUsuario || review.nivel || review.user_level || 1, 10);
+        let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
+
         const isSpoiler = review.moderation_status === 'SPOILER';
         const spoilerCheckboxId = `spoiler-toggle-\${review.reviewId}`;
         const spoilerTextClass = isSpoiler ? 'review-spoiler-text' : '';
@@ -468,7 +513,9 @@
 
                 <div class="review-content">
                     <div class="user-info">
-                        <img src="\${avatarUrl}" class="user-avatar" alt="\${safeUsername}">
+                        <div class="user-avatar-wrapper \${burgerClass}">
+                            <img src="\${avatarUrl}" class="user-avatar" alt="\${safeUsername}">
+                        </div>
                         <div class="user-details">
                             <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                                 <a href="${pageContext.request.contextPath}/profile?id=\${review.userId}" class="user-name" onclick="event.stopPropagation()">\${safeUsername}</a>

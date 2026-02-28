@@ -70,24 +70,39 @@
         .reviews-list { display: flex; flex-direction: column; gap: 20px; }
         .review-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
 
-       /* --- RESEÑA NIVEL 4: CHEDDAR CHORREANDO POR ARRIBA --- */
         .cheddar-review-card {
             position: relative;
             border: 3px solid #FFB800 !important;
             border-radius: 15px !important;
             background: #FFFdf5 !important;
-            margin-top: 30px !important; /* Espacio para el badge de arriba */
-            margin-bottom: 20px !important;
+            margin-top: 30px !important;
+            margin-bottom: 40px !important;
             padding: 25px !important; 
-            padding-top: 40px !important; /* Espacio para que el queso no tape la foto */
             overflow: visible !important; 
         }
 
-        /* El badge de Crítico Supremo (ESTO FALTABA) */
-        .cheddar-review-card::before {
-            content: '👑 Crítico Michelin';
+        .cheddar-review-card::after {
+            content: '';
             position: absolute;
-            top: -16px;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            height: 40px;
+            background-image: url('${pageContext.request.contextPath}/utils/cheddar.png');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+            background-position: top left;
+
+            z-index: 10;
+            pointer-events: none; 
+            border-top-left-radius: 15px; 
+            border-top-right-radius: 15px; 
+        }
+
+        .cheddar-review-card::before {
+            content: '👑 Crítico Supremo';
+            position: absolute;
+            top: -15px;
             right: 20px;
             background: #222;
             color: #FFB800;
@@ -99,24 +114,6 @@
             z-index: 11;
             border: 2px solid #FFB800;
         }
-        
-        /* Queso derretido cayendo desde el borde SUPERIOR (Más orgánico y asimétrico) */
-        .cheddar-review-card::after {
-            content: '';
-            position: absolute;
-            top: -3px; 
-            left: -3px; 
-            right: -3px; 
-            height: 35px; /* Un poco más alto para darle lugar a las gotas largas */
-            /* SVG de queso asimétrico, con gotas de distintos tamaños y curvas orgánicas */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 50' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1000,0 L1000,10 C960,10 950,45 920,45 C890,45 880,15 840,15 C810,15 800,35 770,35 C740,35 730,5 690,5 C660,5 650,50 620,50 C590,50 580,20 540,20 C510,20 500,40 470,40 C440,40 430,10 390,10 C360,10 350,35 320,35 C290,35 280,15 240,15 C210,15 200,45 170,45 C140,45 130,20 90,20 C60,20 50,35 20,35 C10,35 5,15 0,15 Z' fill='%23FFB800'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-size: 100% 100%; /* Estira el diseño a lo ancho en vez de repetirlo como baldosas */
-            z-index: 10;
-            pointer-events: none; 
-            border-top-left-radius: 15px; 
-            border-top-right-radius: 15px; 
-        }
 
         .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .review-text { color: #444; line-height: 1.6; margin-bottom: 10px; }
@@ -127,11 +124,9 @@
         .author-avatar-wrapper { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; background-color: #f5f5f5; }
 
-        /* --- AVATAR NIVEL 3/4: LA HAMBURGUESA INFALIBLE (SIN EMOJI) --- */
         .burger-avatar-border {
             border-radius: 50% !important;
             padding: 4px;
-            /* Degradados que forman pan, lechuga, carne y pan */
             background: linear-gradient(180deg, 
                 #F5B041 0%, #F5B041 30%,   
                 #58D68D 30%, #58D68D 40%,   
@@ -212,10 +207,11 @@
         .comment-author-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
         .comment-text { color: #555; line-height: 1.4; word-wrap: break-word; }
         
-        .comment-actions { display: flex; gap: 5px; margin-left: auto; }
-        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.5; transition: all 0.2s; padding: 0 4px; }
-        .btn-icon:hover { opacity: 1; transform: scale(1.15); }
-        .btn-icon.delete:hover { filter: hue-rotate(320deg) saturate(300%); }
+        .comment-actions { display: flex; gap: 8px; margin-left: auto; }
+        .btn-action { background: transparent; border: 1px solid #333; color: #333; font-family: inherit; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-action:hover { background: #333; color: #fff; }
+        .btn-action.delete { border-color: #d32f2f; color: #d32f2f; }
+        .btn-action.delete:hover { background: #d32f2f; color: #fff; }
         
         .comment-form { display: flex; gap: 10px; }
         .comment-input { flex: 1; padding: 10px; border: 2px solid #eee; border-radius: 8px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.3s; }
@@ -236,6 +232,7 @@
         @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutToast { to { opacity: 0; visibility: hidden; margin-top: -50px; } }
 
+        /* --- TRUCO UX: El overlay se enciende, pero el contenido espera 400ms --- */
         #aiLoadingOverlay {
             position: fixed;
             top: 0;
@@ -249,6 +246,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            opacity: 0; /* Empieza invisible */
+            animation: fadeInOverlay 0.3s ease 0.4s forwards; /* Tarda 400ms en mostrarse */
+        }
+
+        @keyframes fadeInOverlay {
+            to { opacity: 1; }
         }
 
         .spinner-ai {
@@ -304,7 +307,7 @@
 <body>
     <div id="aiLoadingOverlay">
         <div class="spinner-ai"></div>
-        <h3 style="color:#333; margin-top:20px;">Nuestra IA está analizando tu reseña...</h3>
+        <h3 style="color:#333; margin-top:20px;" id="aiLoadingText">Nuestra IA está analizando tu contenido...</h3>
         <p style="color:#666;">Verificando normas de la comunidad y posibles spoilers.</p>
     </div>
 
@@ -313,7 +316,7 @@
             <div id="resultIcon" class="result-icon"></div>
             <div id="resultTitle" class="result-title"></div>
             <div id="resultMessage" class="result-message"></div>
-            <button class="result-btn" onclick="window.location.reload()">Entendido</button>
+            <button class="result-btn" id="resultBtn" onclick="window.location.reload()">Entendido</button>
         </div>
     </div>
 
@@ -425,7 +428,7 @@
                         savedWatchedOn = userReview.getWatched_on().toString();
                     }
                 %>
-                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
+                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required autocomplete="off"><%= savedReviewText %></textarea>
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Rating:</label>
@@ -449,7 +452,7 @@
                         %>
                         <input type="date" id="watchedOnInput" name="watchedOn" value="<%= savedWatchedOn %>" min="<%= minDate %>" max="<%= java.time.LocalDate.now() %>" required>
                     </div>
-                    <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
+                    <button type="submit" id="submitReviewBtn"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
                 </div>
             </form>
         </div>
@@ -536,7 +539,6 @@
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
                         boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
                         
-                        // LÓGICA DE NIVELES
                         int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getId_user())) ? userLevelsMap.get(review.getId_user()) : 1;
                         String reviewCardClass = authorLevel == 4 ? "review-card cheddar-review-card" : "review-card";
                         String avatarWrapperClass = authorLevel >= 3 ? "author-avatar-wrapper burger-avatar-border" : "author-avatar-wrapper";
@@ -616,7 +618,7 @@
                             <div class="comment-list" id="comment-list-<%= review.getId() %>"></div>
                             <% if (loggedUser != null) { %>
                                 <div class="comment-form">
-                                    <input type="text" class="comment-input" id="comment-input-<%= review.getId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500">
+                                    <input type="text" class="comment-input" id="comment-input-<%= review.getId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500" autocomplete="off">
                                     <button class="btn-submit-comment" onclick="submitComment(<%= review.getId() %>)">Enviar</button>
                                 </div>
                             <% } else { %>
@@ -661,8 +663,14 @@
     if (ajaxForm) {
         ajaxForm.addEventListener('submit', function(e) {
             e.preventDefault(); 
-
+            
+            document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu reseña...';
             document.getElementById('aiLoadingOverlay').style.display = 'flex';
+            
+            const submitBtn = document.getElementById('submitReviewBtn');
+            const origText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
 
             const payload = {
                 id_movie: parseInt(document.getElementById('movieIdInput').value),
@@ -689,10 +697,12 @@
             })
             .catch(err => {
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = origText;
                 if(err.error) {
-                    showModerationResult('🚫', 'Acción Denegada', err.error);
+                    showModerationResult('🚫', 'Acción Denegada', err.error, true);
                 } else {
-                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.');
+                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.', false);
                 }
             });
         });
@@ -712,36 +722,44 @@
                     document.getElementById('aiLoadingOverlay').style.display = 'none';
                     
                     if (review.moderationStatus === 'APPROVED') {
-                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.');
+                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.', true);
                     } else if (review.moderationStatus === 'SPOILER') {
-                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.');
+                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.', true);
                     } else if (review.moderationStatus === 'REJECTED') {
-                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'));
+                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'), true);
                     }
                 }
             })
             .catch(err => {
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
-                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.');
+                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.', true);
             });
 
             if(attempts >= 20) {
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
-                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.');
+                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.', true);
             }
 
         }, 1500); 
     }
 
-    function showModerationResult(icon, title, message) {
+    function showModerationResult(icon, title, message, reloadOnClose = false) {
         document.getElementById('resultIcon').textContent = icon;
         document.getElementById('resultTitle').textContent = title;
         document.getElementById('resultMessage').innerHTML = message;
         document.getElementById('resultOverlay').style.display = 'flex';
-    }
 
+        const btn = document.getElementById('resultBtn');
+        if (reloadOnClose) {
+            btn.onclick = () => window.location.reload();
+        } else {
+            btn.onclick = () => {
+                document.getElementById('resultOverlay').style.display = 'none';
+            };
+        }
+    }
 
     function toggleFollow(targetUserId, btnElement) {
         if (currentUserId === null) {
@@ -919,21 +937,47 @@
         const submitBtn = inputField.nextElementSibling;
         
         if (!commentText) return;
-        inputField.disabled = true; submitBtn.disabled = true;
-        const origText = submitBtn.textContent; submitBtn.textContent = 'Enviando...';
+        
+        document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu comentario...';
+        document.getElementById('aiLoadingOverlay').style.display = 'flex';
+        
+        inputField.disabled = true;
+        submitBtn.disabled = true;
+        const origText = submitBtn.textContent; 
+        submitBtn.textContent = 'Enviando...';
         
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=create&reviewId=' + reviewId + '&commentText=' + encodeURIComponent(commentText)
         }).then(res => res.json()).then(data => {
-            inputField.disabled = false; submitBtn.disabled = false; submitBtn.textContent = origText;
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            inputField.disabled = false; 
+            submitBtn.disabled = false; 
+            submitBtn.textContent = origText;
+            
             if (data.success) {
-                inputField.value = '';
-                showToast('Comentario publicado');
-                loadComments(reviewId); 
+                if (data.status === 'REJECTED') {
+                    showModerationResult('🚫', 'Comentario Rechazado', 'Tu comentario incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.', true);
+                } else if (data.status === 'SPOILER') {
+                    inputField.value = '';
+                    loadComments(reviewId);
+                    showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu comentario revela detalles clave de la trama. Se ha publicado, pero oculto por defecto.', false);
+                } else {
+                    inputField.value = '';
+                    loadComments(reviewId);
+                    showModerationResult('✅', '¡Comentario Aprobado!', 'Tu comentario cumple con todas las normas y ya ha sido publicado.', false);
+                }
             } else if (data.bannedUntil) {
-                showToast('Baneado hasta: ' + data.bannedUntil, 'error');
-            } else { showToast('Error: ' + data.error, 'error'); }
+                showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
+            } else { 
+                showModerationResult('❌', 'Error', data.error || 'Ocurrió un error inesperado al procesar tu comentario.', false);
+            }
+        }).catch(err => {
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            inputField.disabled = false; 
+            submitBtn.disabled = false; 
+            submitBtn.textContent = origText;
+            showModerationResult('❌', 'Error de conexión', 'No se pudo conectar con el servidor.', false);
         });
     }
 
@@ -942,7 +986,7 @@
         const currentText = commentItem.getAttribute('data-text'); 
         const safeText = currentText.replace(/"/g, '&quot;');
         const textContainer = commentItem.querySelector('.comment-text-container');
-        textContainer.innerHTML = '<input type="text" class="comment-input edit-input" value="' + safeText + '" style="width: 100%; margin-top: 5px;">' +
+        textContainer.innerHTML = '<input type="text" class="comment-input edit-input" value="' + safeText + '" style="width: 100%; margin-top: 5px;" autocomplete="off">' +
                             '<div style="margin-top: 5px; text-align: right;">' +
                                 '<button onclick="saveEditComment(' + commentId + ', this)" class="btn-submit-comment" style="padding: 4px 10px; font-size: 0.8rem;">Guardar</button>' +
                                 '<button onclick="cancelEditComment(this)" class="btn-submit-comment" style="background: #999; padding: 4px 10px; font-size: 0.8rem; margin-left: 5px;">Cancelar</button>' +
@@ -960,22 +1004,40 @@
         const newText = commentItem.querySelector('.edit-input').value.trim();
         const reviewId = btnElement.closest('.comments-container').id.split('-')[2];
         if (!newText) { showToast('Comentario vacío', 'error'); return; }
+        
+        document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu edición...';
+        document.getElementById('aiLoadingOverlay').style.display = 'flex';
+        
         const btn = btnElement; btn.textContent = '...'; btn.disabled = true;
 
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=edit&commentId=' + commentId + '&commentText=' + encodeURIComponent(newText)
         }).then(r => r.json()).then(data => {
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            
             if (data.success) {
-                showToast('Comentario editado');
-                loadComments(reviewId); 
+                if (data.status === 'REJECTED') {
+                    showModerationResult('🚫', 'Edición Rechazada', 'Tu edición incumple las normas. Tu cuenta ha sido baneada temporalmente.', true);
+                } else if (data.status === 'SPOILER') {
+                    loadComments(reviewId); 
+                    showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu edición revela detalles clave. Se ha actualizado, pero oculto por defecto.', false);
+                } else {
+                    loadComments(reviewId); 
+                    showModerationResult('✅', '¡Edición Aprobada!', 'Tu comentario editado cumple con todas las normas y ya es visible.', false);
+                }
             } else if (data.bannedUntil) {
-                showToast('Baneado hasta: ' + data.bannedUntil, 'error');
+                showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
                 loadComments(reviewId);
             } else {
-                showToast('Error: ' + data.error, 'error');
+                showModerationResult('❌', 'Error', data.error || 'No se pudo editar el comentario.', false);
                 btn.textContent = 'Guardar'; btn.disabled = false;
+                loadComments(reviewId);
             }
+        }).catch(err => {
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            showModerationResult('❌', 'Error de conexión', 'No se pudo conectar con el servidor.', false);
+            loadComments(reviewId);
         });
     }
 
@@ -1002,8 +1064,8 @@
         let actionsHtml = '';
         if (currentUserId !== null && currentUserId === commentUserId) {
             actionsHtml = '<div class="comment-actions">' +
-                            '<button class="btn-icon edit" onclick="startEditComment(' + commentId + ', this)" title="Editar">✏️</button>' +
-                            '<button class="btn-icon delete" onclick="deleteComment(' + commentId + ', ' + reviewId + ')" title="Eliminar">🗑️</button>' +
+                            '<button class="btn-action" onclick="startEditComment(' + commentId + ', this)">Editar</button>' +
+                            '<button class="btn-action delete" onclick="deleteComment(' + commentId + ', ' + reviewId + ')">Eliminar</button>' +
                           '</div>';
         }
 
@@ -1015,7 +1077,7 @@
             contentHtml = '<input type="checkbox" class="comment-spoiler-checkbox" id="spoiler-comment-' + commentId + '">' +
                           '<div class="comment-text comment-spoiler-text">' + text + '</div>' +
                           '<label for="spoiler-comment-' + commentId + '" class="comment-spoiler-overlay">' +
-                              '<span style="font-size: 0.75rem; font-weight: 600;">Mostrar reseña</span>' +
+                              '<span style="font-size: 0.75rem; font-weight: 600;">Mostrar comentario</span>' +
                           '</label>';
         } else {
             contentHtml = '<div class="comment-text">' + text + '</div>';

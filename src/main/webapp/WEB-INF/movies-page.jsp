@@ -161,13 +161,15 @@
         .filter-row {
             display: flex;
             gap: 20px;
-            align-items: end;
+            align-items: flex-end;
         }
         
         .filter-group {
             display: flex;
             flex-direction: column;
             flex: 1;
+            position: relative;
+            padding-bottom: 22px;
         }
         
         .filter-group label {
@@ -179,7 +181,9 @@
         
         .filter-group input,
         .filter-group select {
-            padding: 12px;
+            padding: 10px 12px;
+            height: 46px;
+            box-sizing: border-box;
             border: 2px solid #E0E0E0;
             border-radius: 8px;
             font-size: 1rem;
@@ -191,17 +195,47 @@
             outline: none;
             border-color: #333;
         }
+
+        .filter-group input.input-error {
+            border-color: #c0392b;
+        }
+
+        .field-error {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            color: #c0392b;
+            font-size: 0.78rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+            padding-bottom: 22px;
+        }
         
-        .filter-btn {
-            background: #333;
-            color: #FAF8F3;
-            border: none;
-            padding: 12px 24px;
+        .filter-btn, .clear-btn {
+            height: 46px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
+            text-decoration: none;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .filter-btn {
+            background: #333;
+            color: #FAF8F3;
         }
         
         .filter-btn:hover {
@@ -211,14 +245,6 @@
         .clear-btn {
             background: #999;
             color: #FAF8F3;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.3s;
         }
         
         .clear-btn:hover {
@@ -236,6 +262,18 @@
             .filter-row {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 0;
+            }
+            .filter-group {
+                margin-bottom: 15px;
+            }
+            .filter-actions {
+                width: 100%;
+                padding-bottom: 0;
+                margin-top: 10px;
+            }
+            .filter-btn, .clear-btn {
+                flex: 1;
             }
         }
     </style>
@@ -244,58 +282,75 @@
     <%@ include file="/WEB-INF/components/navbar-new.jsp" %>
     
     <div class="page-container">
-        <!-- Filter Section -->
         <div class="filter-section">
-            <h2 class="section-title">Buscar y Filtrar Películas</h2>
-            <form action="${pageContext.request.contextPath}/movies-page" method="get" class="filter-form">
+            <h2 class="section-title" style="margin-bottom: 20px;">Buscar y Filtrar Películas</h2>
+            <form action="${pageContext.request.contextPath}/movies-page" method="get" class="filter-form" id="filterForm" onsubmit="return validateYears()">
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="name">Nombre:</label>
-                        <input type="text" id="name" name="name" placeholder="Buscar por nombre..." value="${currentName != null ? currentName : ''}" onchange="this.form.submit()">
+                        <input type="text" id="name" name="name" 
+                               placeholder="Buscar por nombre..." 
+                               value="${currentName != null ? currentName : ''}">
                     </div>
                     <div class="filter-group">
                         <label for="genre">Género:</label>
-                        <select id="genre" name="genre" onchange="this.form.submit()">
+                        <select id="genre" name="genre">
                             <option value="" ${currentGenre == null || currentGenre == '' ? 'selected' : ''}>Todos los géneros</option>
-                            <option value="Acción" ${currentGenre == 'Acción' ? 'selected' : ''}>Acción</option>
-                            <option value="Aventura" ${currentGenre == 'Aventura' ? 'selected' : ''}>Aventura</option>
-                            <option value="Animación" ${currentGenre == 'Animación' ? 'selected' : ''}>Animación</option>
-                            <option value="Comedia" ${currentGenre == 'Comedia' ? 'selected' : ''}>Comedia</option>
-                            <option value="Crimen" ${currentGenre == 'Crimen' ? 'selected' : ''}>Crimen</option>
-                            <option value="Documental" ${currentGenre == 'Documental' ? 'selected' : ''}>Documental</option>
-                            <option value="Drama" ${currentGenre == 'Drama' ? 'selected' : ''}>Drama</option>
-                            <option value="Familia" ${currentGenre == 'Familia' ? 'selected' : ''}>Familia</option>
-                            <option value="Fantasía" ${currentGenre == 'Fantasía' ? 'selected' : ''}>Fantasía</option>
-                            <option value="Historia" ${currentGenre == 'Historia' ? 'selected' : ''}>Historia</option>
-                            <option value="Terror" ${currentGenre == 'Terror' ? 'selected' : ''}>Terror</option>
-                            <option value="Música" ${currentGenre == 'Música' ? 'selected' : ''}>Música</option>
-                            <option value="Misterio" ${currentGenre == 'Misterio' ? 'selected' : ''}>Misterio</option>
-                            <option value="Romance" ${currentGenre == 'Romance' ? 'selected' : ''}>Romance</option>
+                            <option value="Acción"          ${currentGenre == 'Acción'          ? 'selected' : ''}>Acción</option>
+                            <option value="Aventura"        ${currentGenre == 'Aventura'        ? 'selected' : ''}>Aventura</option>
+                            <option value="Animación"       ${currentGenre == 'Animación'       ? 'selected' : ''}>Animación</option>
+                            <option value="Comedia"         ${currentGenre == 'Comedia'         ? 'selected' : ''}>Comedia</option>
+                            <option value="Crimen"          ${currentGenre == 'Crimen'          ? 'selected' : ''}>Crimen</option>
+                            <option value="Documental"      ${currentGenre == 'Documental'      ? 'selected' : ''}>Documental</option>
+                            <option value="Drama"           ${currentGenre == 'Drama'           ? 'selected' : ''}>Drama</option>
+                            <option value="Familia"         ${currentGenre == 'Familia'         ? 'selected' : ''}>Familia</option>
+                            <option value="Fantasía"        ${currentGenre == 'Fantasía'        ? 'selected' : ''}>Fantasía</option>
+                            <option value="Historia"        ${currentGenre == 'Historia'        ? 'selected' : ''}>Historia</option>
+                            <option value="Terror"          ${currentGenre == 'Terror'          ? 'selected' : ''}>Terror</option>
+                            <option value="Música"          ${currentGenre == 'Música'          ? 'selected' : ''}>Música</option>
+                            <option value="Misterio"        ${currentGenre == 'Misterio'        ? 'selected' : ''}>Misterio</option>
+                            <option value="Romance"         ${currentGenre == 'Romance'         ? 'selected' : ''}>Romance</option>
                             <option value="Ciencia ficción" ${currentGenre == 'Ciencia ficción' ? 'selected' : ''}>Ciencia ficción</option>
-                            <option value="Película de TV" ${currentGenre == 'Película de TV' ? 'selected' : ''}>Película de TV</option>
-                            <option value="Suspense" ${currentGenre == 'Suspense' ? 'selected' : ''}>Suspense</option>
-                            <option value="Bélica" ${currentGenre == 'Bélica' ? 'selected' : ''}>Bélica</option>
-                            <option value="Western" ${currentGenre == 'Western' ? 'selected' : ''}>Western</option>
+                            <option value="Película de TV"  ${currentGenre == 'Película de TV'  ? 'selected' : ''}>Película de TV</option>
+                            <option value="Suspense"        ${currentGenre == 'Suspense'        ? 'selected' : ''}>Suspense</option>
+                            <option value="Bélica"          ${currentGenre == 'Bélica'          ? 'selected' : ''}>Bélica</option>
+                            <option value="Western"         ${currentGenre == 'Western'         ? 'selected' : ''}>Western</option>
                         </select>
                     </div>
                 </div>
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="since">Desde año:</label>
-                        <input type="number" id="since" name="since" min="1900" max="<%= java.time.Year.now().getValue() %>" placeholder="1990" value="${currentSince != null ? currentSince : ''}" onchange="validateYears(); this.form.submit();">
+                        <input type="number" id="since" name="since" 
+                               min="1890" max="<%= java.time.Year.now().getValue() %>" 
+                               placeholder="1890" 
+                               value="${currentSince != null ? currentSince : ''}">
+                        <span class="field-error" id="since-error"></span>
                     </div>
                     <div class="filter-group">
                         <label for="until">Hasta año:</label>
-                        <input type="number" id="until" name="until" min="1900" max="<%= java.time.Year.now().getValue() %>" placeholder="<%= java.time.Year.now().getValue() %>" value="${currentUntil != null ? currentUntil : ''}" onchange="validateYears(); this.form.submit();">
+                        <input type="number" id="until" name="until" 
+                               min="1890" max="<%= java.time.Year.now().getValue() %>" 
+                               placeholder="<%= java.time.Year.now().getValue() %>" 
+                               value="${currentUntil != null ? currentUntil : ''}">
+                        <span class="field-error" id="until-error"></span>
                     </div>
-                    <div class="filter-group">
+                    <div class="filter-actions">
                         <button type="submit" class="filter-btn">Buscar</button>
+                        <% 
+                            String pName   = request.getParameter("name");
+                            String pGenre  = request.getParameter("genre");
+                            String pSince  = request.getParameter("since");
+                            String pUntil  = request.getParameter("until");
+                            boolean hasFilters = (pName  != null && !pName.trim().isEmpty())
+                                             || (pGenre  != null && !pGenre.trim().isEmpty())
+                                             || (pSince  != null && !pSince.trim().isEmpty())
+                                             || (pUntil  != null && !pUntil.trim().isEmpty());
+                        %>
+                        <% if (hasFilters) { %>
+                            <a href="${pageContext.request.contextPath}/movies-page" class="clear-btn">Limpiar</a>
+                        <% } %>
                     </div>
-                    <% if (request.getAttribute("filteredMovies") != null) { %>
-                    <div class="filter-group">
-                        <a href="${pageContext.request.contextPath}/movies-page" class="clear-btn">Limpiar</a>
-                    </div>
-                    <% } %>
                 </div>
             </form>
         </div>
@@ -312,7 +367,6 @@
         %>
         
         <% if (filteredMovies != null) { %>
-        <!-- Resultados Filtrados -->
         <div class="section">
             <h2 class="section-title">Resultados de Búsqueda (<%= filteredMovies.size() %> películas)</h2>
             <div class="movies-grid">
@@ -344,7 +398,6 @@
         </div>
         <% } else { %>
         
-        <!-- Películas Más Populares -->
         <div class="section">
             <h2 class="section-title">Más Populares</h2>
             <div class="carousel-container">
@@ -376,7 +429,6 @@
             </div>
         </div>
         
-        <!-- Mejor Valoradas -->
         <div class="section">
             <h2 class="section-title">Mejor Valoradas</h2>
             <div class="carousel-container">
@@ -408,7 +460,6 @@
             </div>
         </div>
         
-        <!-- Películas Recientes -->
         <div class="section">
             <h2 class="section-title">Estrenos Recientes</h2>
             <div class="carousel-container">
@@ -443,36 +494,66 @@
     </div>
     
     <script>
-        function scrollCarousel(carouselId, scrollAmount) {
-            const carousel = document.getElementById(carouselId + '-carousel');
-            carousel.scrollBy({
-                left: scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-        
-        function validateYears() {
-            const sinceInput = document.getElementById('since');
-            const untilInput = document.getElementById('until');
-            const currentYear = new Date().getFullYear();
-            
-            const since = parseInt(sinceInput.value) || 0;
-            const until = parseInt(untilInput.value) || 0;
-            
-            if (until > 0 && until > currentYear) {
-                alert('El año hasta no puede ser mayor al año actual (' + currentYear + ')');
-                untilInput.value = currentYear;
-                return false;
+    function scrollCarousel(carouselId, scrollAmount) {
+        const carousel = document.getElementById(carouselId + '-carousel');
+        carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+
+    function clearError(inputId, errorId) {
+        document.getElementById(inputId).classList.remove('input-error');
+        document.getElementById(errorId).textContent = '';
+    }
+
+    function validateYears() {
+        const sinceInput = document.getElementById('since');
+        const untilInput = document.getElementById('until');
+        const sinceError = document.getElementById('since-error');
+        const untilError = document.getElementById('until-error');
+        const currentYear = new Date().getFullYear();
+        const MIN_YEAR = 1890;
+
+        clearError('since', 'since-error');
+        clearError('until', 'until-error');
+
+        const since = sinceInput.value ? parseInt(sinceInput.value) : null;
+        const until = untilInput.value ? parseInt(untilInput.value) : null;
+        let valid = true;
+
+        if (since !== null) {
+            if (since < MIN_YEAR) {
+                sinceError.textContent = `El año mínimo es ${MIN_YEAR}.`;
+                sinceInput.classList.add('input-error');
+                valid = false;
+            } else if (since > currentYear) {
+                sinceError.textContent = `El año no puede superar ${currentYear}.`;
+                sinceInput.classList.add('input-error');
+                valid = false;
             }
-            
-            if (since > 0 && until > 0 && since > until) {
-                alert('El año desde no puede ser mayor al año hasta');
-                sinceInput.value = until;
-                return false;
-            }
-            
-            return true;
         }
+
+        if (until !== null) {
+            if (until < MIN_YEAR) {
+                untilError.textContent = `El año mínimo es ${MIN_YEAR}.`;
+                untilInput.classList.add('input-error');
+                valid = false;
+            } else if (until > currentYear) {
+                untilError.textContent = `El año no puede superar ${currentYear}.`;
+                untilInput.classList.add('input-error');
+                valid = false;
+            }
+        }
+
+        if (since !== null && until !== null && valid && since > until) {
+            sinceError.textContent = '"Desde" no puede ser mayor que "Hasta".';
+            sinceInput.classList.add('input-error');
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    document.getElementById('since').addEventListener('input', () => clearError('since', 'since-error'));
+    document.getElementById('until').addEventListener('input', () => clearError('until', 'until-error'));
     </script>
 </body>
 </html>

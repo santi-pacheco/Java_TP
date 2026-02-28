@@ -37,7 +37,7 @@ public class ReviewRepository {
                 }
             }
         } catch (SQLException e) {
-        	System.out.println("SQL Error: " + e.getMessage());
+            System.out.println("SQL Error: " + e.getMessage());
             if (e.getMessage().contains("unique_user_movie_review")) throw ErrorFactory.duplicate("Ya tienes una reseña para esta película");
             else if (e.getMessage().contains("id_user")) throw ErrorFactory.notFound("El usuario especificado no existe");
             else if (e.getMessage().contains("id_movie")) throw ErrorFactory.notFound("La película especificada no existe");
@@ -149,12 +149,12 @@ public class ReviewRepository {
     public List<Review> findByMovie(int movieId, int idUsuarioLogueado) {
         List<Review> reviews = new ArrayList<>();
         String sql = "SELECT r.*, u.username, u.profile_image, p.name as movie_title, " +
-	                 "COALESCE((SELECT COUNT(*) FROM reviews_comments rc WHERE rc.id_review = r.id_review AND rc.moderation_status IN ('APPROVED', 'SPOILER')), 0) as comments_count " +
-	                 "FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-	                 "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
-	                 "AND r.id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
-	                 "AND r.id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
-	                 "ORDER BY r.created_at DESC";
+                     "COALESCE((SELECT COUNT(*) FROM reviews_comments rc WHERE rc.id_review = r.id_review AND rc.moderation_status IN ('APPROVED', 'SPOILER')), 0) as comments_count " +
+                     "FROM reviews r JOIN usuarios u ON r.id_user = u.id_user JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                     "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
+                     "AND r.id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
+                     "AND r.id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
+                     "ORDER BY r.created_at DESC";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
                stmt.setInt(1, movieId);
@@ -273,16 +273,16 @@ public class ReviewRepository {
         List<Review> reviews = new ArrayList<>();
 
         String sql = "SELECT r.id_review, r.id_user, r.id_movie, r.review_text, r.rating, " +
-	                 "r.watched_on, r.created_at, r.moderation_status, r.moderation_reason, " +
-	                 "u.username, u.profile_image, p.titulo_original as movie_title, " +
-	                 "COALESCE((SELECT COUNT(*) FROM review_likes rl WHERE rl.id_review = r.id_review), 0) as likes_count " +
-	                 "FROM reviews r " +
-	                 "JOIN usuarios u ON r.id_user = u.id_user " +
-	                 "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-	                 "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
-	                 "AND r.id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
-	                 "AND r.id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
-	                 "ORDER BY likes_count DESC, r.created_at DESC";
+                     "r.watched_on, r.created_at, r.moderation_status, r.moderation_reason, " +
+                     "u.username, u.profile_image, p.titulo_original as movie_title, " +
+                     "COALESCE((SELECT COUNT(*) FROM review_likes rl WHERE rl.id_review = r.id_review), 0) as likes_count " +
+                     "FROM reviews r " +
+                     "JOIN usuarios u ON r.id_user = u.id_user " +
+                     "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
+                     "WHERE r.id_movie = ? AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
+                     "AND r.id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
+                     "AND r.id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
+                     "ORDER BY likes_count DESC, r.created_at DESC";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -300,9 +300,10 @@ public class ReviewRepository {
            return reviews;
     }
 
-        public List<FeedReviewDTO> getFriendsFeedPaginated(int idUsuarioLogueado, int offset, int limit) {           List<FeedReviewDTO> feed = new ArrayList<>();
+        public List<FeedReviewDTO> getFriendsFeedPaginated(int idUsuarioLogueado, int offset, int limit) {
+            List<FeedReviewDTO> feed = new ArrayList<>();
             String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.moderation_status, " +
-                         "u.id_user, u.username, u.profile_image, " +
+                         "u.id_user, u.username, u.profile_image, u.nivel_usuario, " +
                          "p.poster_path, p.name AS movie_title " +
                          "FROM reviews r " +
                          "INNER JOIN seguidores s ON r.id_user = s.id_seguido " +
@@ -314,7 +315,7 @@ public class ReviewRepository {
                          "LIMIT ? OFFSET ?";
                          
             try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-                    PreparedStatement stmt = conn.prepareStatement(sql)) {
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
                 
                 stmt.setInt(1, idUsuarioLogueado);
                 stmt.setInt(2, limit);
@@ -331,6 +332,7 @@ public class ReviewRepository {
                     dto.setPosterPath(rs.getString("poster_path"));
                     dto.setUsername(rs.getString("username"));
                     dto.setUserAvatar(rs.getString("profile_image"));
+                    dto.setUserLevel(rs.getInt("nivel_usuario")); // SETEAMOS EL NIVEL ACÁ
                     if (rs.getTimestamp("created_at") != null) {
                         dto.setDateFormatted(sdf.format(rs.getTimestamp("created_at")));
                     } else {
@@ -369,7 +371,7 @@ public class ReviewRepository {
             List<FeedReviewDTO> feed = new ArrayList<>();
 
             String sql = "SELECT r.id_review, r.id_movie, r.review_text, r.rating, r.created_at, r.likes_count, r.moderation_status, " +
-                         "u.id_user, u.username, u.profile_image, p.poster_path, p.name AS movie_title " +
+                         "u.id_user, u.username, u.profile_image, u.nivel_usuario, p.poster_path, p.name AS movie_title " +
                          "FROM reviews r " +
                          "INNER JOIN usuarios u ON r.id_user = u.id_user " +
                          "INNER JOIN peliculas p ON r.id_movie = p.id_pelicula " +
@@ -401,6 +403,7 @@ public class ReviewRepository {
                     dto.setUserId(rs.getInt("id_user"));
                     dto.setUsername(rs.getString("username"));
                     dto.setUserAvatar(rs.getString("profile_image"));
+                    dto.setUserLevel(rs.getInt("nivel_usuario")); // SETEAMOS EL NIVEL ACÁ
                     dto.setPosterPath(rs.getString("poster_path"));
                     dto.setDateFormatted(rs.getTimestamp("created_at") != null ? sdf.format(rs.getTimestamp("created_at")) : "Reciente");
                     dto.setRating(rs.getDouble("rating"));

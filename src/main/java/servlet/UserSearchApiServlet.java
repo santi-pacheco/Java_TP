@@ -66,6 +66,8 @@ public class UserSearchApiServlet extends HttpServlet {
                 userJson.addProperty("id", u.getId());
                 userJson.addProperty("username", u.getUsername());
                 userJson.addProperty("profileImage", u.getProfileImage() != null ? u.getProfileImage() : "");
+                // FALTABA ESTA LÍNEA PARA QUE EL JS SEPA EL NIVEL:
+                userJson.addProperty("nivelUsuario", u.getNivelUsuario()); 
                 jsonArray.add(userJson);
             }
 
