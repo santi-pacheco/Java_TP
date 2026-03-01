@@ -39,8 +39,8 @@ public class CommentService {
         if (review == null) throw new IllegalArgumentException("Review no encontrada");
 
         Movie movie = movieRepository.findOne(review.getId_movie());
-        String movieTitle = movie != null ? movie.getTituloOriginal() : "";
-        String moviePlot = movie != null ? movie.getSinopsis() : "";
+        String movieTitle = movie != null ? movie.getOriginalTitle() : "";
+        String moviePlot = movie != null ? movie.getSynopsis() : "";
 
         ReviewComment comment = new ReviewComment();
         comment.setIdUsuario(userId);
@@ -63,8 +63,8 @@ public class CommentService {
 
         Review review = reviewRepository.findOne(comment.getIdReview());
         Movie movie = movieRepository.findOne(review.getId_movie());
-        String movieTitle = movie != null ? movie.getTituloOriginal() : "";
-        String moviePlot = movie != null ? movie.getSinopsis() : "";
+        String movieTitle = movie != null ? movie.getOriginalTitle() : "";
+        String moviePlot = movie != null ? movie.getSynopsis() : "";
 
         moderateAndSaveComment(comment, newText.trim(), review.getReview_text(), moviePlot, movieTitle, userId, true);
         comment.setCommentText(newText.trim());

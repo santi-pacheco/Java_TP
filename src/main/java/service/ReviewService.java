@@ -61,8 +61,8 @@ public class ReviewService {
         
         movieService.updateReviewStats(review.getId_movie());
         
-        if (watchlistService.getWatchlist(review.getId_user()).getMovies().contains(String.valueOf(movie.getId()))) {
-            watchlistService.removeMovie(review.getId_user(), String.valueOf(movie.getId()));
+        if (watchlistService.getWatchlist(review.getId_user()).getMovies().contains(String.valueOf(movie.getMovieId()))) {
+            watchlistService.removeMovie(review.getId_user(), String.valueOf(movie.getMovieId()));
         }
         
         return savedReview;

@@ -46,23 +46,23 @@ public class MovieService {
 	
 	public Movie updateMovie(Movie movie) {
 		// 1. Primero, verifica que la película exista
-	    Movie existingMovie = movieRepository.findOne(movie.getId());
+	    Movie existingMovie = movieRepository.findOne(movie.getMovieId());
 	    if (existingMovie == null) {
-	        throw ErrorFactory.notFound("No se puede actualizar. Película con ID " + movie.getId() + " no encontrada.");
+	        throw ErrorFactory.notFound("No se puede actualizar. Película con ID " + movie.getMovieId() + " no encontrada.");
 	    }
-	    existingMovie.setEstrenoYear(movie.getEstrenoYear());
-	    existingMovie.setDuracion(movie.getDuracion());
-	    existingMovie.setAdulto(movie.getAdulto());
-	    existingMovie.setTitulo(movie.getTitulo());
+	    existingMovie.setReleaseYear(movie.getReleaseYear());
+	    existingMovie.setDuration(movie.getDuration());
+	    existingMovie.setIsAdult(movie.getIsAdult());
+	    existingMovie.setTitle(movie.getTitle());
 	    existingMovie.setPopularidad(movie.getPopularidad());
-	    existingMovie.setTituloOriginal(movie.getTituloOriginal());
-	    existingMovie.setSinopsis(movie.getSinopsis());
-	    existingMovie.setPuntuacionApi(movie.getPuntuacionApi());
-	    existingMovie.setIdiomaOriginal(movie.getIdiomaOriginal());
+	    existingMovie.setTitleOriginal(movie.getOriginalTitle());
+	    existingMovie.setSynopsis(movie.getSynopsis());
+	    existingMovie.setApiRating(movie.getApiRating());
+	    existingMovie.setOriginalLanguage(movie.getOriginalLanguage());
 	    existingMovie.setPosterPath(movie.getPosterPath());
-	    existingMovie.setId_api(movie.getId_api());
-        existingMovie.setVotosApi(movie.getVotosApi());
-        existingMovie.setId_imdb(movie.getId_imdb());
+	    existingMovie.setApiId(movie.getApiId());
+        existingMovie.setApiVotes(movie.getApiVotes());
+        existingMovie.setImdbId(movie.getImdbId());
 	    
 	    return movieRepository.update(existingMovie);	
 	}
@@ -92,7 +92,7 @@ public class MovieService {
 				return 0.0f;
 			}
 			// Hacemos la llamada a la API externa
-    		URL url = new URL("https://api.imdbapi.dev/titles/" + movie.getId_imdb() );
+    		URL url = new URL("https://api.imdbapi.dev/titles/" + movie.getImdbId() );
     		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
     		conn.setRequestMethod("GET");
     		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));

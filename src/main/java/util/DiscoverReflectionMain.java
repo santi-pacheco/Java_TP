@@ -163,11 +163,11 @@ public class DiscoverReflectionMain {
             // ✅ Esta es la línea clave. El código se pausará aquí el tiempo justo para no superar el límite.
             rateLimiter.acquire();
 
-            System.out.println("Procesando película " + (i + 1) + "/" + allMovies.size() + ": '" + movie.getTitulo() + "'");
+            System.out.println("Procesando película " + (i + 1) + "/" + allMovies.size() + ": '" + movie.getTitle() + "'");
 
             try {
                 // Obtenemos el id_api de la película actual
-                int apiId = movie.getId_api();
+                int apiId = movie.getApiId();
                 
                 // Llamamos a tu método en ExternalApiService
                 MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(apiId, null);
@@ -185,15 +185,15 @@ public class DiscoverReflectionMain {
                 for (Country c : paisesPeli) {
                     CountryRepository cr = new CountryRepository();
                     int co =  cr.findOneByISO(c.getIso_3166_1());
-                    System.out.println("   -> Guardando país: " + co + " para la película: " + movie.getTitulo());
-                    cr.saveCountryMovie(co, movie.getId());
+                    System.out.println("   -> Guardando país: " + co + " para la película: " + movie.getTitle());
+                    cr.saveCountryMovie(co, movie.getMovieId());
                 }
                 
                  
                  
             } catch (Exception e) {
                 // ❌ Si falla una película, registramos el error y continuamos con la siguiente.
-                System.err.println("   -> ERROR al procesar '" + movie.getTitulo() + "': " + e.getMessage());
+                System.err.println("   -> ERROR al procesar '" + movie.getTitle() + "': " + e.getMessage());
                 errorCount++;
             }
         }
@@ -324,11 +324,11 @@ public class DiscoverReflectionMain {
             // ✅ Esta es la línea clave. El código se pausará aquí el tiempo justo para no superar el límite.
             rateLimiter.acquire();
 
-            System.out.println("Procesando película " + (i + 1) + "/" + allMovies.size() + ": '" + movie.getTitulo() + "'");
+            System.out.println("Procesando película " + (i + 1) + "/" + allMovies.size() + ": '" + movie.getTitle() + "'");
 
             try {
                 // Obtenemos el id_api de la película actual
-                int apiId = movie.getId_api();
+                int apiId = movie.getApiId();
                 
                 // Llamamos a tu método en ExternalApiService
                 MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(apiId, null);
@@ -351,7 +351,7 @@ public class DiscoverReflectionMain {
                     // --- FIN DE LA CONVERSIÓN ---
 
                     // Asignamos el valor de tipo Time a la entidad
-                    movie.setDuracion(sqlTime);
+                    movie.setDuration(sqlTime);
 
                     // Aquí guardarías la película actualizada en la BD
                     // movieRepository.save(movie);
@@ -363,7 +363,7 @@ public class DiscoverReflectionMain {
                     System.out.println("   -> Info: No se encontró un runtime válido para la película. Se omite actualización.");
                     // Opcionalmente, puedes contar esto como un éxito si no lo consideras un error
                 }
-                movie.setId_imdb(details.getId_imdb());
+                movie.setImdbId(details.getId_imdb());
                 System.out.println("   -> Actualizando otros detalles de la película...");
                 //Mostrar tipo de dato de la duracion y el de id_imdb 
                 movieController.modifyMovie(movie);
@@ -374,7 +374,7 @@ public class DiscoverReflectionMain {
 						.map(info.movito.themoviedbapi.model.core.Genre::getId)
 						.collect(Collectors.toList());
                 System.out.println("   -> Actualizando géneros asociados...");
-                movieController.updateMovieGenres(movie.getId(), genreIds, genreController);
+                movieController.updateMovieGenres(movie.getMovieId(), genreIds, genreController);
                 System.out.println("   -> Géneros actualizados.");
                 
                 info.movito.themoviedbapi.model.movies.Credits credits = details.getCredits();
@@ -383,18 +383,18 @@ public class DiscoverReflectionMain {
                 List<actorCharacter> ac = personController.saveActors(personWithCharacter);
 
                 System.out.println("   -> Actores guardados. Actualizando relación actores-película...");
-                movieController.updateMovieActors(movie.getId(), ac);
+                movieController.updateMovieActors(movie.getMovieId(), ac);
                 List<entity.Person> director = externalApiService.mapCrew(credits.getCrew());
                 System.out.println("   -> Actualizando directores asociados a personas...");
                 List<entity.Person> d = personController.saveDirectors(director);
                 System.out.println("   -> Directores guardados. Actualizando relación directores-película...");
-                movieController.updateMovieDirectors(movie.getId(), d);
+                movieController.updateMovieDirectors(movie.getMovieId(), d);
 				System.out.println("   -> Relación directores-película actualizada.");
 				// Si llegamos aquí, todo fue bien
-				System.out.println("   -> Proceso completado para '" + movie.getTitulo() + "'.\n");
+				System.out.println("   -> Proceso completado para '" + movie.getTitle() + "'.\n");
             } catch (Exception e) {
                 // ❌ Si falla una película, registramos el error y continuamos con la siguiente.
-                System.err.println("   -> ERROR al procesar '" + movie.getTitulo() + "': " + e.getMessage());
+                System.err.println("   -> ERROR al procesar '" + movie.getTitle() + "': " + e.getMessage());
                 errorCount++;
             }
         }

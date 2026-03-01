@@ -91,7 +91,7 @@ public class DatosApiService {
 	        List<Object[]> batchRelations = new ArrayList<>();
 
 	        for (Movie movie : moviesToSave) {
-	            Integer realDbId = mapApiIdToDbId.get(movie.getId_api());
+	            Integer realDbId = mapApiIdToDbId.get(movie.getApiId());
 	            
 	            if (realDbId != null && movie.getGenerosTemporales() != null) {
 	                for (Integer idGenero : movie.getGenerosTemporales()) {
@@ -163,13 +163,13 @@ public class DatosApiService {
 		List<Object[]> batchCountries = new ArrayList<>();
 		
 		for (Movie m : movies) {
-			List<service.ExternalApiService.PersonWithCharacter> movieCast = mapMovieActors.get(m.getId_api());
+			List<service.ExternalApiService.PersonWithCharacter> movieCast = mapMovieActors.get(m.getApiId());
 			if (movieCast != null) {
 				for (var actor : movieCast) {
 				  Integer dbPersonId = peopleMap.get(actor.getId_api());
 				  if (dbPersonId != null) {
 				      batchCast.add(new Object[]{ 
-				          m.getId(),
+				          m.getMovieId(),
 				          dbPersonId,
 				          actor.getCharacterName()
 				      });
@@ -177,26 +177,26 @@ public class DatosApiService {
 				}
 			}
 		
-			List<entity.Person> movieCrew = mapMovieDirectors.get(m.getId_api());
+			List<entity.Person> movieCrew = mapMovieDirectors.get(m.getApiId());
 			if (movieCrew != null) {
 				for (var dir : movieCrew) {
 				  Integer dbPersonId = peopleMap.get(dir.getId_api());
 				  
 				  if (dbPersonId != null) {
 				       batchCrew.add(new Object[]{ 
-				           m.getId(), 
+				           m.getMovieId(), 
 				           dbPersonId, 
 				           "Director"
 				       });
 				  }
 				}
 			}
-			List<entity.Country> peliPaises = mapMovieCountries.get(m.getId_api());
+			List<entity.Country> peliPaises = mapMovieCountries.get(m.getApiId());
 	        if (peliPaises != null) {
 	            for (var c : peliPaises) {
 	                Integer dbCountryId = countryMap.get(c.getIso_3166_1());
 	                if (dbCountryId != null) {
-	                    batchCountries.add(new Object[]{ m.getId(), dbCountryId });
+	                    batchCountries.add(new Object[]{ m.getMovieId(), dbCountryId });
 	                }
 	            }
 	        }
@@ -227,9 +227,9 @@ public class DatosApiService {
 	    if (runtime != null && runtime > 0) {
 	        long hours = TimeUnit.MINUTES.toHours(runtime);
 	        long mins = runtime % 60;
-	        movie.setDuracion(Time.valueOf(LocalTime.of((int)hours, (int)mins, 0)));
+	        movie.setDuration(Time.valueOf(LocalTime.of((int)hours, (int)mins, 0)));
 	    }
-	    movie.setId_imdb(details.getId_imdb());
+	    movie.setImdbId(details.getId_imdb());
 	}
 	
 	public void loadActorsDirectorsAndRuntime() {
@@ -277,9 +277,9 @@ public class DatosApiService {
 
             try {
             	if (processedCount % 10 == 0) {
-                    System.out.println("   -> Procesando: " + processedCount + "/" + allMovies.size() + " - " + movie.getTitulo());
+                    System.out.println("   -> Procesando: " + processedCount + "/" + allMovies.size() + " - " + movie.getTitle());
                 }
-                MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(movie.getId_api(), null);
+                MovieDetailsDTO details = externalApiService.fetchMovieDetailsWithCredits(movie.getApiId(), null);
 
                 updateMovieInMemory(movie, details);
                 bufferMoviesToUpdate.add(movie);
@@ -291,9 +291,9 @@ public class DatosApiService {
                 bufferDirectors.addAll(directors);
                 bufferCountries.addAll(countries);
                 
-                mapMovieActors.put(movie.getId_api(), actors);
-                mapMovieDirectors.put(movie.getId_api(), directors);
-                mapMovieCountries.put(movie.getId_api(), countries);
+                mapMovieActors.put(movie.getApiId(), actors);
+                mapMovieDirectors.put(movie.getApiId(), directors);
+                mapMovieCountries.put(movie.getApiId(), countries);
 
                 if (bufferMoviesToUpdate.size() >= BATCH_SIZE) {
                     flushBuffers(externalApiService, bufferMoviesToUpdate, bufferActors, bufferDirectors, bufferCountries, mapMovieActors, mapMovieDirectors, mapMovieCountries, 
@@ -301,7 +301,7 @@ public class DatosApiService {
                 }
 
             } catch (Exception e) {
-            	System.err.println("   -> [WARN] Error procesando película ID " + movie.getId_api() + ": " + e.getMessage());
+            	System.err.println("   -> [WARN] Error procesando película ID " + movie.getApiId() + ": " + e.getMessage());
             }
         }
         if (!bufferMoviesToUpdate.isEmpty()) {

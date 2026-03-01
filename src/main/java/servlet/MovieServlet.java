@@ -86,7 +86,7 @@ public class MovieServlet extends HttpServlet {
                     
                 case "actualizar":
                     movieFromForm = new Movie();
-                    movieFromForm.setId(parseIntParam(request.getParameter("id"), "ID"));
+                    movieFromForm.setMovieId(parseIntParam(request.getParameter("id"), "ID"));
                     populateMovieFromRequest(movieFromForm, request);
                     
                     Set<ConstraintViolation<Movie>> violationsUpdate = validator.validate(movieFromForm);
@@ -126,19 +126,19 @@ public class MovieServlet extends HttpServlet {
 	}
     
     private void populateMovieFromRequest(Movie movie, HttpServletRequest request) {
-        movie.setId_api(parseIntParam(request.getParameter("id_api"), "ID API"));
-        movie.setTitulo(request.getParameter("titulo"));
-        movie.setTituloOriginal(request.getParameter("tituloOriginal"));
-        movie.setSinopsis(request.getParameter("sinopsis"));
-        movie.setEstrenoYear(parseIntParam(request.getParameter("estrenoYear"), "Año de Estreno"));
-        movie.setDuracion(parseTimeParam(request.getParameter("duracion"), "Duración"));
-        movie.setAdulto(Boolean.parseBoolean(request.getParameter("adulto")));
-        movie.setPuntuacionApi(parseDoubleParam(request.getParameter("puntuacionApi"), "Puntuación API"));
-        movie.setIdiomaOriginal(request.getParameter("idiomaOriginal"));
+        movie.setApiId(parseIntParam(request.getParameter("id_api"), "ID API"));
+        movie.setTitle(request.getParameter("titulo"));
+        movie.setOriginalTitle(request.getParameter("tituloOriginal"));
+        movie.setSynopsis(request.getParameter("sinopsis"));
+        movie.setReleaseYear(parseIntParam(request.getParameter("estrenoYear"), "Año de Estreno"));
+        movie.setDuration(parseTimeParam(request.getParameter("duracion"), "Duración"));
+        movie.setIsAdult(Boolean.parseBoolean(request.getParameter("adulto")));
+        movie.setApiRating(parseDoubleParam(request.getParameter("puntuacionApi"), "Puntuación API"));
+        movie.setOriginalLanguage(request.getParameter("idiomaOriginal"));
         movie.setPosterPath(request.getParameter("posterPath"));
-        movie.setPopularidad(parseDoubleParam(request.getParameter("popularidad"), "Popularidad"));
-        movie.setVotosApi(parseIntParam(request.getParameter("votosApi"), "Votos API"));
-        movie.setId_imdb(request.getParameter("id_imdb"));
+        movie.setPopularity(parseDoubleParam(request.getParameter("popularidad"), "Popularidad"));
+        movie.setApiVotes(parseIntParam(request.getParameter("votosApi"), "Votos API"));
+        movie.setImdbId(request.getParameter("id_imdb"));
     }
 
     private int parseIntParam(String param, String fieldName) {

@@ -209,27 +209,27 @@ public class ExternalApiService {
     
     public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
     	Movie m = new Movie();
-    	m.setId_api(tmdbMovie.getId());
-        m.setTitulo(tmdbMovie.getTitle());
-        m.setTituloOriginal(tmdbMovie.getOriginalTitle());
-        m.setSinopsis(tmdbMovie.getOverview());
-        m.setPuntuacionApi(tmdbMovie.getVoteAverage() != null ? tmdbMovie.getVoteAverage() : null);
-        m.setVotosApi(tmdbMovie.getVoteCount() != null ? tmdbMovie.getVoteCount() : null);
-        m.setPopularidad(tmdbMovie.getPopularity() != null ? tmdbMovie.getPopularity() : null);
-        m.setAdulto(tmdbMovie.getAdult());
+    	m.setApiId(tmdbMovie.getId());
+        m.setTitle(tmdbMovie.getTitle());
+        m.setOriginalTitle(tmdbMovie.getOriginalTitle());
+        m.setSynopsis(tmdbMovie.getOverview());
+        m.setApiRating(tmdbMovie.getVoteAverage() != null ? tmdbMovie.getVoteAverage() : null);
+        m.setApiVotes(tmdbMovie.getVoteCount() != null ? tmdbMovie.getVoteCount() : 0);
+        m.setPopularity(tmdbMovie.getPopularity() != null ? tmdbMovie.getPopularity() : null);
+        m.setIsAdult(tmdbMovie.getAdult());
         m.setPosterPath(tmdbMovie.getPosterPath());
-        m.setIdiomaOriginal(tmdbMovie.getOriginalLanguage());
+        m.setOriginalLanguage(tmdbMovie.getOriginalLanguage());
         if (tmdbMovie.getReleaseDate() != null && !tmdbMovie.getReleaseDate().isBlank()) {
             try {
             	LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
                 int year = release.getYear();
-                m.setEstrenoYear(year);
-                m.setFechaEstreno(release);
+                m.setReleaseYear(year);
+                m.setReleaseDate(release);
             } catch (DateTimeParseException ex) {
             }
         }
-        m.setDuracion(null);
-        m.setId_imdb(null);
+        m.setDuration(null);
+        m.setImdbId(null);
         return m;
     }
 

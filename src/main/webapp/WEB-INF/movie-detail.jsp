@@ -16,7 +16,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= ((Movie)request.getAttribute("movie")).getTitulo() %> - Fat Movies</title>
+    <title><%= ((Movie)request.getAttribute("movie")).getTitle() %> - Fat Movies</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -339,20 +339,20 @@
     <div class="movie-bg"></div>
     <div class="movie-hero">
         <div class="movie-content">
-            <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" alt="<%= movie.getTitulo() %>" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Imagen'">
+            <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" alt="<%= movie.getTitle() %>" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Imagen'">
             <div class="movie-info">
-                <h1 class="movie-title"><%= movie.getTitulo() %></h1>
-                <% if (movie.getTituloOriginal() != null && !movie.getTituloOriginal().equals(movie.getTitulo())) { %>
-                    <div class="movie-original-title"><%= movie.getTituloOriginal() %></div>
+                <h1 class="movie-title"><%= movie.getTitle() %></h1>
+                <% if (movie.getOriginalTitle() != null && !movie.getOriginalTitle().equals(movie.getTitle())) { %>
+                    <div class="movie-original-title"><%= movie.getOriginalTitle() %></div>
                 <% } %>
                 
                 <div class="movie-meta">
-                    <div class="meta-item"><span class="meta-label">Año</span><span class="meta-value"><%= movie.getEstrenoYear() %></span></div>
-                    <% if (movie.getDuracion() != null) { %>
-                        <div class="meta-item"><span class="meta-label">Duración</span><span class="meta-value"><%= movie.getDuracion() %></span></div>
+                    <div class="meta-item"><span class="meta-label">Año</span><span class="meta-value"><%= movie.getReleaseYear() %></span></div>
+                    <% if (movie.getDuration() != null) { %>
+                        <div class="meta-item"><span class="meta-label">Duración</span><span class="meta-value"><%= movie.getDuration() %></span></div>
                     <% } %>
-                    <% if (movie.getIdiomaOriginal() != null) { %>
-                        <div class="meta-item"><span class="meta-label">Idioma</span><span class="meta-value"><%= movie.getIdiomaOriginal().toUpperCase() %></span></div>
+                    <% if (movie.getOriginalLanguage() != null) { %>
+                        <div class="meta-item"><span class="meta-label">Idioma</span><span class="meta-value"><%= movie.getOriginalLanguage().toUpperCase() %></span></div>
                     <% } %>
                     <% 
                         @SuppressWarnings("unchecked")
@@ -370,13 +370,13 @@
                     <% } %>
                 </div>
                 
-                <% if (movie.getSinopsis() != null && !movie.getSinopsis().trim().isEmpty()) { %>
-                    <div class="movie-synopsis"><%= movie.getSinopsis() %></div>
+                <% if (movie.getSynopsis() != null && !movie.getSynopsis().trim().isEmpty()) { %>
+                    <div class="movie-synopsis"><%= movie.getSynopsis() %></div>
                 <% } %>
                 
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                        <div class="rating-badge">⭐ TMDB: <%= String.format("%.1f", movie.getPuntuacionApi()) %>/10</div>
+                    <% if (movie.getApiRating() != null && movie.getApiRating() > 0) { %>
+                        <div class="rating-badge">⭐ TMDB: <%= String.format("%.1f", movie.getApiRating()) %>/10</div>
                     <% } %>
                     <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
                         <div class="rating-badge" style="background: #8B7355;">🍿 FatMovies: <%= String.format("%.1f", movie.getPromedioResenasLocal()) %>/5.0 (<%= movie.getCantidadResenasLocal() %> reseñas)</div>
@@ -396,7 +396,7 @@
                     <% } else { %>
                         <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
                             <input type="hidden" name="action" value="add">
-                            <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                            <input type="hidden" name="movieId" value="<%= movie.getMovieId() %>">
                             <button type="submit" class="btn-watchlist">+ Agregar a Watchlist</button>
                         </form>
                     <%      }
@@ -419,7 +419,7 @@
             <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
             
             <form id="ajaxReviewForm">
-                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getId() %>">
+                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getMovieId() %>">
                 <% 
                     String savedReviewText = "", savedRating = "0", savedWatchedOn = "";
                     if (userReview != null) {
@@ -446,8 +446,8 @@
                             String minDate = "";
                             if (movie.getFechaEstreno() != null) {
                                 minDate = movie.getFechaEstreno().toString(); 
-                            } else if (movie.getEstrenoYear() > 0) {
-                                minDate = movie.getEstrenoYear() + "-01-01";
+                            } else if (movie.getReleaseYear() > 0) {
+                                minDate = movie.getReleaseYear() + "-01-01";
                             }
                         %>
                         <input type="date" id="watchedOnInput" name="watchedOn" value="<%= savedWatchedOn %>" min="<%= minDate %>" max="<%= java.time.LocalDate.now() %>" required>

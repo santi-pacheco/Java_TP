@@ -261,17 +261,17 @@
 					     data-rating="<%= review.getRating() %>" 
 					     data-timestamp="<%= timestamp %>"
 					     data-status="<%= status %>"
-					     onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'"> 
+					     onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>'"> 
                          
                         <img src="<%= posterUrl %>" 
-                             alt="<%= movie.getTitulo() %>" 
+                             alt="<%= movie.getTitle() %>" 
                              class="movie-poster"
                              onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
                         
                         <div class="review-content">
 
                             <span class="movie-title">
-						    	<%= movie.getTitulo() %>
+						    	<%= movie.getTitle() %>
 							</span>
                             
                             <div class="rating-date">

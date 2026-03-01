@@ -62,8 +62,8 @@ public class ReviewModerationService {
 
         ModerationResult result = geminiService.moderateReview(
             review.getReview_text(),
-            movie.getSinopsis(),
-            movie.getTitulo()
+            movie.getSynopsis(),
+            movie.getTitle()
         );
 
         ModerationStatus newStatus = determineStatus(result);
