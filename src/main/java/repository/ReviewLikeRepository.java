@@ -25,7 +25,7 @@ public class ReviewLikeRepository {
     }
 
     public boolean existsLike(int userId, int reviewId) {
-        String sql = "SELECT 1 FROM reviews_likes WHERE id_usuario = ? AND id_review = ?";
+        String sql = "SELECT 1 FROM review_likes WHERE user_id = ? AND review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -42,7 +42,7 @@ public class ReviewLikeRepository {
     }
 
     private void addLike(int userId, int reviewId) {
-        String sql = "INSERT INTO reviews_likes (id_usuario, id_review) VALUES (?, ?)";
+        String sql = "INSERT INTO review_likes (user_id, review_id) VALUES (?, ?)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -61,7 +61,7 @@ public class ReviewLikeRepository {
     }
 
     private void removeLike(int userId, int reviewId) {
-        String sql = "DELETE FROM reviews_likes WHERE id_usuario = ? AND id_review = ?";
+        String sql = "DELETE FROM review_likes WHERE user_id = ? AND review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -76,7 +76,7 @@ public class ReviewLikeRepository {
     }
 
     private void updateLikesCount(int reviewId, int delta) {
-        String sql = "UPDATE reviews SET likes_count = likes_count + ? WHERE id_review = ?";
+        String sql = "UPDATE reviews SET likes_count = likes_count + ? WHERE review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -91,7 +91,7 @@ public class ReviewLikeRepository {
     }
 
     public int getLikesCount(int reviewId) {
-        String sql = "SELECT likes_count FROM reviews WHERE id_review = ?";
+        String sql = "SELECT likes_count FROM reviews WHERE review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
