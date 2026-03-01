@@ -487,9 +487,14 @@
     function fetchMoreReviews() {
         isFetching = true;
         sentinel.style.display = 'flex';
-
         fetch(`${pageContext.request.contextPath}/api/feed?offset=\${offset}`)
-            .then(response => response.json())
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.message || "Error interno al cargar el feed");
+                }
+                return data; 
+            })
             .then(data => {
                 if (data.length === 0) {
                     hasMoreData = false;
@@ -505,14 +510,12 @@
                     }
                     return;
                 }
-
                 data.forEach(review => {
                     const reviewHTML = createReviewCard(review);
                     feedContainer.insertAdjacentHTML('beforeend', reviewHTML);
                 });
                 offset += data.length;
                 isFetching = false;
-                
                 if (data.length < 10) {
                     hasMoreData = false;
                     sentinel.style.display = 'none';
@@ -523,6 +526,18 @@
                 console.error("Error cargando el feed:", error);
                 isFetching = false;
                 sentinel.style.display = 'none';
+                if (offset === 0) {
+                    feedContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #d9534f;">
+                            <h4>⚠️ Ocurrió un problema</h4>
+                            <p>\${error.message}</p>
+                            <button onclick="location.reload()" style="padding: 8px 16px; margin-top: 15px; cursor: pointer;">Reintentar</button>
+                        </div>`;
+                } else {
+                    noMoreDataMsg.innerHTML = '⚠️ Error al cargar más reseñas. Intenta recargar la página.';
+                    noMoreDataMsg.style.display = 'block';
+                    noMoreDataMsg.style.color = '#d9534f';
+                }
             });
     }
 
