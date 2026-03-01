@@ -22,17 +22,17 @@ public class ReviewRepository {
         String sql = "INSERT INTO reviews (user_id, movie_id, review_text, rating, watched_on, moderation_status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, review.getId_user());
-            stmt.setInt(2, review.getId_movie());
-            stmt.setString(3, review.getReview_text());
+            stmt.setInt(1, review.getUserId());
+            stmt.setInt(2, review.getMovieId());
+            stmt.setString(3, review.getReviewText());
             stmt.setDouble(4, review.getRating());
-            stmt.setDate(5, java.sql.Date.valueOf(review.getWatched_on()));
+            stmt.setDate(5, java.sql.Date.valueOf(review.getWatchedOn()));
             stmt.setString(6, review.getModerationStatus().getValue());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet keyResultSet = stmt.getGeneratedKeys()) {
                     if (keyResultSet.next()) {
-                        review.setId(keyResultSet.getInt(1));
+                        review.setReviewId(keyResultSet.getInt(1));
                     }
                 }
             }
@@ -122,11 +122,11 @@ public class ReviewRepository {
         String sql = "UPDATE reviews SET review_text = ?, rating = ?, watched_on = ?, moderation_status = ? WHERE review_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, review.getReview_text());
+            stmt.setString(1, review.getReviewText());
             stmt.setDouble(2, review.getRating());
-            stmt.setDate(3, java.sql.Date.valueOf(review.getWatched_on()));
+            stmt.setDate(3, java.sql.Date.valueOf(review.getWatchedOn()));
             stmt.setString(4, ModerationStatus.PENDING_MODERATION.getValue());
-            stmt.setInt(5, review.getId());
+            stmt.setInt(5, review.getReviewId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error updating review in database");
@@ -138,7 +138,7 @@ public class ReviewRepository {
         String sql = "DELETE FROM reviews WHERE review_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, review.getId());
+            stmt.setInt(1, review.getReviewId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error deleting review from database");
@@ -239,33 +239,32 @@ public class ReviewRepository {
         return reviews;
     }
 
-    private Review extractReviewFromResultSet(ResultSet rs) throws SQLException {
+private Review extractReviewFromResultSet(ResultSet rs) throws SQLException {
         Review review = new Review();
-        review.setId(rs.getInt("review_id"));
-        review.setId_user(rs.getInt("user_id"));
-        review.setId_movie(rs.getInt("movie_id"));
-        review.setReview_text(rs.getString("review_text"));
+        review.setReviewId(rs.getInt("review_id"));
+        review.setUserId(rs.getInt("user_id"));
+        review.setMovieId(rs.getInt("movie_id"));
+        review.setReviewText(rs.getString("review_text"));
         review.setRating(rs.getDouble("rating"));
-        
+
         java.sql.Date watchedDate = rs.getDate("watched_on");
-        if (watchedDate != null) review.setWatched_on(watchedDate.toLocalDate());
-        
+        if (watchedDate != null) review.setWatchedOn(watchedDate.toLocalDate());
+
         java.sql.Date createdDate = rs.getDate("created_at");
-        if (createdDate != null) review.setCreated_at(createdDate.toLocalDate());
-        
+        if (createdDate != null) review.setCreatedAt(createdDate.toLocalDate());
+
         String statusStr = rs.getString("moderation_status");
         if (statusStr != null) review.setModerationStatus(ModerationStatus.fromString(statusStr));
-        
+
         review.setModerationReason(rs.getString("moderation_reason"));
         review.setUsername(rs.getString("username"));
         review.setMovieTitle(rs.getString("movie_title"));
-
 
         try { review.setProfileImage(rs.getString("profile_image")); } catch (Exception e) {}
 
         try { review.setLikesCount(rs.getInt("likes_count")); } catch (Exception e) {}
         try { review.setCommentsCount(rs.getInt("comments_count")); } catch (Exception e) {}
-        
+
         return review;
     }
 

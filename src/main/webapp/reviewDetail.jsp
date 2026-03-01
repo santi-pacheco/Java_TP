@@ -55,15 +55,15 @@
         %>
         <% if (review != null) { %>
         
-        <div class="info-row"><span class="info-label">ID:</span><span><%= review.getId() %></span></div>
-        <div class="info-row"><span class="info-label">Usuario:</span><span><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getId_user() %></span></div>
-        <div class="info-row"><span class="info-label">Película:</span><span><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getId_movie() %></span></div>
+        <div class="info-row"><span class="info-label">ID:</span><span><%= review.getReviewId() %></span></div>
+        <div class="info-row"><span class="info-label">Usuario:</span><span><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getUserId() %></span></div>
+        <div class="info-row"><span class="info-label">Película:</span><span><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getMovieId() %></span></div>
         <div class="info-row"><span class="info-label">Rating (kcal):</span><span><%= String.format("%.1f", review.getRating()) %> / 5.0</span></div>
-        <div class="info-row"><span class="info-label">Fecha de creación:</span><span><%= review.getCreated_at() %></span></div>
-        <div class="info-row"><span class="info-label">Visto el:</span><span><%= review.getWatched_on() %></span></div>
+        <div class="info-row"><span class="info-label">Fecha de creación:</span><span><%= review.getCreatedAt() %></span></div>
+        <div class="info-row"><span class="info-label">Visto el:</span><span><%= review.getWatchedOn() %></span></div>
         
         <h4 style="margin-top: 30px;">Texto de la Reseña:</h4>
-        <div class="review-text"><%= review.getReview_text() %></div>
+        <div class="review-text"><%= review.getReviewText() %></div>
 
         <!-- Barra de Acciones: Likes y Comentarios -->
         <div class="actions-bar">
@@ -126,7 +126,7 @@
                 
                 <form action="<%= request.getContextPath() %>/reviews-admin" method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="accion" value="actualizarModeracion">
-                    <input type="hidden" name="id" value="<%= review.getId() %>">
+                    <input type="hidden" name="id" value="<%= review.getReviewId() %>">
                     
                     <div class="form-group">
                         <label><input type="radio" name="status" value="PENDING_MODERATION" <%= review.getModerationStatus() == ModerationStatus.PENDING_MODERATION ? "checked" : "" %>> Pendiente</label>
@@ -154,7 +154,7 @@
 
 <script>
     const contextPath = '<%= request.getContextPath() %>';
-    const reviewId = <%= review != null ? review.getId() : "null" %>;
+    const reviewId = <%= review != null ? review.getReviewId() : "null" %>;
     const userId = <%= loggedUser != null ? loggedUser.getId() : "null" %>;
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -59,7 +59,7 @@ public class UserReviewsServlet extends HttpServlet {
         List<Review> reviews = reviewService.getReviewsByUser(user.getId());
         
         Map<Integer, Movie> moviesMap = reviews.stream()
-            .map(Review::getId_movie)
+            .map(Review::getMovieId)
             .distinct()
             .collect(Collectors.toMap(
                 movieId -> movieId,

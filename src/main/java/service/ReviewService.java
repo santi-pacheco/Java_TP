@@ -35,11 +35,11 @@ public class ReviewService {
     }
 
     public Review createReview(Review review) {
-        checkUserBanStatus(review.getId_user());
+        checkUserBanStatus(review.getUserId());
         
-        Movie movie = movieService.getMovieById(review.getId_movie());
+        Movie movie = movieService.getMovieById(review.getMovieId());
 
-        if (reviewRepository.existsByUserAndMovie(review.getId_user(), review.getId_movie())) {
+        if (reviewRepository.existsByUserAndMovie(review.getUserId(), review.getMovieId())) {
             throw ErrorFactory.duplicate("Ya tienes una reseña para esta película. Puedes editarla en lugar de crear una nueva");
         }
 
@@ -47,11 +47,11 @@ public class ReviewService {
             throw ErrorFactory.validation("El rating debe estar entre 0.0 y 5.0");
         }
 
-        if (review.getReview_text() == null || review.getReview_text().trim().isEmpty()) {
+        if (review.getReviewText() == null || review.getReviewText().trim().isEmpty()) {
             throw ErrorFactory.validation("El texto de la reseña es requerido");
         }
 
-        if (review.getReview_text().trim().length() < 10) {
+        if (review.getReviewText().trim().length() < 10) {
             throw ErrorFactory.validation("La reseña debe tener al menos 10 caracteres");
         }
 
@@ -59,10 +59,10 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.add(review);
         
-        movieService.updateReviewStats(review.getId_movie());
+        movieService.updateReviewStats(review.getMovieId());
         
-        if (watchlistService.getWatchlist(review.getId_user()).getMovies().contains(String.valueOf(movie.getMovieId()))) {
-            watchlistService.removeMovie(review.getId_user(), String.valueOf(movie.getMovieId()));
+        if (watchlistService.getWatchlist(review.getUserId()).getMovies().contains(String.valueOf(movie.getMovieId()))) {
+            watchlistService.removeMovie(review.getUserId(), String.valueOf(movie.getMovieId()));
         }
         
         return savedReview;
@@ -81,22 +81,22 @@ public class ReviewService {
     }
 
     public Review updateReview(Review review) {
-        checkUserBanStatus(review.getId_user());
+        checkUserBanStatus(review.getUserId());
         
-        Review existingReview = reviewRepository.findOne(review.getId());
+        Review existingReview = reviewRepository.findOne(review.getReviewId());
         if (existingReview == null) {
-            throw ErrorFactory.notFound("No se puede actualizar. Reseña con ID " + review.getId() + " no encontrada");
+            throw ErrorFactory.notFound("No se puede actualizar. Reseña con ID " + review.getReviewId() + " no encontrada");
         }
 
         if (review.getRating() < 0.0 || review.getRating() > 5.0) {
             throw ErrorFactory.validation("El rating debe estar entre 0.0 y 5.0");
         }
 
-        if (review.getReview_text() == null || review.getReview_text().trim().isEmpty()) {
+        if (review.getReviewText() == null || review.getReviewText().trim().isEmpty()) {
             throw ErrorFactory.validation("El texto de la reseña es requerido");
         }
 
-        if (review.getReview_text().trim().length() < 10) {
+        if (review.getReviewText().trim().length() < 10) {
             throw ErrorFactory.validation("La reseña debe tener al menos 10 caracteres");
         }
 
@@ -104,7 +104,7 @@ public class ReviewService {
 
         Review updatedReview = reviewRepository.update(review);
         
-        movieService.updateReviewStats(review.getId_movie());
+        movieService.updateReviewStats(review.getMovieId());
         
         return updatedReview;
     }
@@ -116,7 +116,7 @@ public class ReviewService {
         }
 
         reviewRepository.delete(existingReview);
-        movieService.updateReviewStats(existingReview.getId_movie());
+        movieService.updateReviewStats(existingReview.getMovieId());
     }
 
     public List<Review> getReviewsByMovie(int movieId, int idLector) {
@@ -137,10 +137,10 @@ public class ReviewService {
 
     public Review createOrUpdateReview(Review review) {
 
-        Review existingReview = reviewRepository.findAnyByUserAndMovie(review.getId_user(), review.getId_movie());
+        Review existingReview = reviewRepository.findAnyByUserAndMovie(review.getUserId(), review.getMovieId());
         
         if (existingReview != null) {
-            review.setId(existingReview.getId());
+            review.setReviewId(existingReview.getReviewId());
             return updateReview(review); 
         } else {
             return createReview(review);
@@ -156,7 +156,7 @@ public class ReviewService {
         try {
             boolean updated = reviewRepository.updateModerationStatus(reviewId, status, reason);
             if (updated) {
-                movieService.updateReviewStats(review.getId_movie());
+                movieService.updateReviewStats(review.getMovieId());
             }
             return updated;
         } catch (Exception e) {

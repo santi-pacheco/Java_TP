@@ -263,10 +263,10 @@
           let result = '📋 Reseñas APROBADAS de la película ' + movieId + ':\n\n';
           data.forEach(review => {
             const stars = getStarDisplay(review.rating);
-            result += `👤 ${review.username || 'Usuario #' + review.id_user}\n`;
+            result += `👤 ${review.username || 'Usuario #' + review.userId}\n`;
             result += `${stars} (${review.rating})\n`;
-            result += `💬 ${review.review_text}\n`;
-            result += `📅 Visto: ${review.watched_on}\n\n`;
+            result += `💬 ${review.reviewText}\n`;
+            result += `📅 Visto: ${review.watchedOn}\n\n`;
           });
           showResult(result);
         } else {

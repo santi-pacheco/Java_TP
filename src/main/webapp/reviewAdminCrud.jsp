@@ -75,14 +75,14 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 12px; ver
                             }
                 %>
                 <tr>
-                    <td><%= review.getId() %></td>
-                    <td><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getId_user() %></td>
-                    <td><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getId_movie() %></td>
+                    <td><%= review.getReviewId() %></td>
+                    <td><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getUserId() %></td>
+                    <td><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getMovieId() %></td>
                     <td><%= String.format("%.1f", review.getRating()) %> / 5.0</td>
-                    <td><%= review.getCreated_at() %></td>
+                    <td><%= review.getCreatedAt() %></td>
                     <td><span class="badge <%= statusClass %>"><%= statusBadge %></span></td>
                     <td>
-                        <a href="<%= request.getContextPath() %>/reviews-admin?accion=detalle&id=<%= review.getId() %>" class="btn btn-info btn-xs">Ver Detalle</a>
+                        <a href="<%= request.getContextPath() %>/reviews-admin?accion=detalle&id=<%= review.getReviewId() %>" class="btn btn-info btn-xs">Ver Detalle</a>
                     </td>
                 </tr>
                 <%

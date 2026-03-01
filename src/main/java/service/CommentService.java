@@ -38,7 +38,7 @@ public class CommentService {
         Review review = reviewRepository.findOne(reviewId);
         if (review == null) throw new IllegalArgumentException("Review no encontrada");
 
-        Movie movie = movieRepository.findOne(review.getId_movie());
+        Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
 
@@ -49,7 +49,7 @@ public class CommentService {
         comment.setModerationStatus(ModerationStatus.PENDING_MODERATION);
 
         comment = commentRepository.add(comment);
-        moderateAndSaveComment(comment, commentText, review.getReview_text(), moviePlot, movieTitle, userId, false);
+        moderateAndSaveComment(comment, commentText, review.getReviewText(), moviePlot, movieTitle, userId, false);
         return comment;
     }
 
@@ -62,11 +62,11 @@ public class CommentService {
         if (comment == null || comment.getIdUsuario() != userId) throw new IllegalArgumentException("No tienes permiso para editar este comentario");
 
         Review review = reviewRepository.findOne(comment.getIdReview());
-        Movie movie = movieRepository.findOne(review.getId_movie());
+        Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
 
-        moderateAndSaveComment(comment, newText.trim(), review.getReview_text(), moviePlot, movieTitle, userId, true);
+        moderateAndSaveComment(comment, newText.trim(), review.getReviewText(), moviePlot, movieTitle, userId, true);
         comment.setCommentText(newText.trim());
         return comment;
     }

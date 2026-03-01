@@ -423,9 +423,9 @@
                 <% 
                     String savedReviewText = "", savedRating = "0", savedWatchedOn = "";
                     if (userReview != null) {
-                        savedReviewText = userReview.getReview_text();
+                        savedReviewText = userReview.getReviewText();
                         savedRating = String.valueOf(userReview.getRating());
-                        savedWatchedOn = userReview.getWatched_on().toString();
+                        savedWatchedOn = userReview.getWatchedOn().toString();
                     }
                 %>
                 <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required autocomplete="off"><%= savedReviewText %></textarea>
@@ -537,9 +537,9 @@
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
-                        boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
+                        boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getUserId(), false);
                         
-                        int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getId_user())) ? userLevelsMap.get(review.getId_user()) : 1;
+                        int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getUserId())) ? userLevelsMap.get(review.getUserId()) : 1;
                         String reviewCardClass = authorLevel == 4 ? "review-card cheddar-review-card" : "review-card";
                         String avatarWrapperClass = authorLevel >= 3 ? "author-avatar-wrapper burger-avatar-border" : "author-avatar-wrapper";
 
@@ -548,8 +548,8 @@
                             userAvatarPath = request.getContextPath() + "/uploads/" + review.getProfileImage();
                         }
             %>
-            <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
-                <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>"><% } %>
+            <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreatedAt() != null ? review.getCreatedAt().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
+                <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getReviewId() %>"><% } %>
                 <div class="review-content">
                     <div class="review-header">
                         <div class="author-container">
@@ -559,19 +559,19 @@
                             <div class="author-details">
                                 <div class="author-name-row">
                                     <strong>
-                                        <a href="${pageContext.request.contextPath}/profile?id=<%= review.getId_user() %>" class="user-profile-link">
-                                            <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %>
+                                        <a href="${pageContext.request.contextPath}/profile?id=<%= review.getUserId() %>" class="user-profile-link">
+                                            <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getUserId() %>
                                         </a>
                                     </strong>
                                     <% if (isSpoiler) { %><span class="spoiler-badge">SPOILER</span><% } %>
                                     
-                                    <% if (currentUserId != null && currentUserId != review.getId_user()) { %>
-                                        <button class="follow-btn <%= isFollowing ? "following" : "" %>" data-user-id="<%= review.getId_user() %>" onclick="toggleFollow(<%= review.getId_user() %>, this)">
+                                    <% if (currentUserId != null && currentUserId != review.getUserId()) { %>
+                                        <button class="follow-btn <%= isFollowing ? "following" : "" %>" data-user-id="<%= review.getUserId() %>" onclick="toggleFollow(<%= review.getUserId() %>, this)">
                                             <%= isFollowing ? "Siguiendo" : "Seguir" %>
                                         </button>
                                     <% } %>
                                 </div>
-                                <span style="color: #888; font-size: 0.8rem;">Visto el <%= review.getWatched_on().format(formatter) %></span>
+                                <span style="color: #888; font-size: 0.8rem;">Visto el <%= review.getWatchedOn().format(formatter) %></span>
                             </div>
                         </div>
 
@@ -589,16 +589,16 @@
                         </div>
                      </div>
                      
-                    <div class="<%= isSpoiler ? "review-text review-spoiler-text" : "review-text" %>"><%= review.getReview_text() %></div>
+                    <div class="<%= isSpoiler ? "review-text review-spoiler-text" : "review-text" %>"><%= review.getReviewText() %></div>
                     
                     <div class="review-meta">
-                        <span>Publicado el <%= review.getCreated_at() != null ? review.getCreated_at().format(formatter) : "N/A" %></span>
+                        <span>Publicado el <%= review.getCreatedAt() != null ? review.getCreatedAt().format(formatter) : "N/A" %></span>
                         <div class="like-section">
                             <% 
-                                boolean isLiked = userLikesMap != null && userLikesMap.getOrDefault(review.getId(), false);
-                                int likesCount = likesCountMap != null ? likesCountMap.getOrDefault(review.getId(), 0) : 0;
+                                boolean isLiked = userLikesMap != null && userLikesMap.getOrDefault(review.getReviewId(), false);
+                                int likesCount = likesCountMap != null ? likesCountMap.getOrDefault(review.getReviewId(), 0) : 0;
                             %>
-                            <button class="like-btn <%= isLiked ? "liked" : "" %>" onclick="toggleLike(<%= review.getId() %>, this)" title="<%= isLiked ? "Quitar voto" : "Votar esta reseña" %>">
+                            <button class="like-btn <%= isLiked ? "liked" : "" %>" onclick="toggleLike(<%= review.getReviewId() %>, this)" title="<%= isLiked ? "Quitar voto" : "Votar esta reseña" %>">
                                 <svg class="soda-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                                     <path class="liquid-fill" d="M20 20 L24 56 H40 L44 20 Z" />
                                     <path class="soda-stroke" d="M38 4 L38 12 M38 4 L46 4" />
@@ -611,15 +611,15 @@
                     </div>
 
                     <div class="comments-section">
-                        <button class="comments-toggle" onclick="toggleComments(<%= review.getId() %>)">
+                        <button class="comments-toggle" onclick="toggleComments(<%= review.getReviewId() %>)">
                             💬 Ver Comentarios (<%= review.getCommentsCount() %>)
                         </button>
-                        <div class="comments-container" id="comments-panel-<%= review.getId() %>">
-                            <div class="comment-list" id="comment-list-<%= review.getId() %>"></div>
+                        <div class="comments-container" id="comments-panel-<%= review.getReviewId() %>">
+                            <div class="comment-list" id="comment-list-<%= review.getReviewId() %>"></div>
                             <% if (loggedUser != null) { %>
                                 <div class="comment-form">
-                                    <input type="text" class="comment-input" id="comment-input-<%= review.getId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500" autocomplete="off">
-                                    <button class="btn-submit-comment" onclick="submitComment(<%= review.getId() %>)">Enviar</button>
+                                    <input type="text" class="comment-input" id="comment-input-<%= review.getReviewId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500" autocomplete="off">
+                                    <button class="btn-submit-comment" onclick="submitComment(<%= review.getReviewId() %>)">Enviar</button>
                                 </div>
                             <% } else { %>
                                 <div style="font-size: 0.85rem; color: #888; text-align: center; margin-top: 10px;">Iniciá sesión para comentar.</div>
@@ -628,7 +628,7 @@
                     </div>
                 </div> 
                 <% if (isSpoiler) { %>
-                    <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
+                    <label for="spoiler-<%= review.getReviewId() %>" class="spoiler-overlay">
                         <div class="spoiler-text">Mostrar reseña</div>
                     </label>
                 <% } %>

@@ -166,25 +166,25 @@ public class MovieDetailServlet extends HttpServlet {
             Map<Integer, Integer> userLevelsMap = new HashMap<>();
             
             for (Review review : reviews) {
-                int likesCount = likeService.getLikesCount(review.getId());
-                likesCountMap.put(review.getId(), likesCount);
+                int likesCount = likeService.getLikesCount(review.getReviewId());
+                likesCountMap.put(review.getReviewId(), likesCount);
                 
                 if (session != null && session.getAttribute("usuarioLogueado") != null) {
                     User user = (User) session.getAttribute("usuarioLogueado");
-                    boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getId());
-                    userLikesMap.put(review.getId(), hasLiked);
+                    boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getReviewId());
+                    userLikesMap.put(review.getReviewId(), hasLiked);
                 }
                 
-                if (!followedUsersMap.containsKey(review.getId_user())) {
-                    followedUsersMap.put(review.getId_user(), followingIds.contains(review.getId_user()));
+                if (!followedUsersMap.containsKey(review.getUserId())) {
+                    followedUsersMap.put(review.getUserId(), followingIds.contains(review.getUserId()));
                 }
                 
-                if (!userLevelsMap.containsKey(review.getId_user())) {
-                    User reviewAuthor = userService.getUserById(review.getId_user());
+                if (!userLevelsMap.containsKey(review.getUserId())) {
+                    User reviewAuthor = userService.getUserById(review.getUserId());
                     if (reviewAuthor != null) {
-                        userLevelsMap.put(review.getId_user(), reviewAuthor.getNivelUsuario());
+                        userLevelsMap.put(review.getUserId(), reviewAuthor.getNivelUsuario());
                     } else {
-                        userLevelsMap.put(review.getId_user(), 1); 
+                        userLevelsMap.put(review.getUserId(), 1); 
                     }
                 }
             }

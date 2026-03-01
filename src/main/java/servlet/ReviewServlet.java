@@ -128,8 +128,8 @@ public class ReviewServlet extends HttpServlet {
             // GET /reviews?id=123 - Obtener reseña por ID
             int id = Integer.parseInt(idParam);
             Review review = reviewController.getReviewById(id);
-            if (review != null && idLector != -1 && idLector != review.getId_user()) {
-                int idAutor = review.getId_user();
+            if (review != null && idLector != -1 && idLector != review.getUserId()) {
+                int idAutor = review.getUserId();
                 if (userController.isBlocking(idLector, idAutor) || userController.isBlocking(idAutor, idLector)) {
                     review = null;
                 }
@@ -147,8 +147,8 @@ public class ReviewServlet extends HttpServlet {
             int movieId = Integer.parseInt(movieIdParam);
             Review review = reviewController.getReviewByUserAndMovie(userId, movieId);
             
-            if (review != null && idLector != -1 && idLector != review.getId_user()) {
-                int idAutor = review.getId_user();
+            if (review != null && idLector != -1 && idLector != review.getUserId()) {
+                int idAutor = review.getUserId();
                 if (userController.isBlocking(idLector, idAutor) || userController.isBlocking(idAutor, idLector)) {
                     review = null;
                 }
@@ -196,13 +196,13 @@ public class ReviewServlet extends HttpServlet {
                 
                 movieId = Integer.parseInt(movieIdStr);
                 newReview = new Review();
-                newReview.setId_movie(movieId);
-                newReview.setReview_text(reviewText);
+                newReview.setMovieId(movieId);
+                newReview.setReviewText(reviewText);
                 newReview.setRating(Double.parseDouble(ratingStr));
-                newReview.setWatched_on(LocalDate.parse(watchedOnStr));
+                newReview.setWatchedOn(LocalDate.parse(watchedOnStr));
             }
             
-            newReview.setId_user(loggedUser.getId());
+            newReview.setUserId(loggedUser.getId());
             
             Set<ConstraintViolation<Review>> violations = validator.validate(newReview);
             if (!violations.isEmpty()) {
@@ -214,14 +214,14 @@ public class ReviewServlet extends HttpServlet {
             
             Review createdReview = reviewController.createOrUpdateReview(newReview);
             ReviewModerationService moderationService = ReviewModerationService.getInstance();
-            moderationService.moderateReviewAsync(createdReview.getId());
+            moderationService.moderateReviewAsync(createdReview.getReviewId());
             
             if (contentType != null && contentType.contains("application/json")) {
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write(gson.toJson(createdReview));
             } else {
-                response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getId_movie());
+                response.sendRedirect(request.getContextPath() + "/movie/" + newReview.getMovieId());
             }
             
         // --- NUEVO: ATRAPAMOS EL BANEO AQUÍ ---
@@ -264,11 +264,11 @@ public class ReviewServlet extends HttpServlet {
         
         int id = Integer.parseInt(idParam);
         Review reviewToUpdate = gson.fromJson(request.getReader(), Review.class);
-        reviewToUpdate.setId(id);
+        reviewToUpdate.setReviewId(id);
         
         //Verificar que la reseña pertenece al usuario logueado
         Review existingReview = reviewController.getReviewById(id);
-        if (existingReview.getId_user() != loggedUser.getId()) {
+        if (existingReview.getUserId() != loggedUser.getId()) {
             throw ErrorFactory.forbidden("Solo puedes editar tus propias reseñas");
         }
         
@@ -284,9 +284,9 @@ public class ReviewServlet extends HttpServlet {
 
         try {
             Review updatedReview = reviewController.updateReview(reviewToUpdate);
-            if (!existingReview.getReview_text().equals(reviewToUpdate.getReview_text())) {
+            if (!existingReview.getReviewText().equals(reviewToUpdate.getReviewText())) {
                 ReviewModerationService moderationService = ReviewModerationService.getInstance();
-                moderationService.moderateReviewAsync(updatedReview.getId());
+                moderationService.moderateReviewAsync(updatedReview.getReviewId());
             }
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json;charset=UTF-8");
@@ -314,7 +314,7 @@ public class ReviewServlet extends HttpServlet {
         
      //Verificar que la reseña pertenece al usuario logueado (o es admin)
         Review existingReview = reviewController.getReviewById(id);
-        if (existingReview.getId_user() != loggedUser.getId() && !"admin".equals(loggedUser.getRole())) {
+        if (existingReview.getUserId() != loggedUser.getId() && !"admin".equals(loggedUser.getRole())) {
             throw ErrorFactory.forbidden("Solo puedes eliminar tus propias reseñas");
         }
         

@@ -43,7 +43,7 @@ public class LikeService {
         Review review = reviewRepository.findOne(reviewId);
         if (review == null) return;
 
-        int authorId = review.getId_user();
+        int authorId = review.getUserId();
 
         if (actorId != authorId) {
             int kcalsModifier = isAddingLike ? 500 : -500;

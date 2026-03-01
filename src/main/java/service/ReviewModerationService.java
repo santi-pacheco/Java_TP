@@ -55,13 +55,13 @@ public class ReviewModerationService {
             throw new IllegalArgumentException("Reseña no encontrada: " + reviewId);
         }
 
-        Movie movie = movieRepository.findOne(review.getId_movie());
+        Movie movie = movieRepository.findOne(review.getMovieId());
         if (movie == null) {
-            throw new IllegalArgumentException("Película no encontrada: " + review.getId_movie());
+            throw new IllegalArgumentException("Película no encontrada: " + review.getMovieId());
         }
 
         ModerationResult result = geminiService.moderateReview(
-            review.getReview_text(),
+            review.getReviewText(),
             movie.getSynopsis(),
             movie.getTitle()
         );
@@ -78,8 +78,8 @@ public class ReviewModerationService {
             System.out.println("[MODERACIÓN] Reseña " + reviewId + " → " + newStatus + " | Razón: " + result.getReason());
             
             if (newStatus == ModerationStatus.REJECTED) {
-                userRepository.banUser(review.getId_user(), BAN_DAYS);
-                System.out.println("⚠️ [SISTEMA] USUARIO BANEADO: ID " + review.getId_user() + " por " + BAN_DAYS + " días. Motivo: Reseña tóxica.");
+                userRepository.banUser(review.getUserId(), BAN_DAYS);
+                System.out.println("⚠️ [SISTEMA] USUARIO BANEADO: ID " + review.getUserId() + " por " + BAN_DAYS + " días. Motivo: Reseña tóxica.");
             }
         }
     }

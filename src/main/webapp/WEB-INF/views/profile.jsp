@@ -373,13 +373,13 @@
                     <div class="review-item">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <a href="<%= request.getContextPath() %>/movie/${review.id_movie}" style="text-decoration: none; color: #8B7355; font-weight: 600; font-size: 16px;">
+                                <a href="<%= request.getContextPath() %>/movie/${review.movieId}" style="text-decoration: none; color: #8B7355; font-weight: 600; font-size: 16px;">
                                     <c:choose>
                                         <c:when test="${not empty review.movieTitle}">
                                             ${review.movieTitle}
                                         </c:when>
                                         <c:otherwise>
-                                            Película ID: ${review.id_movie}
+                                            Película ID: ${review.movieId}
                                         </c:otherwise>
                                     </c:choose>
                                 </a>
@@ -391,21 +391,21 @@
                                     </c:if>
                                 </div>
                             </div>
-                            <small style="color: #999;">${review.created_at}</small>
+                            <small style="color: #999;">${review.createdAt}</small>
                         </div>
                         
                         <c:choose>
                             <c:when test="${review.moderationStatus == 'SPOILER'}">
-                                <input type="checkbox" id="spoiler-check-${review.id}" class="spoiler-trigger">
-                                <label for="spoiler-check-${review.id}" class="spoiler-wrapper" style="display: block; margin: 10px 0 0 0;">
+                                <input type="checkbox" id="spoiler-check-${review.reviewId}" class="spoiler-trigger">
+                                <label for="spoiler-check-${review.reviewId}" class="spoiler-wrapper" style="display: block; margin: 10px 0 0 0;">
                                     <div class="spoiler-overlay-label">Mostrar reseña</div>
                                     <p class="spoiler-content" style="margin: 0; color: #666;">
-                                        ${review.review_text}
+                                        ${review.reviewText}
                                     </p>
                                 </label>
                             </c:when>
                             <c:otherwise>
-                                <p style="margin: 10px 0 0 0; color: #666;">${review.review_text}</p>
+                                <p style="margin: 10px 0 0 0; color: #666;">${review.reviewText}</p>
                             </c:otherwise>
                         </c:choose>
                     </div>
