@@ -640,8 +640,12 @@
                         }
                     }
                 },
-                error: function() {
-                    alert('Hubo un error al procesar la solicitud.');
+                error: function(xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        alert(xhr.responseJSON.message);
+                    } else {
+                        alert('Hubo un error al procesar la solicitud.');
+                    }
                 }
             });
         }

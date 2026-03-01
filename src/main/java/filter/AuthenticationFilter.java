@@ -53,6 +53,9 @@ public class AuthenticationFilter implements Filter {
                               requestURI.contains("/system-settings") ||
                               requestURI.contains("/admin/data-load");;
         
+        String acceptHeader = httpRequest.getHeader("Accept");
+        String requestedWithHeader = httpRequest.getHeader("X-Requested-With");
+        boolean isAjaxRequest = (acceptHeader != null && acceptHeader.contains("application/json")) || "XMLHttpRequest".equals(requestedWithHeader);
         if (isLoginServlet || isRegisterServlet || isLandingServlet || isForgotPasswordServlet || isResetPasswordServlet || isPublicResource) {
             chain.doFilter(request, response);
         } else if (isAdminRoute) {
@@ -64,8 +67,15 @@ public class AuthenticationFilter implements Filter {
         } else if (isLoggedIn) {
             chain.doFilter(request, response);
         } else {
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
-        }
+            if (isAjaxRequest) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.setCharacterEncoding("UTF-8");
+                httpResponse.getWriter().write("{\"success\":false, \"message\":\"Tu sesión ha expirado. Por favor, inicia sesión nuevamente.\"}");
+            } else {
+                httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
+            }
+       }
     }
 
     @Override

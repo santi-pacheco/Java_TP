@@ -4,7 +4,6 @@ import entity.Person;
 import entity.ActorWithCharacter;
 
 import repository.PersonRepository;
-import util.DiscoverReflectionMain.actorCharacter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,30 +53,6 @@ public class PersonService {
 	
 	public void deletePerson(Person per) {
 		personRepository.delete(per);
-	}
-	
-	public List<actorCharacter> saveActors(List <service.ExternalApiService.PersonWithCharacter> personWithCharacter){
-		//Verificar que la persona no exista ya en la base de datos antes de guardarla
-		List<actorCharacter> actorCharacters = new ArrayList<>();
-		for (service.ExternalApiService.PersonWithCharacter pwc : personWithCharacter) {
-			Person existingPerson = personRepository.findByApiId(pwc.getApiId());
-			if (existingPerson != null) {
-				actorCharacter ac = new actorCharacter(existingPerson.getPersonId(), pwc.getCharacterName());
-				actorCharacters.add(ac);
-			} else {
-				Person newPerson = new Person();
-				newPerson.setApiId(pwc.getApiId());
-				newPerson.setName(pwc.getName());
-				newPerson.setAlsoKnownAs(pwc.getAlsoKnownAs());
-				newPerson.setPlaceOfBirth(pwc.getPlaceOfBirth());
-				newPerson.setBirthdate(pwc.getBirthdate());
-				System.out.println("Saving new person: " + newPerson);
-				Person savedPerson = personRepository.add(newPerson);
-				actorCharacter ac = new actorCharacter(savedPerson.getPersonId(), pwc.getCharacterName());
-				actorCharacters.add(ac);
-			}
-		}
-		return actorCharacters;
 	}
 	
 		public List<Person> saveDirectors(List<Person> directors) {
