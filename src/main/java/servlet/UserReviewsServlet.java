@@ -56,7 +56,7 @@ public class UserReviewsServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("usuarioLogueado");
-        List<Review> reviews = reviewService.getReviewsByUser(user.getId());
+        List<Review> reviews = reviewService.getReviewsByUser(user.getUserId());
         
         Map<Integer, Movie> moviesMap = reviews.stream()
             .map(Review::getMovieId)

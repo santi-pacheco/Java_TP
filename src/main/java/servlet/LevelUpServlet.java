@@ -37,7 +37,7 @@ public class LevelUpServlet extends HttpServlet {
             int newLevel = Integer.parseInt(request.getParameter("level"));
             
             // Actualiza en BD
-            userRepository.markLevelAsNotified(user.getId(), newLevel);
+            userRepository.markLevelAsNotified(user.getUserId(), newLevel);
             
             // Actualiza en Sesión
             user.setNivelNotificado(newLevel);

@@ -42,7 +42,7 @@
         if (loggedUser != null) {
       %>
         <strong>👤 Usuario logueado:</strong> <%= loggedUser.getUsername() %> 
-        (ID: <%= loggedUser.getId() %>, Role: <%= loggedUser.getRole() %>)
+        (ID: <%= loggedUser.getUserId() %>, Role: <%= loggedUser.getRole() %>)
       <% } else { %>
         <strong>⚠️ No hay usuario logueado.</strong> 
         <a href="<%= request.getContextPath() %>/login">Ir a Login</a>

@@ -71,7 +71,7 @@
         <form action="${formAction}" method="POST">
             
             <input type="hidden" name="accion" value="actualizar">
-            <input type="hidden" name="id" value="${user.id}">
+            <input type="hidden" name="id" value="${user.userId}">
 
             <div class="text-center" style="margin-bottom: 25px;">
                 <c:choose>
@@ -82,7 +82,7 @@
                         <img src="${pageContext.request.contextPath}/utils/no-user.png" class="avatar-preview" alt="Sin foto" style="opacity: 0.5;">
                     </c:otherwise>
                 </c:choose>
-                <p class="text-muted small">ID: ${user.id} - ${user.username}</p>
+                <p class="text-muted small">ID: ${user.userId} - ${user.username}</p>
             </div>
 
             <div class="form-group">

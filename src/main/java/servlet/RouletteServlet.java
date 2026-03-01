@@ -57,7 +57,7 @@ public class RouletteServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("usuarioLogueado");
-        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getUserId());
         
         if (movieIds.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/watchlist");

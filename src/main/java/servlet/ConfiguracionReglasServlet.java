@@ -88,7 +88,7 @@ public class ConfiguracionReglasServlet extends HttpServlet {
 
         if (session != null && session.getAttribute("usuarioLogueado") != null) {
             User user = (User) session.getAttribute("usuarioLogueado");
-            config.setAdminUserId(user.getId());
+            config.setAdminUserId(user.getUserId());
         } else {
             config.setAdminUserId(null);
         }

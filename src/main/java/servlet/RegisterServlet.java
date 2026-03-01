@@ -90,7 +90,7 @@ public class RegisterServlet extends HttpServlet {
             
             try {
                 repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository(new repository.MovieRepository());
-                watchlistRepo.addWatchlist(createdUser.getId());
+                watchlistRepo.addWatchlist(createdUser.getUserId());
             } catch (Exception e) {
                 System.err.println("Error creating watchlist for new user: " + e.getMessage());
             }

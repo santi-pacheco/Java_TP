@@ -91,35 +91,35 @@ public class ProfileServlet extends HttpServlet {
             
             if (profileUser == null) profileUser = loggedUser;
 
-            boolean isMyProfile = (loggedUser.getId() == profileUser.getId());
+            boolean isMyProfile = (loggedUser.getUserId() == profileUser.getUserId());
             boolean isFollowing = false;
 
             if (!isMyProfile) {
-                boolean loBloquee = userController.isBlocking(loggedUser.getId(), profileUser.getId());
-                boolean meBloqueo = userController.isBlocking(profileUser.getId(), loggedUser.getId());
+                boolean loBloquee = userController.isBlocking(loggedUser.getUserId(), profileUser.getUserId());
+                boolean meBloqueo = userController.isBlocking(profileUser.getUserId(), loggedUser.getUserId());
                 if (loBloquee || meBloqueo) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Usuario no encontrado");
                     return;
                 }
             }
             if (!isMyProfile) {
-                isFollowing = userController.checkFollowStatus(loggedUser.getId(), profileUser.getId());
+                isFollowing = userController.checkFollowStatus(loggedUser.getUserId(), profileUser.getUserId());
             }
 
-            List<Review> userReviews = reviewController.getReviewsByUser(profileUser.getId());
+            List<Review> userReviews = reviewController.getReviewsByUser(profileUser.getUserId());
             
-            List<User> followersList = userController.getFollowers(profileUser.getId());
-            List<User> followingList = userController.getFollowing(profileUser.getId());
+            List<User> followersList = userController.getFollowers(profileUser.getUserId());
+            List<User> followingList = userController.getFollowing(profileUser.getUserId());
             int realFollowersCount = followersList.size();
             int realFollowingCount = followingList.size();
             if (loggedUser != null) {
                 followersList.removeIf(u -> 
-                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
-                    userController.isBlocking(u.getId(), loggedUser.getId())
+                    userController.isBlocking(loggedUser.getUserId(), u.getUserId()) || 
+                    userController.isBlocking(u.getUserId(), loggedUser.getUserId())
                 );
                 followingList.removeIf(u -> 
-                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
-                    userController.isBlocking(u.getId(), loggedUser.getId())
+                    userController.isBlocking(loggedUser.getUserId(), u.getUserId()) || 
+                    userController.isBlocking(u.getUserId(), loggedUser.getUserId())
                 );
             }
             request.setAttribute("followers", followersList);
@@ -127,14 +127,14 @@ public class ProfileServlet extends HttpServlet {
             request.setAttribute("realFollowersCount", realFollowersCount);
             request.setAttribute("realFollowingCount", realFollowingCount);
             if (isMyProfile) {
-                List<User> blockedList = userController.getBlockedUsers(loggedUser.getId());
+                List<User> blockedList = userController.getBlockedUsers(loggedUser.getUserId());
                 request.setAttribute("blockedUsers", blockedList);
             }
             Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
 
             ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();
             int userKcals = profileUser.getTotalKcals();
-            int userLevel = profileUser.getNivelUsuario();
+            int userLevel = profileUser.getUserLevel();
             int nextLevelMax = config.getKcalsToLevel2();
             int currentLevelMin = 0;
 
@@ -156,9 +156,9 @@ public class ProfileServlet extends HttpServlet {
             progressPercentage = Math.max(0, Math.min(100, progressPercentage));
 
             Movie platoPrincipalMovie = null;
-            if (profileUser.getPlatoPrincipalMovieId() != null) {
+            if (profileUser.getMainDishMovieId() != null) {
                 try {
-                    platoPrincipalMovie = movieService.getMovieById(profileUser.getPlatoPrincipalMovieId());
+                    platoPrincipalMovie = movieService.getMovieById(profileUser.getMainDishMovieId());
                 } catch (Exception e) {
                     System.err.println("Error fetching plato principal: " + e.getMessage());
                 }

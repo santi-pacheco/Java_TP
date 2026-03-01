@@ -13,7 +13,7 @@ import entity.User;
 public class FollowRepository {
 
     public void addFollow(int followerId, int followedId) {
-        String sql = "INSERT INTO seguidores (id_seguidor, id_seguido) VALUES (?, ?)";
+        String sql = "INSERT INTO followers (follower_id, followed_id) VALUES (?, ?)";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -32,7 +32,7 @@ public class FollowRepository {
     }
 
     public void removeFollow(int followerId, int followedId) {
-        String sql = "DELETE FROM seguidores WHERE id_seguidor = ? AND id_seguido = ?";
+        String sql = "DELETE FROM followers WHERE follower_id = ? AND followed_id = ?";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -47,7 +47,7 @@ public class FollowRepository {
     }
 
     public boolean isFollowing(int followerId, int followedId) {
-        String sql = "SELECT COUNT(*) FROM seguidores WHERE id_seguidor = ? AND id_seguido = ?";
+        String sql = "SELECT COUNT(*) FROM followers WHERE follower_id = ? AND followed_id = ?";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -68,10 +68,10 @@ public class FollowRepository {
     
     public List<User> findFollowers(int userId) {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT u.id_user, u.username, u.email " +
-                     "FROM usuarios u " +
-                     "INNER JOIN seguidores s ON u.id_user = s.id_seguidor " +
-                     "WHERE s.id_seguido = ?";
+        String sql = "SELECT u.user_id, u.username, u.email " +
+                     "FROM users u " +
+                     "INNER JOIN followers s ON u.user_id = s.follower_id " +
+                     "WHERE s.followed_id = ?";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -80,10 +80,9 @@ public class FollowRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     User user = new User();
-                    user.setId(rs.getInt("id_user"));
+                    user.setUserId(rs.getInt("user_id"));
                     user.setUsername(rs.getString("username"));
                     user.setEmail(rs.getString("email"));
-                    // user.setProfilePath(rs.getString("profile_path"));
                     users.add(user);
                 }
             }
@@ -95,10 +94,10 @@ public class FollowRepository {
 
     public List<User> findFollowing(int userId) {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT u.id_user, u.username, u.email " +
-                     "FROM usuarios u " +
-                     "INNER JOIN seguidores s ON u.id_user = s.id_seguido " +
-                     "WHERE s.id_seguidor = ?";
+        String sql = "SELECT u.user_id, u.username, u.email " +
+                     "FROM users u " +
+                     "INNER JOIN followers s ON u.user_id = s.followed_id " +
+                     "WHERE s.follower_id = ?";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -107,7 +106,7 @@ public class FollowRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     User user = new User();
-                    user.setId(rs.getInt("id_user"));
+                    user.setUserId(rs.getInt("user_id"));
                     user.setUsername(rs.getString("username"));
                     user.setEmail(rs.getString("email"));
                     users.add(user);

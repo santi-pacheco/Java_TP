@@ -45,8 +45,8 @@ public class ConfiguracionReglasService {
                 newLevel = 2;
             }
             
-            if (user.getNivelUsuario() != newLevel) {
-                userRepo.updateUserVolume(user.getId(), kcals, newLevel);
+            if (user.getUserLevel() != newLevel) {
+                userRepo.updateUserVolume(user.getUserId(), kcals, newLevel);
             }
         }
     }

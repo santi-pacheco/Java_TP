@@ -222,7 +222,7 @@
             <c:when test="${!isMyProfile}">
                 <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; justify-content: center; gap: 10px;">
                     <form action="<%= request.getContextPath() %>/follow" method="POST" style="margin: 0;">
-                        <input type="hidden" name="idUsuario" value="${user.id}">
+                        <input type="hidden" name="idUsuario" value="${user.userId}">
                         <c:choose>
                             <c:when test="${isFollowing}">
                                 <button type="submit" class="btn btn-danger">
@@ -236,7 +236,7 @@
                             </c:otherwise>
                         </c:choose>
                     </form>
-                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.id}, true)" style="color: #d9534f; border-color: #d4cfc7;">
+                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.userId}, true)" style="color: #d9534f; border-color: #d4cfc7;">
                         <i class="glyphicon glyphicon-ban-circle"></i> Bloquear
                     </button>
                 </div>
@@ -425,7 +425,7 @@
                     <ul class="list-group">
                         <c:forEach var="f" items="${followers}">
                             <li class="list-group-item">
-                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
+                                <a href="<%= request.getContextPath() %>/profile?id=${f.userId}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
                                     <i class="glyphicon glyphicon-user"></i> ${f.username}
                                 </a>
                             </li>
@@ -451,7 +451,7 @@
                         <c:forEach var="b" items="${blockedUsers}">
                             <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                                 <span><i class="glyphicon glyphicon-user" style="color: #999;"></i> ${b.username}</span>
-                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.id}, false)">Desbloquear</button>
+                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.userId}, false)">Desbloquear</button>
                             </li>
                         </c:forEach>
                         <c:if test="${empty blockedUsers}">
@@ -474,7 +474,7 @@
                     <ul class="list-group">
                         <c:forEach var="f" items="${following}">
                             <li class="list-group-item">
-                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
+                                <a href="<%= request.getContextPath() %>/profile?id=${f.userId}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
                                     <i class="glyphicon glyphicon-user"></i> ${f.username}
                                 </a>
                             </li>

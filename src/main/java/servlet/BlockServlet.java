@@ -48,7 +48,7 @@ public class BlockServlet extends HttpServlet {
 
         try {
             int targetId = Integer.parseInt(targetIdStr);
-            userService.toggleBlock(loggedUser.getId(), targetId);
+            userService.toggleBlock(loggedUser.getUserId(), targetId);
             response.getWriter().write("{\"success\":true}");
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

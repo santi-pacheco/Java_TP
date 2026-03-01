@@ -70,7 +70,7 @@ public class WatchlistServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("usuarioLogueado");
-        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getUserId());
         
         List<Movie> movies = new ArrayList<>();
         for (String idStr : movieIds) {
@@ -98,13 +98,13 @@ public class WatchlistServlet extends HttpServlet {
         User user = (User) session.getAttribute("usuarioLogueado");
         String action = request.getParameter("action");
         String movieId = request.getParameter("movieId");
-        User userAct = userController.getUserById(user.getId());
+        User userAct = userController.getUserById(user.getUserId());
 
         if ("add".equals(action)) {
-            List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getId());
+            List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getUserId());
             int cantidadPeliculas = movieIds.size();
             
-            if (userAct.getNivelUsuario() >= 2) {
+            if (userAct.getUserLevel() >= 2) {
                 int limiteActivo = configController.getConfiguracionReglas().getActiveWatchlistLimit();
                 
                 if (cantidadPeliculas >= limiteActivo) {
@@ -122,9 +122,9 @@ public class WatchlistServlet extends HttpServlet {
                     return;
                 }
             }    
-            watchlistController.addMovie(user.getId(), movieId);
+            watchlistController.addMovie(user.getUserId(), movieId);
         } else if ("remove".equals(action)) {
-            watchlistController.removeMovie(user.getId(), movieId);
+            watchlistController.removeMovie(user.getUserId(), movieId);
         }
 
         response.sendRedirect(request.getContextPath() + "/watchlist");

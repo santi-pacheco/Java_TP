@@ -45,9 +45,9 @@ public class UserService {
     }
     
     public User updateUser(User user) {
-        User existingUser = userRepository.findOne(user.getId());    
-        if (existingUser == null) {
-            throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getId() + " no encontrado.");
+User existingUser = userRepository.findOne(user.getUserId());
+         if (existingUser == null) {
+             throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getUserId() + " no encontrado.");
         }
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
@@ -154,7 +154,7 @@ public class UserService {
             return null; 
         }
         String token = UUID.randomUUID().toString();
-        userRepository.savePasswordResetToken(user.getId(), token);
+        userRepository.savePasswordResetToken(user.getUserId(), token);
         return token;
     }
     
@@ -203,7 +203,7 @@ public class UserService {
 
     public void updatePlatoPrincipal(int userId, Integer movieId) {
     	User u = userRepository.findOne(userId);
-    	if (u != null && u.getNivelUsuario() > 2) {
+    	if (u != null && u.getUserLevel() > 2) {
     		userRepository.updatePlatoPrincipal(userId, movieId);
     	} else {
 			throw ErrorFactory.unauthorized("No tienes permiso para actualizar el plato principal.");

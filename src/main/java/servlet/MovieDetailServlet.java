@@ -126,22 +126,22 @@ public class MovieDetailServlet extends HttpServlet {
             
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
-                User updatedUser = userService.getUserById(user.getId()); 
+                User updatedUser = userService.getUserById(user.getUserId()); 
                 
-                List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
+                List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getUserId());
                 isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
-                userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
+                userReview = reviewController.getReviewByUserAndMovie(user.getUserId(), movieId);
                 
                 int cantidadPeliculas = watchlistMovies.size();
-                int limite = updatedUser.getNivelUsuario() >= 2 
+                int limite = updatedUser.getUserLevel() >= 2 
                     ? configController.getConfiguracionReglas().getActiveWatchlistLimit()
                     : configController.getConfiguracionReglas().getNormalWatchlistLimit();
                 canAddToWatchlist = cantidadPeliculas < limite;
                 
-                List<User> followingList = userService.getFollowing(user.getId());
+                List<User> followingList = userService.getFollowing(user.getUserId());
                 if (followingList != null) {
                     for (User u : followingList) {
-                        followingIds.add(u.getId());
+                        followingIds.add(u.getUserId());
                     }
                 }
             }
@@ -149,7 +149,7 @@ public class MovieDetailServlet extends HttpServlet {
             int idLector = -1;
             if (session != null && session.getAttribute("usuarioLogueado") != null) {
                 User user = (User) session.getAttribute("usuarioLogueado");
-                idLector = user.getId();
+                idLector = user.getUserId();
             }
             
             String sortBy = request.getParameter("sortBy");
@@ -171,7 +171,7 @@ public class MovieDetailServlet extends HttpServlet {
                 
                 if (session != null && session.getAttribute("usuarioLogueado") != null) {
                     User user = (User) session.getAttribute("usuarioLogueado");
-                    boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getReviewId());
+                    boolean hasLiked = likeService.hasUserLiked(user.getUserId(), review.getReviewId());
                     userLikesMap.put(review.getReviewId(), hasLiked);
                 }
                 
@@ -182,7 +182,7 @@ public class MovieDetailServlet extends HttpServlet {
                 if (!userLevelsMap.containsKey(review.getUserId())) {
                     User reviewAuthor = userService.getUserById(review.getUserId());
                     if (reviewAuthor != null) {
-                        userLevelsMap.put(review.getUserId(), reviewAuthor.getNivelUsuario());
+                        userLevelsMap.put(review.getUserId(), reviewAuthor.getUserLevel());
                     } else {
                         userLevelsMap.put(review.getUserId(), 1); 
                     }

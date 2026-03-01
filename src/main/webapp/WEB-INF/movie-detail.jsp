@@ -331,7 +331,7 @@
         if (likedReviewIds == null) likedReviewIds = new ArrayList<>();
         
         User loggedUser = (User) session.getAttribute("usuarioLogueado");
-        Integer currentUserId = loggedUser != null ? loggedUser.getId() : null;
+        Integer currentUserId = loggedUser != null ? loggedUser.getUserId() : null;
         
         if (movie != null) {
     %>

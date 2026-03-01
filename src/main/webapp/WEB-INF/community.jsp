@@ -448,7 +448,7 @@
                 let safeUsername = escapeHTML(user.username);
                 let avatarUrl = user.profileImage ? `${pageContext.request.contextPath}/uploads/\${safeImage}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
                 
-                let level = parseInt(user.userLevel || user.nivelUsuario || user.nivel || user.user_level || 1, 10);
+                let level = parseInt(user.userLevel || user.nivel || user.user_level || 1, 10);
                 let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
                 
                 html += `<a href="${pageContext.request.contextPath}/profile?id=\${user.id}" class="user-result-item">
@@ -474,7 +474,7 @@
     const feedContainer = document.getElementById('feed-container');
     const sentinel = document.getElementById('loading-sentinel');
     const noMoreDataMsg = document.getElementById('no-more-data');
-    const currentUserId = ${empty usuarioLogueado ? 'null' : usuarioLogueado.id};
+    const currentUserId = ${empty usuarioLogueado ? 'null' : usuarioLogueado.userId};
 
     const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && !isFetching && hasMoreData) {
@@ -534,7 +534,7 @@
         let avatarUrl = review.userAvatar ? `${pageContext.request.contextPath}/uploads/\${escapeHTML(review.userAvatar)}` : `${pageContext.request.contextPath}/utils/default_profile.png`;
         let posterUrl = review.posterPath ? `https://image.tmdb.org/t/p/w500\${escapeHTML(review.posterPath)}` : `${pageContext.request.contextPath}/utils/no-poster.png`;
 
-        let level = parseInt(review.userLevel || review.nivelUsuario || review.nivel || review.user_level || 1, 10);
+        let level = parseInt(review.userLevel || review.nivel || review.user_level || 1, 10);
         let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
         let cheddarClass = level >= 4 ? 'cheddar-review-card' : '';
 

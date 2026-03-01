@@ -63,7 +63,7 @@ public class FollowServlet extends HttpServlet {
             int targetId = Integer.parseInt(targetIdStr);
             redirectUrl = request.getContextPath() + "/profile?id=" + targetId;
             
-            userController.handleFollowAction(loggedUser.getId(), targetId);
+            userController.handleFollowAction(loggedUser.getUserId(), targetId);
 
             // 2. Respuesta dependiendo de quién lo pidió
             if (isAjax) {

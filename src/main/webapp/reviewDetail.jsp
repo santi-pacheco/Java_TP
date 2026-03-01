@@ -155,7 +155,7 @@
 <script>
     const contextPath = '<%= request.getContextPath() %>';
     const reviewId = <%= review != null ? review.getReviewId() : "null" %>;
-    const userId = <%= loggedUser != null ? loggedUser.getId() : "null" %>;
+    const userId = <%= loggedUser != null ? loggedUser.getUserId() : "null" %>;
 
     document.addEventListener('DOMContentLoaded', function() {
         if (reviewId) {

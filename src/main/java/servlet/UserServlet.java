@@ -125,7 +125,7 @@ public class UserServlet extends HttpServlet {
                 	
                     try {
                         int id = Integer.parseInt(request.getParameter("id"));
-                        userFromForm.setId(id);
+                        userFromForm.setUserId(id);
                     } catch (NumberFormatException e) {
                         throw ErrorFactory.badRequest("ID inválido para actualización.");
                     }

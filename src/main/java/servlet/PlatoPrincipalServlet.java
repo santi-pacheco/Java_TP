@@ -46,11 +46,11 @@ public class PlatoPrincipalServlet extends HttpServlet {
         try {
             if ("set".equals(action)) {
                 int movieId = Integer.parseInt(request.getParameter("movieId"));
-                userService.updatePlatoPrincipal(loggedUser.getId(), movieId);
-                loggedUser.setPlatoPrincipalMovieId(movieId);
+                userService.updatePlatoPrincipal(loggedUser.getUserId(), movieId);
+                loggedUser.setMainDishMovieId(movieId);
             } else if ("remove".equals(action)) {
-                userService.updatePlatoPrincipal(loggedUser.getId(), null);
-                loggedUser.setPlatoPrincipalMovieId(null);
+                userService.updatePlatoPrincipal(loggedUser.getUserId(), null);
+                loggedUser.setMainDishMovieId(null);
             }
             
             session.setAttribute("usuarioLogueado", loggedUser);

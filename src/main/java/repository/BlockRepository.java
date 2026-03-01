@@ -17,7 +17,7 @@ public class BlockRepository {
     }
 
     public void addBlock(int blockerId, int blockedId) {
-        String sql = "INSERT INTO bloqueos (id_blocker, id_blocked) VALUES (?, ?)";
+        String sql = "INSERT INTO user_blocks (blocker_id, blocked_id) VALUES (?, ?)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -34,7 +34,7 @@ public class BlockRepository {
     }
 
     public void removeBlock(int blockerId, int blockedId) {
-        String sql = "DELETE FROM bloqueos WHERE id_blocker = ? AND id_blocked = ?";
+        String sql = "DELETE FROM user_blocks WHERE blocker_id = ? AND blocked_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -49,7 +49,7 @@ public class BlockRepository {
     }
 
     public boolean isBlocking(int blockerId, int blockedId) {
-        String sql = "SELECT 1 FROM bloqueos WHERE id_blocker = ? AND id_blocked = ?";
+        String sql = "SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,9 +67,9 @@ public class BlockRepository {
 
     public List<User> getBlockedUsers(int blockerId) {
         List<User> blockedUsers = new ArrayList<>();
-        String sql = "SELECT u.id_user, u.username, u.profile_image FROM usuarios u " +
-                     "INNER JOIN bloqueos b ON u.id_user = b.id_blocked " +
-                     "WHERE b.id_blocker = ?";
+        String sql = "SELECT u.user_id, u.username, u.profile_image FROM users u " +
+                     "INNER JOIN user_blocks b ON u.user_id = b.blocked_id " +
+                     "WHERE b.blocker_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -77,7 +77,7 @@ public class BlockRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     User user = new User();
-                    user.setId(rs.getInt("id_user"));
+                    user.setUserId(rs.getInt("user_id"));
                     user.setUsername(rs.getString("username"));
                     user.setProfileImage(rs.getString("profile_image"));
                     blockedUsers.add(user);

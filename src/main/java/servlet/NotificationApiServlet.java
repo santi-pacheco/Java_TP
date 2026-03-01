@@ -67,11 +67,11 @@ public class NotificationApiServlet extends HttpServlet {
         
         try {
             
-            User freshUser = userRepository.findOne(sessionUser.getId());
+            User freshUser = userRepository.findOne(sessionUser.getUserId());
             
             List<Notification> notifications = notificationRepository.getNotificationsForUser(
-                freshUser.getId(), 
-                freshUser.getUltimaRevisionNotificaciones()
+                freshUser.getUserId(), 
+                freshUser.getLastNotificationCheck()
             );
             
             response.getWriter().write(gson.toJson(notifications));
@@ -98,9 +98,9 @@ public class NotificationApiServlet extends HttpServlet {
         User sessionUser = (User) session.getAttribute("usuarioLogueado");
         
         try {
-            userRepository.updateNotificacionesLeidas(sessionUser.getId());
+            userRepository.updateNotificacionesLeidas(sessionUser.getUserId());
             
-            User updatedUser = userRepository.findOne(sessionUser.getId());
+            User updatedUser = userRepository.findOne(sessionUser.getUserId());
             session.setAttribute("usuarioLogueado", updatedUser);
             
             response.getWriter().write("{\"success\": true}");

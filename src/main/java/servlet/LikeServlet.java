@@ -44,7 +44,7 @@ public class LikeServlet extends HttpServlet {
             int reviewId = Integer.parseInt(reviewIdParam);
             LikeService likeService = new LikeService();
 
-            LikeService.LikeResponse response = likeService.toggleLike(user.getId(), reviewId);
+            LikeService.LikeResponse response = likeService.toggleLike(user.getUserId(), reviewId);
             
             resp.getWriter().write("{\"success\":true,\"likesCount\":" + response.getLikesCount() + ",\"liked\":" + response.isLiked() + "}");
 

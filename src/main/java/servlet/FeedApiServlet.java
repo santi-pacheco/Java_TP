@@ -66,7 +66,7 @@ public class FeedApiServlet extends HttpServlet {
             }
         }
         int limit = 10;
-        List<FeedReviewDTO> feed = reviewService.getGlobalFeedPaginated(usuarioActual.getId(), offset, limit);
+        List<FeedReviewDTO> feed = reviewService.getGlobalFeedPaginated(usuarioActual.getUserId(), offset, limit);
         
         String json = gson.toJson(feed);
         out.print(json);

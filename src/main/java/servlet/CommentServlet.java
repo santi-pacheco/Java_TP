@@ -40,7 +40,7 @@ public class CommentServlet extends HttpServlet {
             int reviewId = Integer.parseInt(reviewIdParam);
             HttpSession session = req.getSession(false);
             User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
-            int loggedUserId = (loggedUser != null) ? loggedUser.getId() : -1;
+            int loggedUserId = (loggedUser != null) ? loggedUser.getUserId() : -1;
             CommentService commentService = new CommentService();
             List<ReviewComment> comments = commentService.getCommentsByReview(reviewId, loggedUserId);
 
@@ -66,8 +66,8 @@ public class CommentServlet extends HttpServlet {
 
             
                 boolean isFollowing = false;
-                if (loggedUser != null && loggedUser.getId() != c.getUserId()) {
-                    isFollowing = userService.isFollowing(loggedUser.getId(), c.getUserId());
+                if (loggedUser != null && loggedUser.getUserId() != c.getUserId()) {
+                    isFollowing = userService.isFollowing(loggedUser.getUserId(), c.getUserId());
                 }
                 
                 json.append("{")
@@ -107,13 +107,13 @@ public class CommentServlet extends HttpServlet {
 
             if ("delete".equals(action)) {
                 int commentId = Integer.parseInt(req.getParameter("commentId"));
-                commentService.deleteOwnComment(user.getId(), commentId);
+                commentService.deleteOwnComment(user.getUserId(), commentId);
                 resp.getWriter().write("{\"success\":true}");
                 
             } else if ("edit".equals(action)) {
                 int commentId = Integer.parseInt(req.getParameter("commentId"));
                 String newText = req.getParameter("commentText");
-                ReviewComment comment = commentService.editComment(user.getId(), commentId, newText);
+                ReviewComment comment = commentService.editComment(user.getUserId(), commentId, newText);
                 String status = comment.getModerationStatus() != null ? comment.getModerationStatus().getValue() : "APPROVED";
                 
                 resp.getWriter().write("{\"success\":true,\"newText\":\"" + comment.getCommentText().replace("\"", "\\\"") + "\",\"status\":\"" + status + "\"}");
@@ -125,12 +125,12 @@ public class CommentServlet extends HttpServlet {
                 if (commentText == null || commentText.trim().isEmpty()) {
                     resp.getWriter().write("{\"success\":false,\"error\":\"commentText required\"}"); return;
                 }
-                ReviewComment comment = commentService.createComment(user.getId(), reviewId, commentText);
+                ReviewComment comment = commentService.createComment(user.getUserId(), reviewId, commentText);
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 String createdAt = comment.getCreatedAt() != null ? sdf.format(comment.getCreatedAt()) : sdf.format(new java.util.Date());
                 String status = comment.getModerationStatus() != null ? comment.getModerationStatus().getValue() : "APPROVED";
                 
-                resp.getWriter().write("{\"success\":true,\"commentId\":" + comment.getCommentId() + ",\"userId\":" + user.getId() + ",\"username\":\"" + user.getUsername() + "\",\"createdAt\":\"" + createdAt + "\",\"status\":\"" + status + "\"}");
+                resp.getWriter().write("{\"success\":true,\"commentId\":" + comment.getCommentId() + ",\"userId\":" + user.getUserId() + ",\"username\":\"" + user.getUsername() + "\",\"createdAt\":\"" + createdAt + "\",\"status\":\"" + status + "\"}");
             }
 
         } catch (BanException e) {

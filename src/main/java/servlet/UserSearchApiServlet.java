@@ -49,7 +49,7 @@ public class UserSearchApiServlet extends HttpServlet {
 
         jakarta.servlet.http.HttpSession session = request.getSession(false);
         entity.User loggedUser = (session != null) ? (entity.User) session.getAttribute("usuarioLogueado") : null;
-        int loggedUserId = (loggedUser != null) ? loggedUser.getId() : -1;
+        int loggedUserId = (loggedUser != null) ? loggedUser.getUserId() : -1;
         
         if (query == null || query.trim().length() < 1) {
             out.print("[]");
@@ -63,10 +63,10 @@ public class UserSearchApiServlet extends HttpServlet {
             JsonArray jsonArray = new JsonArray();
             for (User u : foundUsers) {
                 JsonObject userJson = new JsonObject();
-                userJson.addProperty("id", u.getId());
+                userJson.addProperty("id", u.getUserId());
                 userJson.addProperty("username", u.getUsername());
                 userJson.addProperty("profileImage", u.getProfileImage() != null ? u.getProfileImage() : "");
-                userJson.addProperty("nivelUsuario", u.getNivelUsuario()); 
+                userJson.addProperty("userLevel", u.getUserLevel()); 
                 jsonArray.add(userJson);
             }
 

@@ -12,86 +12,40 @@ import util.DataSourceProvider;
 import exception.ErrorFactory;
 
 public class UserRepository {
-    
+
     public UserRepository() {
     }
 
     public List<User> findAll() {
         List<User> Users = new ArrayList<>();
-        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios ORDER BY id_user";
-        
+        String sql = "SELECT user_id, password, username, role, email, birth_date, total_kcals, user_level, notified_level, main_dish_movie_id, profile_image, banned_until, last_notification_check FROM users ORDER BY user_id";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-            
+
             while (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id_user"));
-                user.setPassword(rs.getString("password"));
-                user.setUsername(rs.getString("username"));
-                user.setRole(rs.getString("role"));
-                user.setEmail(rs.getString("email"));
-                user.setBirthDate(rs.getDate("birthdate"));
-                user.setTotalKcals(rs.getInt("total_kcals"));
-                user.setNivelUsuario(rs.getInt("nivel_usuario"));
-                user.setNivelNotificado(rs.getInt("nivel_notificado"));
-                
-                Object platoObj = rs.getObject("plato_principal_movie_id");
-                if (platoObj != null) {
-                    user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
-                }
-                
-                user.setProfileImage(rs.getString("profile_image"));
-                user.setBannedUntil(rs.getTimestamp("banned_until")); 
-                
-                java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
-                if (ultimaRevTs != null) {
-                    user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
-                }
-                
+                User user = mapResultSetToUser(rs);
                 Users.add(user);
             }
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error fetching users from database");
         }
-        
+
         return Users;
     }
 
     public User findOne(int id) {
         User user = null;
+        String sql = "SELECT user_id, password, username, role, email, birth_date, total_kcals, user_level, notified_level, main_dish_movie_id, profile_image, banned_until, last_notification_check FROM users WHERE user_id = ?";
 
-        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE id_user = ?";
-        
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    user = new User();
-                    user.setId(rs.getInt("id_user"));
-                    user.setPassword(rs.getString("password"));
-                    user.setUsername(rs.getString("username"));
-                    user.setRole(rs.getString("role"));
-                    user.setEmail(rs.getString("email"));
-                    user.setBirthDate(rs.getDate("birthdate"));
-                    user.setTotalKcals(rs.getInt("total_kcals"));
-                    user.setNivelUsuario(rs.getInt("nivel_usuario"));
-                    user.setNivelNotificado(rs.getInt("nivel_notificado"));
-                    
-                    Object platoObj = rs.getObject("plato_principal_movie_id");
-                    if (platoObj != null) {
-                        user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
-                    }
-                    
-                    user.setProfileImage(rs.getString("profile_image"));
-                    user.setBannedUntil(rs.getTimestamp("banned_until"));
-                    
-                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
-                    if (ultimaRevTs != null) {
-                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
-                    }
+                    user = mapResultSetToUser(rs);
                 }
             }
         } catch (SQLException e) {
@@ -100,64 +54,91 @@ public class UserRepository {
         return user;
     }
 
+    private User mapResultSetToUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserId(rs.getInt("user_id"));
+        user.setPassword(rs.getString("password"));
+        user.setUsername(rs.getString("username"));
+        user.setRole(rs.getString("role"));
+        user.setEmail(rs.getString("email"));
+        user.setBirthDate(rs.getDate("birth_date"));
+        user.setTotalKcals(rs.getInt("total_kcals"));
+        user.setUserLevel(rs.getInt("user_level"));
+        user.setNotifiedLevel(rs.getInt("notified_level"));
+
+        Object mainDishObj = rs.getObject("main_dish_movie_id");
+        if (mainDishObj != null) {
+            user.setMainDishMovieId(((Number) mainDishObj).intValue());
+        }
+
+        user.setProfileImage(rs.getString("profile_image"));
+        user.setBannedUntil(rs.getTimestamp("banned_until"));
+
+        java.sql.Timestamp lastCheckTs = rs.getTimestamp("last_notification_check");
+        if (lastCheckTs != null) {
+            user.setLastNotificationCheck(lastCheckTs.toLocalDateTime());
+        }
+        return user;
+    }
+
     public User add(User u) {
-        String sql = "INSERT INTO usuarios (password, username, role, email, birthdate, profile_image) VALUES (?, ?, ?, ?, ?, ?)";
-        
+        String sql = "INSERT INTO users (password, username, role, email, birth_date, profile_image) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setString(1, u.getPassword());
             stmt.setString(2, u.getUsername());
             stmt.setString(3, u.getRole());
             stmt.setString(4, u.getEmail());
             stmt.setDate(5, u.getBirthDate());
             stmt.setString(6, u.getProfileImage());
-            
+
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet keyResultSet = stmt.getGeneratedKeys()) {
                     if (keyResultSet.next()) {
-                        u.setId(keyResultSet.getInt(1));
+                        u.setUserId(keyResultSet.getInt(1));
                     }
                 }
             }
         } catch (SQLException e) {
-            if (e.getErrorCode() == 1062) { 
+            if (e.getErrorCode() == 1062) {
                 throw ErrorFactory.duplicate("Username or email already exists");
             } else {
                 throw ErrorFactory.internal("Error adding user to database");
             }
         }
-        
+
         return u;
     }
 
     public User update(User u) {
-        String sql = "UPDATE usuarios SET username = ?, password = ?, role = ?, email = ?, birthdate = ?, total_kcals = ?, nivel_usuario = ?, nivel_notificado = ?, plato_principal_movie_id = ?, profile_image = ? WHERE id_user = ?";
-        
+        String sql = "UPDATE users SET username = ?, password = ?, role = ?, email = ?, birth_date = ?, total_kcals = ?, user_level = ?, notified_level = ?, main_dish_movie_id = ?, profile_image = ? WHERE user_id = ?";
+
         try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
+
             stmt.setString(1, u.getUsername());
             stmt.setString(2, u.getPassword());
             stmt.setString(3, u.getRole());
             stmt.setString(4, u.getEmail());
             stmt.setDate(5, u.getBirthDate());
             stmt.setInt(6, u.getTotalKcals());
-            stmt.setInt(7, u.getNivelUsuario());
-            stmt.setInt(8, u.getNivelNotificado());
-            
-            if (u.getPlatoPrincipalMovieId() != null) {
-                stmt.setInt(9, u.getPlatoPrincipalMovieId());
+            stmt.setInt(7, u.getUserLevel());
+            stmt.setInt(8, u.getNotifiedLevel());
+
+            if (u.getMainDishMovieId() != null) {
+                stmt.setInt(9, u.getMainDishMovieId());
             } else {
                 stmt.setNull(9, java.sql.Types.INTEGER);
             }
-            
+
             stmt.setString(10, u.getProfileImage());
-            stmt.setInt(11, u.getId());
-            
+            stmt.setInt(11, u.getUserId());
+
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             if (e.getErrorCode() == 1062) {
                 throw ErrorFactory.duplicate("Username or email already exists");
@@ -169,30 +150,30 @@ public class UserRepository {
     }
 
     public void updateProfileImage(int userId, String fileName) {
-        String sql = "UPDATE usuarios SET profile_image = ? WHERE id_user = ?";
-        
+        String sql = "UPDATE users SET profile_image = ? WHERE user_id = ?";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setString(1, fileName);
             stmt.setInt(2, userId);
-            
+
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error updating profile image");
         }
     }
-    
+
     public User delete(User u) {
-        String sql = "DELETE FROM usuarios WHERE id_user = ?";
-        
-        try ( Connection connection = DataSourceProvider.getDataSource().getConnection();
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
-            
-            stmt.setInt(1, u.getId());
+
+            stmt.setInt(1, u.getUserId());
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error deleting user from database");
         }
@@ -201,84 +182,61 @@ public class UserRepository {
 
     public User findByUsername(String username) {
         User user = null;
+        String sql = "SELECT user_id, password, username, role, email, birth_date, total_kcals, user_level, notified_level, main_dish_movie_id, profile_image, banned_until, last_notification_check FROM users WHERE username = ?";
 
-        String sql = "SELECT id_user, password, username, role, email, birthdate, total_kcals, nivel_usuario, nivel_notificado, plato_principal_movie_id, profile_image, banned_until, ultima_revision_notificaciones FROM usuarios WHERE username = ?";
-        
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setString(1, username);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    user = new User();
-                    user.setId(rs.getInt("id_user"));
-                    user.setPassword(rs.getString("password"));
-                    user.setUsername(rs.getString("username"));
-                    user.setRole(rs.getString("role"));
-                    user.setEmail(rs.getString("email"));
-                    user.setBirthDate(rs.getDate("birthdate"));
-                    user.setTotalKcals(rs.getInt("total_kcals"));
-                    user.setNivelUsuario(rs.getInt("nivel_usuario"));
-                    user.setNivelNotificado(rs.getInt("nivel_notificado"));
-                    
-                    Object platoObj = rs.getObject("plato_principal_movie_id");
-                    if (platoObj != null) {
-                        user.setPlatoPrincipalMovieId(((Number) platoObj).intValue());
-                    }
-                    
-                    user.setProfileImage(rs.getString("profile_image"));
-                    user.setBannedUntil(rs.getTimestamp("banned_until")); 
-                    
-                    java.sql.Timestamp ultimaRevTs = rs.getTimestamp("ultima_revision_notificaciones");
-                    if (ultimaRevTs != null) {
-                        user.setUltimaRevisionNotificaciones(ultimaRevTs.toLocalDateTime());
-                    }
+                    user = mapResultSetToUser(rs);
                 }
             }
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error fetching user by username from database");
         }
-        
+
         return user;
     }
-    
-    public void updateUserVolume(int userId, int totalKcals, int nivelUsuario) {
-        String sql = "UPDATE usuarios SET total_kcals = ?, nivel_usuario = ? WHERE id_user = ?";
-        
+
+    public void updateUserVolume(int userId, int totalKcals, int userLevel) {
+        String sql = "UPDATE users SET total_kcals = ?, user_level = ? WHERE user_id = ?";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, totalKcals);
-            stmt.setInt(2, nivelUsuario);
+            stmt.setInt(2, userLevel);
             stmt.setInt(3, userId);
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error updating user volume");
         }
     }
 
     public void banUser(int userId, int daysToban) {
-        String sql = "UPDATE usuarios SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE id_user = ?";
-        
+        String sql = "UPDATE users SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE user_id = ?";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, daysToban);
             stmt.setInt(2, userId);
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error banning user");
         }
     }
 
     public java.sql.Timestamp getBannedUntil(int userId) {
-        String sql = "SELECT banned_until FROM usuarios WHERE id_user = ?";
-        
+        String sql = "SELECT banned_until FROM users WHERE user_id = ?";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -297,55 +255,55 @@ public class UserRepository {
         return bannedUntil.after(new java.sql.Timestamp(System.currentTimeMillis()));
     }
 
-	public List<User> searchUsersByUsername(String query, int loggedUserId) {
-	    List<User> users = new ArrayList<>();
-	    String sql = "SELECT id_user, username, profile_image, nivel_usuario FROM usuarios " +
-	                 "WHERE username LIKE ? AND id_user != ? " +
-	                 "AND id_user NOT IN (SELECT id_blocked FROM bloqueos WHERE id_blocker = ?) " +
-	                 "AND id_user NOT IN (SELECT id_blocker FROM bloqueos WHERE id_blocked = ?) " +
-	                 "LIMIT 10";
-	    try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql)) {
-	        stmt.setString(1, "%" + query + "%");
-	        stmt.setInt(2, loggedUserId);
-	        stmt.setInt(3, loggedUserId);
-	        stmt.setInt(4, loggedUserId);
-	        
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            while (rs.next()) {
-	                User user = new User();
-	                user.setId(rs.getInt("id_user"));
-	                user.setUsername(rs.getString("username"));
-	                user.setProfileImage(rs.getString("profile_image"));
-	                user.setNivelUsuario(rs.getInt("nivel_usuario"));
-	                users.add(user);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        throw ErrorFactory.internal("Error buscando usuarios por nombre");
-	    }
-	    return users;
-	}
-	
-	public User findByEmail(String email) {
-        User user = null;
-        String sql = "SELECT id_user, password, username, role, email, birthdate, profile_image, banned_until FROM usuarios WHERE email = ?";
-        
+    public List<User> searchUsersByUsername(String query, int loggedUserId) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT user_id, username, profile_image, user_level FROM users " +
+                "WHERE username LIKE ? AND user_id != ? " +
+                "AND user_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?) " +
+                "AND user_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?) " +
+                "LIMIT 10";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+            stmt.setString(1, "%" + query + "%");
+            stmt.setInt(2, loggedUserId);
+            stmt.setInt(3, loggedUserId);
+            stmt.setInt(4, loggedUserId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getInt("user_id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setProfileImage(rs.getString("profile_image"));
+                    user.setUserLevel(rs.getInt("user_level"));
+                    users.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error buscando usuarios por nombre");
+        }
+        return users;
+    }
+
+    public User findByEmail(String email) {
+        User user = null;
+        String sql = "SELECT user_id, password, username, role, email, birth_date, profile_image, banned_until FROM users WHERE email = ?";
+
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, email);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     user = new User();
-                    user.setId(rs.getInt("id_user"));
+                    user.setUserId(rs.getInt("user_id"));
                     user.setPassword(rs.getString("password"));
                     user.setUsername(rs.getString("username"));
                     user.setRole(rs.getString("role"));
                     user.setEmail(rs.getString("email"));
-                    user.setBirthDate(rs.getDate("birthdate"));
+                    user.setBirthDate(rs.getDate("birth_date"));
                     user.setProfileImage(rs.getString("profile_image"));
-                    user.setBannedUntil(rs.getTimestamp("banned_until")); 
+                    user.setBannedUntil(rs.getTimestamp("banned_until"));
                 }
             }
         } catch (SQLException e) {
@@ -353,17 +311,17 @@ public class UserRepository {
         }
         return user;
     }
-	
-	public void savePasswordResetToken(int userId, String token) {
-        String deleteOldSql = "DELETE FROM password_resets WHERE id_user = ?";
-        String insertSql = "INSERT INTO password_resets (id_user, token, expiry_date) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))";
-        
+
+    public void savePasswordResetToken(int userId, String token) {
+        String deleteOldSql = "DELETE FROM password_resets WHERE user_id = ?";
+        String insertSql = "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection()) {
             try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOldSql)) {
                 deleteStmt.setInt(1, userId);
                 deleteStmt.executeUpdate();
             }
-            
+
             try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 insertStmt.setInt(1, userId);
                 insertStmt.setString(2, token);
@@ -373,17 +331,17 @@ public class UserRepository {
             throw ErrorFactory.internal("Error guardando el token de recuperación");
         }
     }
-	
-	public Integer getUserIdByValidToken(String token) {
-        String sql = "SELECT id_user FROM password_resets WHERE token = ? AND expiry_date > NOW()";
-        
+
+    public Integer getUserIdByValidToken(String token) {
+        String sql = "SELECT user_id FROM password_resets WHERE token = ? AND expires_at > NOW()";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setString(1, token);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("id_user");
+                    return rs.getInt("user_id");
                 }
             }
         } catch (SQLException e) {
@@ -392,23 +350,23 @@ public class UserRepository {
         return null;
     }
 
-	public void updatePasswordAndClearToken(int userId, String hashedPassword, String token) {
-        String updateSql = "UPDATE usuarios SET password = ? WHERE id_user = ?";
+    public void updatePasswordAndClearToken(int userId, String hashedPassword, String token) {
+        String updateSql = "UPDATE users SET password = ? WHERE user_id = ?";
         String deleteTokenSql = "DELETE FROM password_resets WHERE token = ?";
-        
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection()) {
             conn.setAutoCommit(false);
-            
+
             try (PreparedStatement updateStmt = conn.prepareStatement(updateSql);
                  PreparedStatement deleteStmt = conn.prepareStatement(deleteTokenSql)) {
-                
+
                 updateStmt.setString(1, hashedPassword);
                 updateStmt.setInt(2, userId);
                 updateStmt.executeUpdate();
-                
+
                 deleteStmt.setString(1, token);
                 deleteStmt.executeUpdate();
-                
+
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -418,23 +376,22 @@ public class UserRepository {
             throw ErrorFactory.internal("Error actualizando la contraseña");
         }
     }
-	
 
     public void updateNotificacionesLeidas(int userId) {
-        String sql = "UPDATE usuarios SET ultima_revision_notificaciones = NOW() WHERE id_user = ?";
+        String sql = "UPDATE users SET last_notification_check = NOW() WHERE user_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, userId);
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error al actualizar la revisión de notificaciones");
         }
     }
 
     public void markLevelAsNotified(int userId, int level) {
-        String sql = "UPDATE usuarios SET nivel_notificado = ? WHERE id_user = ?";
+        String sql = "UPDATE users SET notified_level = ? WHERE user_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, level);
@@ -446,10 +403,10 @@ public class UserRepository {
     }
 
     public void updatePlatoPrincipal(int userId, Integer movieId) {
-        String sql = "UPDATE usuarios SET plato_principal_movie_id = ? WHERE id_user = ?";
+        String sql = "UPDATE users SET main_dish_movie_id = ? WHERE user_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             if (movieId != null) {
                 stmt.setInt(1, movieId);
             } else {
@@ -457,7 +414,7 @@ public class UserRepository {
             }
             stmt.setInt(2, userId);
             stmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error actualizando el plato principal");
         }

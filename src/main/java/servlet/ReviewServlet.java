@@ -118,7 +118,7 @@ public class ReviewServlet extends HttpServlet {
         
         HttpSession session = request.getSession(false);
         User usuarioLogueado = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
-        int idLector = (usuarioLogueado != null) ? usuarioLogueado.getId() : -1;
+        int idLector = (usuarioLogueado != null) ? usuarioLogueado.getUserId() : -1;
         
         String idParam = request.getParameter("id");
         String userIdParam = request.getParameter("userId");
@@ -202,7 +202,7 @@ public class ReviewServlet extends HttpServlet {
                 newReview.setWatchedOn(LocalDate.parse(watchedOnStr));
             }
             
-            newReview.setUserId(loggedUser.getId());
+            newReview.setUserId(loggedUser.getUserId());
             
             Set<ConstraintViolation<Review>> violations = validator.validate(newReview);
             if (!violations.isEmpty()) {
@@ -268,7 +268,7 @@ public class ReviewServlet extends HttpServlet {
         
         //Verificar que la reseña pertenece al usuario logueado
         Review existingReview = reviewController.getReviewById(id);
-        if (existingReview.getUserId() != loggedUser.getId()) {
+        if (existingReview.getUserId() != loggedUser.getUserId()) {
             throw ErrorFactory.forbidden("Solo puedes editar tus propias reseñas");
         }
         
@@ -314,7 +314,7 @@ public class ReviewServlet extends HttpServlet {
         
      //Verificar que la reseña pertenece al usuario logueado (o es admin)
         Review existingReview = reviewController.getReviewById(id);
-        if (existingReview.getUserId() != loggedUser.getId() && !"admin".equals(loggedUser.getRole())) {
+        if (existingReview.getUserId() != loggedUser.getUserId() && !"admin".equals(loggedUser.getRole())) {
             throw ErrorFactory.forbidden("Solo puedes eliminar tus propias reseñas");
         }
         

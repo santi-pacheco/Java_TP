@@ -261,7 +261,7 @@
             </div>
             
             <a href="${pageContext.request.contextPath}/profile" title="<%= user.getUsername() %>" 
-               class="navbar-avatar-wrapper <%= user.getNivelUsuario() >= 3 ? "burger-avatar-border" : "" %>">
+               class="navbar-avatar-wrapper <%= user.getUserLevel() >= 3 ? "burger-avatar-border" : "" %>">
                 <img src="<%= navAvatar %>" alt="Perfil" class="navbar-avatar-img" onerror="this.src='${pageContext.request.contextPath}/utils/default_profile.png'">
             </a>
             
@@ -278,8 +278,8 @@
     <%
         if (usuarioLogueado != null) {
             entity.User userLvl = (entity.User) usuarioLogueado;
-            if (userLvl.getNivelUsuario() > userLvl.getNivelNotificado()) {
-                int newLevel = userLvl.getNivelUsuario();
+            if (userLvl.getUserLevel() > userLvl.getNotifiedLevel()) {
+                int newLevel = userLvl.getUserLevel();
                 String modalTitle = "";
                 String modalBody = "";
                 String modalIcon = request.getContextPath() + "/utils/level" + newLevel + ".svg";
