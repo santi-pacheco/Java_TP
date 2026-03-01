@@ -917,17 +917,28 @@
         listContainer.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">Cargando...</div>';
         
         fetch('<%= request.getContextPath() %>/review-comments?reviewId=' + reviewId + '&t=' + new Date().getTime())
-            .then(response => response.text())
-            .then(text => {
+            .then(async response => {
+                const text = await response.text();
                 let data;
-                try { data = JSON.parse(text); } catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor.</div>'; return; }
+                try { data = JSON.parse(text); } 
+                catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor al leer comentarios.</div>'; return null; }
+                if (!response.ok || data.success === false) { 
+                    listContainer.innerHTML = '<div style="color:red; text-align:center;">' + (data.message || 'Error al cargar comentarios') + '</div>'; 
+                    return null; 
+                }
+                return data;
+            })
+            .then(data => {
+                if (!data) return;
                 listContainer.innerHTML = ''; 
-                if (data.error) { listContainer.innerHTML = '<div style="color:red; text-align:center;">' + data.error + '</div>'; return; }
                 if (!Array.isArray(data) || data.length === 0) { listContainer.innerHTML = '<div style="text-align:center; color:#888; padding: 10px;">Sin comentarios.</div>'; return; }
                 
                 data.forEach(comment => {
                     appendCommentToDOM(reviewId, comment.commentId, comment.userId, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
                 });
+            })
+            .catch(err => {
+                listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de conexión.</div>';
             });
     }
 
@@ -949,34 +960,35 @@
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=create&reviewId=' + reviewId + '&commentText=' + encodeURIComponent(commentText)
-        }).then(res => res.json()).then(data => {
+        })
+        .then(async res => {
+            const data = await res.json();
             document.getElementById('aiLoadingOverlay').style.display = 'none';
             inputField.disabled = false; 
             submitBtn.disabled = false; 
             submitBtn.textContent = origText;
-            
-            if (data.success) {
-                if (data.status === 'REJECTED') {
-                    showModerationResult('🚫', 'Comentario Rechazado', 'Tu comentario incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.', true);
-                } else if (data.status === 'SPOILER') {
-                    inputField.value = '';
-                    loadComments(reviewId);
-                    showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu comentario revela detalles clave de la trama. Se ha publicado, pero oculto por defecto.', false);
-                } else {
-                    inputField.value = '';
-                    loadComments(reviewId);
-                    showModerationResult('✅', '¡Comentario Aprobado!', 'Tu comentario cumple con todas las normas y ya ha sido publicado.', false);
+            if (!res.ok || data.success === false) {
+                if (data.bannedUntil) {
+                    showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
+                } else { 
+                    showModerationResult('❌', 'Error', data.message || data.error || 'Ocurrió un error inesperado al procesar tu comentario.', false);
                 }
-            } else if (data.bannedUntil) {
-                showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
-            } else { 
-                showModerationResult('❌', 'Error', data.error || 'Ocurrió un error inesperado al procesar tu comentario.', false);
+                return;
+            }
+            if (data.status === 'REJECTED') {
+                showModerationResult('🚫', 'Comentario Rechazado', 'Tu comentario incumple nuestras normas. Tu cuenta ha sido baneada.', true);
+            } else if (data.status === 'SPOILER') {
+                inputField.value = '';
+                loadComments(reviewId);
+                showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu comentario revela detalles clave de la trama. Se ha publicado, pero oculto.', false);
+            } else {
+                inputField.value = '';
+                loadComments(reviewId);
+                showModerationResult('✅', '¡Comentario Aprobado!', 'Tu comentario cumple con todas las normas y ya ha sido publicado.', false);
             }
         }).catch(err => {
             document.getElementById('aiLoadingOverlay').style.display = 'none';
-            inputField.disabled = false; 
-            submitBtn.disabled = false; 
-            submitBtn.textContent = origText;
+            inputField.disabled = false; submitBtn.disabled = false; submitBtn.textContent = origText;
             showModerationResult('❌', 'Error de conexión', 'No se pudo conectar con el servidor.', false);
         });
     }
@@ -1003,7 +1015,7 @@
         const commentItem = btnElement.closest('.comment-item');
         const newText = commentItem.querySelector('.edit-input').value.trim();
         const reviewId = btnElement.closest('.comments-container').id.split('-')[2];
-        if (!newText) { showToast('Comentario vacío', 'error'); return; }
+        if (!newText) { showToast('El comentario no puede estar vacío', 'error'); return; }
         
         document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu edición...';
         document.getElementById('aiLoadingOverlay').style.display = 'flex';
@@ -1013,25 +1025,28 @@
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=edit&commentId=' + commentId + '&commentText=' + encodeURIComponent(newText)
-        }).then(r => r.json()).then(data => {
+        })
+        .then(async res => {
+            const data = await res.json();
             document.getElementById('aiLoadingOverlay').style.display = 'none';
             
-            if (data.success) {
-                if (data.status === 'REJECTED') {
-                    showModerationResult('🚫', 'Edición Rechazada', 'Tu edición incumple las normas. Tu cuenta ha sido baneada temporalmente.', true);
-                } else if (data.status === 'SPOILER') {
-                    loadComments(reviewId); 
-                    showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu edición revela detalles clave. Se ha actualizado, pero oculto por defecto.', false);
+            if (!res.ok || data.success === false) {
+                if (data.bannedUntil) {
+                    showModerationResult('🚫', 'Acción Denegada', 'No puedes editar. Has sido baneado hasta: ' + data.bannedUntil, true);
                 } else {
-                    loadComments(reviewId); 
-                    showModerationResult('✅', '¡Edición Aprobada!', 'Tu comentario editado cumple con todas las normas y ya es visible.', false);
+                    showModerationResult('❌', 'Error', data.message || data.error || 'No se pudo editar el comentario.', false);
                 }
-            } else if (data.bannedUntil) {
-                showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
+                btn.textContent = 'Guardar'; btn.disabled = false;
+                loadComments(reviewId);
+                return;
+            }
+            if (data.status === 'REJECTED') {
+                showModerationResult('🚫', 'Edición Rechazada', 'Tu edición incumple las normas. Tu cuenta ha sido baneada.', true);
+            } else if (data.status === 'SPOILER') {
+                showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Se ha actualizado, pero oculto por defecto.', false);
                 loadComments(reviewId);
             } else {
-                showModerationResult('❌', 'Error', data.error || 'No se pudo editar el comentario.', false);
-                btn.textContent = 'Guardar'; btn.disabled = false;
+                showModerationResult('✅', '¡Edición Aprobada!', 'Tu comentario editado ya es visible.', false);
                 loadComments(reviewId);
             }
         }).catch(err => {
@@ -1043,13 +1058,21 @@
 
     function deleteComment(commentId, reviewId) {
         if (!confirm("¿Eliminar comentario permanentemente?")) return;
+        
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=delete&commentId=' + commentId
-        }).then(r => r.json()).then(data => {
-            if (data.success) { showToast('Eliminado'); loadComments(reviewId); } 
-            else { showToast('Error al eliminar', 'error'); }
-        });
+        })
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok || data.success === false) {
+                showToast(data.message || 'Error al eliminar', 'error'); 
+            } else {
+                showToast('Comentario eliminado'); 
+                loadComments(reviewId);
+            }
+        })
+        .catch(err => showToast('Error de red al intentar eliminar', 'error'));
     }
 
     function appendCommentToDOM(reviewId, commentId, commentUserId, username, date, text, status, isFollowing, profilePicture) {

@@ -8,6 +8,7 @@ import entity.Movie;
 import entity.Review;
 import entity.ReviewComment;
 import exception.BanException;
+import exception.ErrorFactory;
 import repository.CommentRepository;
 import repository.MovieRepository;
 import repository.ReviewRepository;
@@ -33,11 +34,14 @@ public class CommentService {
 
     public ReviewComment createComment(int userId, int reviewId, String commentText) {
         checkUserBanStatus(userId);
-        if (commentText == null || commentText.trim().isEmpty()) throw new IllegalArgumentException("El texto del comentario es requerido");
-        
-        Review review = reviewRepository.findOne(reviewId);
-        if (review == null) throw new IllegalArgumentException("Review no encontrada");
 
+        if (commentText == null || commentText.trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El texto del comentario no puede estar vacío.");
+        }
+        Review review = reviewRepository.findOne(reviewId);
+        if (review == null) {
+            throw ErrorFactory.notFound("La reseña a la que intentas comentar no existe.");
+        }
         Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
@@ -47,62 +51,65 @@ public class CommentService {
         comment.setReviewId(reviewId);
         comment.setCommentText(commentText.trim());
         comment.setModerationStatus(ModerationStatus.PENDING_MODERATION);
-
         comment = commentRepository.add(comment);
-        moderateAndSaveComment(comment, commentText, review.getReviewText(), moviePlot, movieTitle, userId, false);
+        moderateAndSaveComment(comment, commentText, review.getReviewText(), moviePlot, movieTitle, userId, false); 
         return comment;
     }
 
-
     public ReviewComment editComment(int userId, int commentId, String newText) {
         checkUserBanStatus(userId);
-        if (newText == null || newText.trim().isEmpty()) throw new IllegalArgumentException("El texto no puede estar vacío");
-
+        
+        if (newText == null || newText.trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El texto no puede estar vacío");
+        }
         ReviewComment comment = commentRepository.findById(commentId);
-        if (comment == null || comment.getUserId() != userId) throw new IllegalArgumentException("No tienes permiso para editar este comentario");
-
+        if (comment == null) {
+            throw ErrorFactory.notFound("El comentario que intentas editar no existe");
+        }
+        if (comment.getUserId() != userId) {
+            throw ErrorFactory.forbidden("No tienes permiso para editar este comentario");
+        }
         Review review = reviewRepository.findOne(comment.getReviewId());
         Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
 
-        moderateAndSaveComment(comment, newText.trim(), review.getReviewText(), moviePlot, movieTitle, userId, true);
+        moderateAndSaveComment(comment, newText.trim(), review.getReviewText(), moviePlot, movieTitle, userId, true); 
         comment.setCommentText(newText.trim());
         return comment;
     }
 
-    // NUEVO: Eliminar propio comentario
+
     public void deleteOwnComment(int userId, int commentId) {
-        ReviewComment comment = commentRepository.findById(commentId);
-        if (comment != null && comment.getUserId() == userId) {
-            commentRepository.delete(commentId);
-        } else {
-            throw new IllegalArgumentException("No tienes permiso para eliminar este comentario");
+    	ReviewComment comment = commentRepository.findById(commentId);
+        if (comment == null) {
+            throw ErrorFactory.notFound("El comentario que intentas eliminar no existe.");
         }
+        if (comment.getUserId() != userId) {
+            throw ErrorFactory.forbidden("No tienes permiso para eliminar este comentario.");
+        }
+        commentRepository.delete(commentId);
     }
 
     private void moderateAndSaveComment(ReviewComment comment, String text, String reviewText, String moviePlot, String movieTitle, int userId, boolean isEdit) {
         try {
             ModerationResult result = moderationService.moderateComment(text, reviewText, moviePlot, movieTitle);
-            String status = "APPROVED";
-            
+            String status = "APPROVED";  
             if (result.hasOffensiveContent()) {
                 status = "REJECTED";
-                userRepository.banUser(userId, BAN_DAYS);
+                userRepository.banUser(userId, BAN_DAYS); // Cuidado: asegúrate de que BAN_DAYS esté definido en tu clase
             } else if (result.hasSpoilers()) {
                 status = "SPOILER";
             }
-
             if (isEdit) {
                 commentRepository.updateTextAndStatus(comment.getCommentId(), text, status, result.getReason());
             } else {
                 commentRepository.updateModerationStatus(comment.getCommentId(), status, result.getReason());
-            }
-            comment.setModerationStatus(ModerationStatus.fromString(status));
-            comment.setModerationReason(result.getReason());
-            
+            } 
+            comment.setModerationStatus(ModerationStatus.valueOf(status)); // Usar valueOf suele ser más estándar que fromString
+            comment.setModerationReason(result.getReason()); 
         } catch (Exception e) {
-            System.err.println("Moderation failed: " + e.getMessage());
+            throw ErrorFactory.internal("Ocurrió un error al analizar el comentario con nuestra IA. Por favor, intenta de nuevo.");
         }
     }
 
