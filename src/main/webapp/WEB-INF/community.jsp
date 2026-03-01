@@ -612,10 +612,16 @@
         
         fetch('${pageContext.request.contextPath}/follow', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
             body: 'idUsuario=' + targetUserId + '&ajax=true'
         })
-        .then(res => res.json())
+        .then(async res => {
+        	const data = await res.json();
+            if (!res.ok || data.success === false) {
+                throw new Error(data.message || data.error || "Error al procesar la acción");
+            }
+            return data;
+        })
         .then(data => {
             if (data && data.success) {
                 const allButtons = document.querySelectorAll(`.follow-btn[data-user-id="\${targetUserId}"]`);

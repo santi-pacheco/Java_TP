@@ -771,13 +771,15 @@
 
         fetch(contextPath + '/follow', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
             body: 'idUsuario=' + targetUserId + '&ajax=true'
         })
         .then(async res => {
-            const text = await res.text();
-            try { return JSON.parse(text); } 
-            catch(e) { throw new Error("Respuesta inválida del servidor"); }
+			const data = await res.json();
+            if (!res.ok || data.success === false) {
+                throw new Error(data.message || data.error || "Error al procesar la acción");
+            }
+            return data;
         })
         .then(data => {
             if (data && data.success) {
