@@ -23,16 +23,16 @@ import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import controller.ConfiguracionReglasController;
-import service.ConfiguracionReglasService;
-import repository.ConfiguracionReglasRepository;
+import controller.SystemSettingsController;
+import service.SystemSettingsService;
+import repository.SystemSettingsRepository;
 
 
 @WebServlet("/watchlist")
 public class WatchlistServlet extends HttpServlet {
     private WatchlistController watchlistController;
     private MovieController movieController;
-    private ConfiguracionReglasController configController;
+    private SystemSettingsController configController;
     private UserController userController;
     
     @Override
@@ -52,9 +52,9 @@ public class WatchlistServlet extends HttpServlet {
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         this.watchlistController = new WatchlistController(watchlistService);
         
-        ConfiguracionReglasRepository configRepo = new ConfiguracionReglasRepository();
-        ConfiguracionReglasService configService = new ConfiguracionReglasService(configRepo);
-        this.configController = new ConfiguracionReglasController(configService);
+        SystemSettingsRepository configRepo = new SystemSettingsRepository();
+        SystemSettingsService configService = new SystemSettingsService(configRepo);
+        this.configController = new SystemSettingsController(configService);
         
         this.userController = new UserController(userService);
         
@@ -105,7 +105,7 @@ public class WatchlistServlet extends HttpServlet {
             int cantidadPeliculas = movieIds.size();
             
             if (userAct.getUserLevel() >= 2) {
-                int limiteActivo = configController.getConfiguracionReglas().getActiveWatchlistLimit();
+                int limiteActivo = configController.getSystemSettings().getActiveWatchlistLimit();
                 
                 if (cantidadPeliculas >= limiteActivo) {
                     session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
@@ -114,7 +114,7 @@ public class WatchlistServlet extends HttpServlet {
                 }
                 
             } else {
-                int limiteNormal = configController.getConfiguracionReglas().getNormalWatchlistLimit();
+                int limiteNormal = configController.getSystemSettings().getNormalWatchlistLimit();
                 
                 if (cantidadPeliculas >= limiteNormal) {
                     session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");

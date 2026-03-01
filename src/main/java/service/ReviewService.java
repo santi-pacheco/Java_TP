@@ -6,7 +6,7 @@ import java.util.List;
 import entity.Review;
 import entity.User;
 import entity.Movie;
-import entity.ConfiguracionReglas;
+import entity.SystemSettings;
 import entity.FeedReviewDTO;
 import entity.ModerationStatus;
 import repository.ReviewRepository;
@@ -21,11 +21,11 @@ public class ReviewService {
     private UserService userService;
     private MovieService movieService;
     private WatchlistService watchlistService;
-    private ConfiguracionReglasService configuracionService;
+    private SystemSettingsService configuracionService;
     private final UserRepository userRepository;
     private static final int BAN_DAYS = 7;
-    
-    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, ConfiguracionReglasService configuracionService, WatchlistService watchlistService) {
+
+    public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, SystemSettingsService configuracionService, WatchlistService watchlistService) {
         this.reviewRepository = reviewRepository;
         this.userService = userService;
         this.movieService = movieService;

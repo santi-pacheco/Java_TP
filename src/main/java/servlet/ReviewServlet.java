@@ -36,7 +36,7 @@ import service.UserService;
 import service.WatchlistService;
 import service.MovieService;
 import service.ReviewModerationService;
-import service.ConfiguracionReglasService;
+import service.SystemSettingsService;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -62,15 +62,15 @@ public class ReviewServlet extends HttpServlet {
         ReviewRepository reviewRepository = new ReviewRepository();
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
-        repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
-        
+        repository.SystemSettingsRepository configuracionRepository = new repository.SystemSettingsRepository();
+
         // Inicializar servicios
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         MovieService movieService = new MovieService(movieRepository);
-        ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
+        SystemSettingsService configuracionService = new SystemSettingsService(configuracionRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);

@@ -3,22 +3,22 @@ package service;
 import repository.ReviewLikeRepository;
 import repository.UserRepository;
 import repository.ReviewRepository;
-import repository.ConfiguracionReglasRepository;
+import repository.SystemSettingsRepository;
 import entity.Review;
-import entity.ConfiguracionReglas;
+import entity.SystemSettings;
 import entity.User;
 
 public class LikeService {
     private final ReviewLikeRepository likeRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
-    private final ConfiguracionReglasService configuracionService;
+    private final SystemSettingsService configuracionService;
 
     public LikeService() {
         this.likeRepository = new ReviewLikeRepository();
         this.userRepository = new UserRepository();
         this.reviewRepository = new ReviewRepository();
-        this.configuracionService = new ConfiguracionReglasService(new ConfiguracionReglasRepository());
+        this.configuracionService = new SystemSettingsService(new SystemSettingsRepository());
     }
 
     public LikeResponse toggleLike(int userId, int reviewId) {
@@ -54,7 +54,7 @@ public class LikeService {
             int newKcals = author.getTotalKcals() + kcalsModifier;
             if (newKcals < 0) newKcals = 0;
 
-            ConfiguracionReglas config = configuracionService.getConfiguracionReglas();
+            SystemSettings config = configuracionService.getSystemSettings();
             int newLevel = 1;
 
             if (config != null) {

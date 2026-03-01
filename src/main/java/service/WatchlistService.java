@@ -7,7 +7,7 @@ import entity.Watchlist;
 import service.UserService;
 import entity.User;
 import entity.Movie;
-import service.MovieService;;
+import service.MovieService;
 
 public class WatchlistService {
 	
@@ -23,16 +23,15 @@ public class WatchlistService {
 		this.movieService = movieService;
 	}
 	
-	public Watchlist getWatchlist(int id_user) {
-		//Verificamos si existe el usuario
-		System.out.println("ID USUARIO EN SERVICE: " + id_user);
-		
-		User user = userService.getUserById(id_user);
+    public Watchlist getWatchlist(int userId) {
+        System.out.println("ID USUARIO EN SERVICE: " + userId);
+
+        User user = userService.getUserById(userId);
 		if (user != null) {
-			Watchlist wl = watchlistRepository.findOne(id_user);
+			Watchlist wl = watchlistRepository.findOne(userId);
 			return wl;
 		} else {
-			throw new IllegalArgumentException("User with ID " + id_user + " does not exist.");
+			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
 		}
 		
 	}
@@ -40,34 +39,28 @@ public class WatchlistService {
 	
 	
 	
-	public void addMovie(int id_user, String id_pelicula) {
-		//Verificamos si existe el usuario
-		Movie movie = movieService.getMovieById(Integer.parseInt(id_pelicula));
-		
-		User user = userService.getUserById(id_user);
+	public void addMovie(int userId, String movieId) {
+		Movie movie = movieService.getMovieById(Integer.parseInt(movieId));
+
+		User user = userService.getUserById(userId);
 		if (user != null && movie != null) {
-			
-			Watchlist wl = watchlistRepository.addMovie(Integer.parseInt(id_pelicula), id_user);
-			
+
+			Watchlist wl = watchlistRepository.addMovie(Integer.parseInt(movieId), userId);
+
 		} else {
-			throw new IllegalArgumentException("User with ID " + id_user + " does not exist.");
+			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
 		}
 	}
-			
-	public void removeMovie(int id_user, String id_pelicula) {
-		//Verificamos si existe el usuario
-		System.out.println("ID PELICULA: " + id_pelicula);
-		System.out.println("ID USUARIO: " + id_user);
-		Movie movie = movieService.getMovieById(Integer.parseInt(id_pelicula));
-		System.out.println("MOVIE: " + movie);
-		User user = userService.getUserById(id_user);
+
+	public void removeMovie(int userId, String movieId) {
+		Movie movie = movieService.getMovieById(Integer.parseInt(movieId));
+		User user = userService.getUserById(userId);
 		if (user != null && movie != null) {
-			
-			watchlistRepository.deleteMovie(id_user, id_pelicula);
-			
+
+			watchlistRepository.deleteMovie(userId, movieId);
+
 		} else {
-			throw new IllegalArgumentException("User with ID " + id_user + " does not exist.");
+			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
 		}
-		
 	}
 }

@@ -191,7 +191,7 @@ public class MovieRepository {
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            System.out.println("Preparando batch insert/update para " + movies.size() + " películas...");
+            System.out.println("Preparing batch insert/update for " + movies.size() + " movies...");
             for (Movie m : movies) {
                 stmt.setObject(1, m.getApiId());
                 stmt.setString(2, m.getTitle());
@@ -243,7 +243,7 @@ public class MovieRepository {
     public float getMovieRating(String movieId){
         try {
 
-            System.out.println("Rating para la pelicula con  en el getMovieRating id: " + movieId );
+        System.out.println("Rating for movie id: " + movieId);
             URL url = new URL("https://api.imdbapi.dev/titles/" + movieId );
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
@@ -259,7 +259,7 @@ public class MovieRepository {
             }
 
         } catch (IOException e) {
-            throw new RuntimeException("Error al obtener rating de película " + movieId, e);
+            throw new RuntimeException("Error fetching movie rating for " + movieId, e);
         }
         return 0.0f;
     }
@@ -465,8 +465,8 @@ public class MovieRepository {
         return movie;
     }
 
-    public List<Movie> movieFilter(String nombre, String genero, int desde, int hasta) {
-        System.out.println("Filtrando películas - Nombre: " + nombre + ", Género: " + genero + ", Años: " + desde + "-" + hasta);
+    public List<Movie> movieFilter(String name, String genre, int yearFrom, int yearTo) {
+        System.out.println("Filtering movies - Name: " + name + ", Genre: " + genre + ", Years: " + yearFrom + "-" + yearTo);
 
         try {
             List<Movie> movies = new ArrayList<>();
@@ -479,23 +479,23 @@ public class MovieRepository {
                .append("p.local_rating_avg, p.local_reviews_count, p.release_date ")
                .append("FROM movies p ");
 
-            if (genero != null && !genero.isBlank()) {
+            if (genre != null && !genre.isBlank()) {
                 sql.append("INNER JOIN movie_genres gp ON gp.movie_id = p.movie_id ")
                    .append("INNER JOIN genres g ON g.genre_id = gp.genre_id ");
             }
 
             List<String> conditions = new ArrayList<>();
-            if (nombre != null && !nombre.trim().isEmpty()) {
+            if (name != null && !name.trim().isEmpty()) {
                 conditions.add("(p.title LIKE ? OR p.original_title LIKE ?)");
             }
-            if (genero != null && !genero.isBlank()) {
+            if (genre != null && !genre.isBlank()) {
                 conditions.add("g.name = ?");
             }
-            if (desde != 0 && hasta != 0) {
+            if (yearFrom != 0 && yearTo != 0) {
                 conditions.add("p.release_year BETWEEN ? AND ?");
-            } else if (desde == 0 && hasta != 0) {
+            } else if (yearFrom == 0 && yearTo != 0) {
                 conditions.add("p.release_year <= ?");
-            } else if (desde != 0 && hasta == 0) {
+            } else if (yearFrom != 0 && yearTo == 0) {
                 conditions.add("p.release_year >= ?");
             }
 
@@ -507,36 +507,36 @@ public class MovieRepository {
                  PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
                 int paramIndex = 1;
-                if (nombre != null && !nombre.trim().isEmpty()) {
-                    String searchPattern = "%" + nombre.trim() + "%";
+                if (name != null && !name.trim().isEmpty()) {
+                    String searchPattern = "%" + name.trim() + "%";
                     stmt.setString(paramIndex++, searchPattern);
                     stmt.setString(paramIndex++, searchPattern);
                 }
-                if (genero != null && !genero.isBlank()) {
-                    stmt.setString(paramIndex++, genero);
+                if (genre != null && !genre.isBlank()) {
+                    stmt.setString(paramIndex++, genre);
                 }
-                if (desde != 0 && hasta != 0) {
-                    stmt.setInt(paramIndex++, desde);
-                    stmt.setInt(paramIndex++, hasta);
-                } else if (desde == 0 && hasta != 0) {
-                    stmt.setInt(paramIndex++, hasta);
-                } else if (desde != 0 && hasta == 0) {
-                    stmt.setInt(paramIndex++, desde);
+                if (yearFrom != 0 && yearTo != 0) {
+                    stmt.setInt(paramIndex++, yearFrom);
+                    stmt.setInt(paramIndex++, yearTo);
+                } else if (yearFrom == 0 && yearTo != 0) {
+                    stmt.setInt(paramIndex++, yearTo);
+                } else if (yearFrom != 0 && yearTo == 0) {
+                    stmt.setInt(paramIndex++, yearFrom);
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        System.out.println("Película encontrada: " + rs.getString("title") + " Año: " + rs.getInt("release_year"));
+                        System.out.println("Movie found: " + rs.getString("title") + " Year: " + rs.getInt("release_year"));
                         movies.add(mapResultSetToMovie(rs));
                     }
                 }
             }
 
-            System.out.println("Se encontraron " + movies.size() + " películas");
+            System.out.println("Found " + movies.size() + " movies");
             return movies;
 
         } catch (Exception e) {
-            System.out.println("Error during movie filtering: " + nombre + genero + desde + hasta);
+            System.out.println("Error during movie filtering: " + name + genre + yearFrom + yearTo);
             System.err.println("Error filtering movies, returning mock data: " + e.getMessage());
             e.printStackTrace();
             return createMockMovies(10);
@@ -622,12 +622,12 @@ public class MovieRepository {
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            for (Object[] fila : relacionesMovieGenre) {
-                stmt.setObject(1, fila[0]);
-                stmt.setObject(2, fila[1]);
+            for (Object[] row : relacionesMovieGenre) {
+                stmt.setObject(1, row[0]);
+                stmt.setObject(2, row[1]);
                 stmt.addBatch();
             }
-            System.out.println("Guardando " + relacionesMovieGenre.size() + " relaciones película-género...");
+            System.out.println("Saving " + relacionesMovieGenre.size() + " movie-genre relations...");
             stmt.executeBatch();
 
         } catch (SQLException e) {
@@ -650,7 +650,7 @@ public class MovieRepository {
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error actualizando lote de películas");
+            throw ErrorFactory.internal("Error updating movie batch");
         }
     }
 

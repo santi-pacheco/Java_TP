@@ -76,7 +76,7 @@ public class CountryRepository {
 			}
 
 		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error fetching country by name");
+			throw ErrorFactory.internal("Error fetching country by ISO code");
 		}
 		return idCountry;
 	}

@@ -50,7 +50,7 @@ public class AuthenticationFilter implements Filter {
                               (requestURI.contains("/movies") && !requestURI.contains("/movies-page")) ||
                               requestURI.contains("/users") ||
                               requestURI.contains("/reviews-admin") ||
-                              requestURI.contains("/configuracion-reglas") ||
+                              requestURI.contains("/system-settings") ||
                               requestURI.contains("/admin/data-load");;
         
         if (isLoginServlet || isRegisterServlet || isLandingServlet || isForgotPasswordServlet || isResetPasswordServlet || isPublicResource) {

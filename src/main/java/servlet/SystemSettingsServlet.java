@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import controller.ConfiguracionReglasController;
-import entity.ConfiguracionReglas;
-import repository.ConfiguracionReglasRepository;
-import service.ConfiguracionReglasService;
+import controller.SystemSettingsController;
+import entity.SystemSettings;
+import repository.SystemSettingsRepository;
+import service.SystemSettingsService;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.servlet.ServletContext;
@@ -21,62 +21,63 @@ import exception.AppException;
 import exception.ErrorFactory;
 import entity.User;
 
-@WebServlet("/configuracion-reglas")
-public class ConfiguracionReglasServlet extends HttpServlet {
+@WebServlet("/system-settings")
+public class SystemSettingsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private ConfiguracionReglasController controller;
+    private SystemSettingsController controller;
     private Validator validator;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        ConfiguracionReglasRepository repository = new ConfiguracionReglasRepository();
-        ConfiguracionReglasService service = new ConfiguracionReglasService(repository);
-        this.controller = new ConfiguracionReglasController(service);
-        
+        SystemSettingsRepository repository = new SystemSettingsRepository();
+        SystemSettingsService service = new SystemSettingsService(repository);
+        this.controller = new SystemSettingsController(service);
+
         ServletContext context = getServletContext();
         this.validator = (Validator) context.getAttribute("miValidador");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<ConfiguracionReglas> configuraciones = controller.getAllConfiguraciones();
+        List<SystemSettings> configuraciones = controller.getAllSystemSettings();
         request.setAttribute("configuraciones", configuraciones);
-        request.getRequestDispatcher("/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/system-settings/SystemSettingsCRUD.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String jspTarget = "/WEB-INF/VistaConfiguracionReglasCRUD/ConfiguracionReglasCRUD.jsp";
-        ConfiguracionReglas configFromForm = null;
-        
+        String jspTarget = "/WEB-INF/views/system-settings/SystemSettingsCRUD.jsp";
+        SystemSettings configFromForm = null;
+
         try {
-            configFromForm = new ConfiguracionReglas();
+            configFromForm = new SystemSettings();
             populateConfigFromRequest(configFromForm, request);
-            Set<ConstraintViolation<ConfiguracionReglas>> violations = validator.validate(configFromForm);
-            
+            Set<ConstraintViolation<SystemSettings>> violations = validator.validate(configFromForm);
+
             if (!violations.isEmpty()) {
                 request.setAttribute("errors", getErrorMessages(violations));
                 request.setAttribute("configForm", configFromForm);
-                request.setAttribute("configuraciones", controller.getAllConfiguraciones()); 
+                request.setAttribute("configuraciones", controller.getAllSystemSettings());
                 request.getRequestDispatcher(jspTarget).forward(request, response);
                 return;
             }
-            controller.addConfiguracionReglas(configFromForm);
-            response.sendRedirect(request.getContextPath() + "/configuracion-reglas?exito=true");
+            controller.addSystemSettings(configFromForm);
+            response.sendRedirect(request.getContextPath() + "/system-settings?exito=true");
 
         } catch (AppException e) {
             Set<String> errors = Set.of(e.getMessage());
             request.setAttribute("errors", errors);
             request.setAttribute("configForm", configFromForm);
-            request.setAttribute("configuraciones", controller.getAllConfiguraciones()); 
+            request.setAttribute("configuraciones", controller.getAllSystemSettings());
             request.getRequestDispatcher(jspTarget).forward(request, response);
-        
+
         } catch (Exception e) {
-            System.err.println("Error no esperado en ConfiguracionReglasServlet: " + e.getMessage());
+            System.err.println("Error no esperado en SystemSettingsServlet: " + e.getMessage());
             throw e;
         }
     }
-    private void populateConfigFromRequest(ConfiguracionReglas config, HttpServletRequest request) {
+
+    private void populateConfigFromRequest(SystemSettings config, HttpServletRequest request) {
 
         config.setKcalsToLevel2(parseIntParam(request.getParameter("kcalsToLevel2"), "Umbral Nivel 2"));
         config.setKcalsToLevel3(parseIntParam(request.getParameter("kcalsToLevel3"), "Umbral Nivel 3"));
@@ -105,10 +106,9 @@ public class ConfiguracionReglasServlet extends HttpServlet {
         }
     }
 
-    private Set<String> getErrorMessages(Set<ConstraintViolation<ConfiguracionReglas>> violations) {
+    private Set<String> getErrorMessages(Set<ConstraintViolation<SystemSettings>> violations) {
         return violations.stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.toSet());
     }
-    
 }

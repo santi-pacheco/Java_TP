@@ -17,7 +17,7 @@ public class UserRepository {
     }
 
     public List<User> findAll() {
-        List<User> Users = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         String sql = "SELECT user_id, password, username, role, email, birth_date, total_kcals, user_level, notified_level, main_dish_movie_id, profile_image, banned_until, last_notification_check FROM users ORDER BY user_id";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
@@ -26,13 +26,13 @@ public class UserRepository {
 
             while (rs.next()) {
                 User user = mapResultSetToUser(rs);
-                Users.add(user);
+                users.add(user);
             }
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error fetching users from database");
         }
 
-        return Users;
+        return users;
     }
 
     public User findOne(int id) {

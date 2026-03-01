@@ -31,7 +31,7 @@ public class FeedApiServlet extends HttpServlet {
         repository.MovieRepository movieRepo = new repository.MovieRepository();
         repository.BlockRepository blockRepository = new repository.BlockRepository();
         service.MovieService movieServ = new service.MovieService(movieRepo);
-        service.ConfiguracionReglasService configServ = new service.ConfiguracionReglasService(new repository.ConfiguracionReglasRepository());
+        service.SystemSettingsService configServ = new service.SystemSettingsService(new repository.SystemSettingsRepository());
         
         service.UserService userService = new service.UserService(userRepo, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), new repository.FollowRepository(), blockRepository);
         service.WatchlistService watchServ = new service.WatchlistService(new repository.WatchlistRepository(movieRepo), userService, movieServ);

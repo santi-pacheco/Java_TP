@@ -379,7 +379,7 @@
                     html += '<img src="https://image.tmdb.org/t/p/w92' + movie.posterPath + '" style="width: 35px; height: 52px; margin-right: 12px; border-radius: 4px;" onerror="this.style.display=\'none\'">';
                 }
                 
-                html += '<div><div style="font-weight: 500;">' + movie.titulo + '</div>';
+                html += '<div><div style="font-weight: 500;">' + movie.title + '</div>';
                 if (movie.estrenoYear) {
                     html += '<div style="font-size: 12px; color: #666;">' + movie.estrenoYear + '</div>';
                 }

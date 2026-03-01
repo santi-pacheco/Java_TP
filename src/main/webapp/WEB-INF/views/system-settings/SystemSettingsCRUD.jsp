@@ -51,7 +51,7 @@
             </div>
         </c:if>
         
-        <form action="<%= request.getContextPath() %>/configuracion-reglas" method="POST">
+        <form action="<%= request.getContextPath() %>/system-settings" method="POST">
             <div class="form-group">
                 <label>Kcals Nivel 2:</label>
                 <input type="number" name="kcalsToLevel2" class="form-control" required min="1"

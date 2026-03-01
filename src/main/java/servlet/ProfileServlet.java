@@ -9,7 +9,7 @@ import java.util.Map;
 import entity.Review;
 import entity.User;
 import entity.Movie;
-import entity.ConfiguracionReglas;
+import entity.SystemSettings;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,13 +22,13 @@ import service.UserService;
 import service.WatchlistService;
 import service.ReviewService;
 import service.MovieService;
-import service.ConfiguracionReglasService;
+import service.SystemSettingsService;
 import repository.UserRepository;
 import repository.WatchlistRepository;
 import repository.ReviewRepository;
 import repository.MovieRepository;
 import repository.FollowRepository;
-import repository.ConfiguracionReglasRepository;
+import repository.SystemSettingsRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import exception.AppException;
 import exception.ErrorFactory;
@@ -38,7 +38,7 @@ public class ProfileServlet extends HttpServlet {
     
     private UserController userController;
     private ReviewController reviewController;
-    private ConfiguracionReglasService configuracionReglasService;
+    private SystemSettingsService configuracionReglasService;
     private MovieService movieService;
     
     @Override
@@ -50,8 +50,8 @@ public class ProfileServlet extends HttpServlet {
         MovieRepository movieRepository = new MovieRepository();
         FollowRepository followRepository = new FollowRepository();
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        ConfiguracionReglasRepository configuracionReglasRepository = new ConfiguracionReglasRepository();
-        this.configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
+        SystemSettingsRepository configuracionReglasRepository = new SystemSettingsRepository();
+        this.configuracionReglasService = new SystemSettingsService(configuracionReglasRepository);
         this.movieService = new MovieService(movieRepository);
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
@@ -132,7 +132,7 @@ public class ProfileServlet extends HttpServlet {
             }
             Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
 
-            ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();
+            SystemSettings config = configuracionReglasService.getSystemSettings();
             int userKcals = profileUser.getTotalKcals();
             int userLevel = profileUser.getUserLevel();
             int nextLevelMax = config.getKcalsToLevel2();

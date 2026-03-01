@@ -30,13 +30,13 @@ public class ReviewAdminServlet extends HttpServlet {
 		this.reviewRepository = new ReviewRepository();
 		repository.UserRepository userRepository = new repository.UserRepository();
 		repository.MovieRepository movieRepository = new repository.MovieRepository();
-		repository.ConfiguracionReglasRepository configRepository = new repository.ConfiguracionReglasRepository();
+		repository.SystemSettingsRepository configRepository = new repository.SystemSettingsRepository();
 		FollowRepository followRepository = new FollowRepository();
 		BlockRepository blockRepository = new BlockRepository();
 		org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
 		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository, blockRepository);
 		service.MovieService movieService = new service.MovieService(movieRepository);
-		service.ConfiguracionReglasService configService = new service.ConfiguracionReglasService(configRepository);
+		service.SystemSettingsService configService = new service.SystemSettingsService(configRepository);
 		WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
 		ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configService, watchlistService);

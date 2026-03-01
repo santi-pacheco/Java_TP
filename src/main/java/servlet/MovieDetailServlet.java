@@ -45,7 +45,7 @@ public class MovieDetailServlet extends HttpServlet {
     private PersonService personService;
     private WatchlistController watchlistController;
     private ReviewController reviewController;
-    private controller.ConfiguracionReglasController configController;
+    private controller.SystemSettingsController configController;
     private LikeService likeService;
     private UserService userService; 
     
@@ -71,11 +71,11 @@ public class MovieDetailServlet extends HttpServlet {
             this.watchlistController = new WatchlistController(watchlistService);
             
             ReviewRepository reviewRepository = new ReviewRepository();
-            repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
-            service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
+            repository.SystemSettingsRepository configuracionRepository = new repository.SystemSettingsRepository();
+            service.SystemSettingsService configuracionService = new service.SystemSettingsService(configuracionRepository);
             ReviewService reviewService = new ReviewService(reviewRepository, this.userService, movieService, configuracionService, watchlistService);
             this.reviewController = new ReviewController(reviewService);
-            this.configController = new controller.ConfiguracionReglasController(configuracionService);
+            this.configController = new controller.SystemSettingsController(configuracionService);
             this.likeService = new LikeService();
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
@@ -134,8 +134,8 @@ public class MovieDetailServlet extends HttpServlet {
                 
                 int cantidadPeliculas = watchlistMovies.size();
                 int limite = updatedUser.getUserLevel() >= 2 
-                    ? configController.getConfiguracionReglas().getActiveWatchlistLimit()
-                    : configController.getConfiguracionReglas().getNormalWatchlistLimit();
+                    ? configController.getSystemSettings().getActiveWatchlistLimit()
+                    : configController.getSystemSettings().getNormalWatchlistLimit();
                 canAddToWatchlist = cantidadPeliculas < limite;
                 
                 List<User> followingList = userService.getFollowing(user.getUserId());

@@ -82,7 +82,7 @@ public class RouletteServlet extends HttpServlet {
         double maxOffset = degreesPerSlice * 0.3;
         double randomOffset = -maxOffset + (random.nextDouble() * (maxOffset * 2));
         
-        System.out.println("Roulette - Total movies: " + movies.size() + ", Selected index: " + selectedIndex + ", Movie: " + selectedMovie.getTitulo() + ", Extra spins: " + extraSpins + ", DegreesPerSlice: " + degreesPerSlice + ", Offset: " + randomOffset + ", Max offset: " + maxOffset);
+        System.out.println("Roulette - Total movies: " + movies.size() + ", Selected index: " + selectedIndex + ", Movie: " + selectedMovie.getTitle() + ", Extra spins: " + extraSpins + ", DegreesPerSlice: " + degreesPerSlice + ", Offset: " + randomOffset + ", Max offset: " + maxOffset);
         
         request.setAttribute("movies", movies);
         request.setAttribute("selectedMovie", selectedMovie);

@@ -20,12 +20,12 @@ import repository.UserRepository;
 import repository.WatchlistRepository;
 import repository.MovieRepository;
 import repository.FollowRepository;
-import repository.ConfiguracionReglasRepository;
+import repository.SystemSettingsRepository;
 import service.ReviewService;
 import service.UserService;
 import service.WatchlistService;
 import service.MovieService;
-import service.ConfiguracionReglasService;
+import service.SystemSettingsService;
 
 public class UserReviewsServlet extends HttpServlet {
     private ReviewService reviewService;
@@ -36,12 +36,12 @@ public class UserReviewsServlet extends HttpServlet {
         ReviewRepository reviewRepository = new ReviewRepository();
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
-        ConfiguracionReglasRepository configuracionRepository = new ConfiguracionReglasRepository();
+        SystemSettingsRepository configuracionRepository = new SystemSettingsRepository();
         FollowRepository followRepository = new FollowRepository();
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository, blockRepository);
         movieService = new MovieService(movieRepository);
-        ConfiguracionReglasService configuracionService = new ConfiguracionReglasService(configuracionRepository);
+        SystemSettingsService configuracionService = new SystemSettingsService(configuracionRepository);
         WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);

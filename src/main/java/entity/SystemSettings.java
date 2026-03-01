@@ -2,7 +2,7 @@ package entity;
 
 import jakarta.validation.constraints.Min;
 
-public class ConfiguracionReglas {
+public class SystemSettings {
 
     private int configId;
 
