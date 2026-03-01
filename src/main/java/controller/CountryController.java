@@ -15,14 +15,11 @@ public class CountryController {
 	}
 	
 	public List<Country> getCountries() {
-		List<Country> contries = countryService.getAllCountries();
-		System.out.println("Países obtenidos exitosamente: " + contries.size() + " registros");
-		return contries;
+		return countryService.getAllCountries();
 	}
 	
 	public Country getCountryById(int id) {
-		Country country = countryService.getCountryById(id);
-		return country;
+		return countryService.getCountryById(id);
 	}
 	
 	public Country createCountry(Country country) {
