@@ -419,9 +419,9 @@
     }
 
     function updateTabIndicators() {
-        const hasNewLikes = allNotifications.some(n => n.unread && n.tipo === 'LIKE');
-        const hasNewComments = allNotifications.some(n => n.unread && n.tipo === 'COMMENT');
-        const hasNewFollows = allNotifications.some(n => n.unread && n.tipo === 'FOLLOW');
+        const hasNewLikes = allNotifications.some(n => n.unread && n.type === 'LIKE');
+        const hasNewComments = allNotifications.some(n => n.unread && n.type === 'COMMENT');
+        const hasNewFollows = allNotifications.some(n => n.unread && n.type === 'FOLLOW');
         const hasAnyNew = hasNewLikes || hasNewComments || hasNewFollows;
 
         const dotHtml = '<div class="tab-indicator"></div>';
@@ -454,7 +454,7 @@
     }
 
     function renderNotifs() {
-        const filtered = currentFilter === 'ALL' ? allNotifications : allNotifications.filter(n => n.tipo === currentFilter);
+        const filtered = currentFilter === 'ALL' ? allNotifications : allNotifications.filter(n => n.type === currentFilter);
         
         if (filtered.length === 0) {
             notifBody.innerHTML = '<div class="empty-notifs">No hay nada por aquí aún.</div>';
@@ -468,14 +468,14 @@
             const unreadClass = n.unread ? 'unread' : '';
             const indicator = n.unread ? '<div class="notif-indicator"></div>' : ''; 
             
-            let level = parseInt(n.userLevel || n.actorLevel || n.nivelUsuario || n.nivel || n.user_level || 1, 10);
+            let level = parseInt(n.userLevel || 1, 10);
             let avatarWrapperClass = level >= 3 ? 'burger-avatar-border' : '';
             
             let text = '';
             let link = '#';
             let icon = '';
 
-            if (n.tipo === 'LIKE') {
+            if (n.type === 'LIKE') {
                 link = '${pageContext.request.contextPath}/movie/' + n.movieId;
                 icon = '🍟';
                 if (n.extraCount > 0) {
@@ -484,13 +484,13 @@
                     text = 'A <strong>' + n.actorUsername + '</strong> le gustó tu reseña de ' + n.movieTitle + '.';
                 }
             } 
-            else if (n.tipo === 'COMMENT') {
+            else if (n.type === 'COMMENT') {
                 link = '${pageContext.request.contextPath}/movie/' + n.movieId;
                 icon = '💬';
-                const snippet = n.commentText.length > 30 ? n.commentText.substring(0,30) + '...' : n.commentText;
+                const snippet = (n.commentText && n.commentText.length > 30) ? n.commentText.substring(0,30) + '...' : (n.commentText || '');
                 text = '<strong>' + n.actorUsername + '</strong> comentó en tu reseña de ' + n.movieTitle + ': "' + snippet + '"';
             }
-            else if (n.tipo === 'FOLLOW') {
+            else if (n.type === 'FOLLOW') {
                 link = '${pageContext.request.contextPath}/profile?id=' + n.actorId;
                 icon = '👤';
                 text = '<strong>' + n.actorUsername + '</strong> comenzó a seguirte.';
@@ -502,7 +502,7 @@
                         '</div>' +
                         '<div class="notif-content">' +
                             text +
-                            '<div class="notif-time">' + icon + ' ' + timeAgo(n.fecha) + '</div>' +
+                            '<div class="notif-time">' + icon + ' ' + timeAgo(n.createdAt) + '</div>' +
                         '</div>' +
                         indicator +
                     '</a>';

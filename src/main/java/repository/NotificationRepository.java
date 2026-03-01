@@ -18,105 +18,100 @@ public class NotificationRepository {
 
     public List<Notification> getNotificationsForUser(int targetUserId, LocalDateTime ultimaRevision) {
         List<Notification> notifications = new ArrayList<>();
-        
-        String sql = 
-            // 1. LIKES (Agrupados por reseña para el efecto "y X más")
+
+        String sql =
             "SELECT 'LIKE' as tipo, " +
-            "  (SELECT rl2.id_usuario FROM reviews_likes rl2 WHERE rl2.id_review = rl.id_review ORDER BY rl2.created_at DESC LIMIT 1) as actor_id, " +
-            "  (SELECT u2.username FROM usuarios u2 JOIN reviews_likes rl2 ON u2.id_user = rl2.id_usuario WHERE rl2.id_review = rl.id_review ORDER BY rl2.created_at DESC LIMIT 1) as actor_username, " +
-            "  (SELECT u2.profile_image FROM usuarios u2 JOIN reviews_likes rl2 ON u2.id_user = rl2.id_usuario WHERE rl2.id_review = rl.id_review ORDER BY rl2.created_at DESC LIMIT 1) as actor_profile_image, " +
-            "  (SELECT u2.nivel_usuario FROM usuarios u2 JOIN reviews_likes rl2 ON u2.id_user = rl2.id_usuario WHERE rl2.id_review = rl.id_review ORDER BY rl2.created_at DESC LIMIT 1) as user_level, " +
-            "  rl.id_review as review_id, " +
-            "  p.name as movie_title, " +
-            "  p.id_pelicula as movie_id, " +
+            "  (SELECT rl2.user_id FROM review_likes rl2 WHERE rl2.review_id = rl.review_id ORDER BY rl2.created_at DESC LIMIT 1) as actor_id, " +
+            "  (SELECT u2.username FROM users u2 JOIN review_likes rl2 ON u2.user_id = rl2.user_id WHERE rl2.review_id = rl.review_id ORDER BY rl2.created_at DESC LIMIT 1) as actor_username, " +
+            "  (SELECT u2.profile_image FROM users u2 JOIN review_likes rl2 ON u2.user_id = rl2.user_id WHERE rl2.review_id = rl.review_id ORDER BY rl2.created_at DESC LIMIT 1) as actor_profile_image, " +
+            "  (SELECT u2.user_level FROM users u2 JOIN review_likes rl2 ON u2.user_id = rl2.user_id WHERE rl2.review_id = rl.review_id ORDER BY rl2.created_at DESC LIMIT 1) as user_level, " +
+            "  rl.review_id as review_id, " +
+            "  m.title as movie_title, " +
+            "  m.movie_id as movie_id, " +
             "  NULL as comment_text, " +
             "  MAX(rl.created_at) as fecha, " +
             "  (COUNT(*) - 1) as extra_count " +
-            "FROM reviews_likes rl " +
-            "JOIN reviews r ON rl.id_review = r.id_review " +
-            "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-            "WHERE r.id_user = ? AND rl.id_usuario != ? " + 
-            "GROUP BY rl.id_review, p.name, p.id_pelicula " +
-            
+            "FROM review_likes rl " +
+            "JOIN reviews r ON rl.review_id = r.review_id " +
+            "JOIN movies m ON r.movie_id = m.movie_id " +
+            "WHERE r.user_id = ? AND rl.user_id != ? " +
+            "GROUP BY rl.review_id, m.title, m.movie_id " +
+
             "UNION ALL " +
-            
-            // 2. COMENTARIOS (Individuales)
+
             "SELECT 'COMMENT' as tipo, " +
-            "  c.id_usuario as actor_id, " +
+            "  c.user_id as actor_id, " +
             "  u.username as actor_username, " +
             "  u.profile_image as actor_profile_image, " +
-            "  u.nivel_usuario as user_level, " +
-            "  c.id_review as review_id, " +
-            "  p.name as movie_title, " +
-            "  p.id_pelicula as movie_id, " +
+            "  u.user_level as user_level, " +
+            "  c.review_id as review_id, " +
+            "  m.title as movie_title, " +
+            "  m.movie_id as movie_id, " +
             "  c.comment_text as comment_text, " +
             "  c.created_at as fecha, " +
             "  0 as extra_count " +
-            "FROM reviews_comments c " +
-            "JOIN usuarios u ON c.id_usuario = u.id_user " +
-            "JOIN reviews r ON c.id_review = r.id_review " +
-            "JOIN peliculas p ON r.id_movie = p.id_pelicula " +
-            "WHERE r.id_user = ? AND c.id_usuario != ? AND (c.moderation_status IS NULL OR c.moderation_status != 'REJECTED') " +
-            
+            "FROM review_comments c " +
+            "JOIN users u ON c.user_id = u.user_id " +
+            "JOIN reviews r ON c.review_id = r.review_id " +
+            "JOIN movies m ON r.movie_id = m.movie_id " +
+            "WHERE r.user_id = ? AND c.user_id != ? AND (c.moderation_status IS NULL OR c.moderation_status != 'REJECTED') " +
+
             "UNION ALL " +
-            
-            // 3. SEGUIDORES
+
             "SELECT 'FOLLOW' as tipo, " +
-            "  s.id_seguidor as actor_id, " +
+            "  f.follower_id as actor_id, " +
             "  u.username as actor_username, " +
             "  u.profile_image as actor_profile_image, " +
-            "  u.nivel_usuario as user_level, " +
+            "  u.user_level as user_level, " +
             "  NULL as review_id, " +
             "  NULL as movie_title, " +
             "  NULL as movie_id, " +
             "  NULL as comment_text, " +
-            "  s.fecha_seguimiento as fecha, " +
+            "  f.followed_at as fecha, " +
             "  0 as extra_count " +
-            "FROM seguidores s " +
-            "JOIN usuarios u ON s.id_seguidor = u.id_user " +
-            "WHERE s.id_seguido = ? " +
-            
-            // ORDENAMOS TODO POR FECHA
+            "FROM followers f " +
+            "JOIN users u ON f.follower_id = u.user_id " +
+            "WHERE f.followed_id = ? " +
+
             "ORDER BY fecha DESC LIMIT 30";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, targetUserId); 
-            stmt.setInt(2, targetUserId); 
-            stmt.setInt(3, targetUserId); 
-            stmt.setInt(4, targetUserId); 
-            stmt.setInt(5, targetUserId); 
-            
+
+            stmt.setInt(1, targetUserId);
+            stmt.setInt(2, targetUserId);
+            stmt.setInt(3, targetUserId);
+            stmt.setInt(4, targetUserId);
+            stmt.setInt(5, targetUserId);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Notification notif = new Notification();
-                    notif.setTipo(rs.getString("tipo"));
+                    notif.setType(rs.getString("tipo"));
                     notif.setActorId(rs.getInt("actor_id"));
                     notif.setActorUsername(rs.getString("actor_username"));
                     notif.setActorProfileImage(rs.getString("actor_profile_image"));
-                    
+
                     notif.setReviewId(rs.getObject("review_id", Integer.class));
-                    notif.setMovieId(rs.getObject("movie_id", Integer.class)); 
+                    notif.setMovieId(rs.getObject("movie_id", Integer.class));
                     notif.setMovieTitle(rs.getString("movie_title"));
                     notif.setCommentText(rs.getString("comment_text"));
                     notif.setExtraCount(rs.getInt("extra_count"));
-                    
-                    // ACÁ SETEAMOS EL NIVEL
-                    notif.setUserLevel(rs.getInt("user_level")); 
-                    
+
+                    notif.setUserLevel(rs.getInt("user_level"));
+
                     java.sql.Timestamp fechaTs = rs.getTimestamp("fecha");
                     if (fechaTs != null) {
                         LocalDateTime notifDate = fechaTs.toLocalDateTime();
-                        notif.setFecha(notifDate);
-                        
+                        notif.setCreatedAt(notifDate);
+
                         if (ultimaRevision == null) {
                             notif.setUnread(true);
                         } else {
                             notif.setUnread(notifDate.isAfter(ultimaRevision));
                         }
                     }
-                    
+
                     notifications.add(notif);
                 }
             }
@@ -124,7 +119,7 @@ public class NotificationRepository {
             System.err.println("Error ejecutando UNION de notificaciones: " + e.getMessage());
             throw ErrorFactory.internal("Error fetching notifications");
         }
-        
+
         return notifications;
     }
 }
