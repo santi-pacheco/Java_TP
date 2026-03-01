@@ -89,7 +89,7 @@ body { background: #FAF8F3;
                 <div class="col-md-4">
                     <div class="form-group">
                          <label>Popularidad:</label>
-                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularidad() : "" %>" required> 
+                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularity() : "" %>" required> 
                     </div>
                 </div>
             </div>

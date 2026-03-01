@@ -54,8 +54,8 @@ public class MovieService {
 	    existingMovie.setDuration(movie.getDuration());
 	    existingMovie.setIsAdult(movie.getIsAdult());
 	    existingMovie.setTitle(movie.getTitle());
-	    existingMovie.setPopularidad(movie.getPopularidad());
-	    existingMovie.setTitleOriginal(movie.getOriginalTitle());
+	    existingMovie.setPopularity(movie.getPopularity());
+	    existingMovie.setOriginalTitle(movie.getOriginalTitle());
 	    existingMovie.setSynopsis(movie.getSynopsis());
 	    existingMovie.setApiRating(movie.getApiRating());
 	    existingMovie.setOriginalLanguage(movie.getOriginalLanguage());

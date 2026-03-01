@@ -76,7 +76,7 @@ public class DatosApiService {
 	        List<Movie> moviesToSave = new ArrayList<>();
 	        for (var tmdbMovie : tmdbMovies) {
 	            Movie localMovie = apiService.mapAndUpsertFromDiscover(tmdbMovie);
-	            localMovie.setGenerosTemporales(tmdbMovie.getGenreIds());
+	            localMovie.setTemporaryGenres(tmdbMovie.getGenreIds());
 	            moviesToSave.add(localMovie);
 	        }
 	        if (moviesToSave.isEmpty()) {
@@ -85,7 +85,7 @@ public class DatosApiService {
 	        System.out.println("   -> Guardando " + moviesToSave.size() + " películas en Base de Datos...");
 	        movieController.saveAllMovies(moviesToSave);
 	        System.out.println("   -> Vinculando películas con sus géneros...");
-	        List<Integer> apiIds = moviesToSave.stream().map(Movie::getId_api).collect(Collectors.toList());
+	        List<Integer> apiIds = moviesToSave.stream().map(Movie::getApiId).collect(Collectors.toList());
 	        Map<Integer, Integer> mapApiIdToDbId = movieController.getMoviesByApiIds(apiIds);
 
 	        List<Object[]> batchRelations = new ArrayList<>();
@@ -93,8 +93,8 @@ public class DatosApiService {
 	        for (Movie movie : moviesToSave) {
 	            Integer realDbId = mapApiIdToDbId.get(movie.getApiId());
 	            
-	            if (realDbId != null && movie.getGenerosTemporales() != null) {
-	                for (Integer idGenero : movie.getGenerosTemporales()) {
+	            if (realDbId != null && movie.getTemporaryGenres() != null) {
+	                for (Integer idGenero : movie.getTemporaryGenres()) {
 	                    batchRelations.add(new Object[]{ realDbId, idGenero });
 	                }
 	            }

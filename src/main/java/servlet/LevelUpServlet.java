@@ -40,7 +40,7 @@ public class LevelUpServlet extends HttpServlet {
             userRepository.markLevelAsNotified(user.getUserId(), newLevel);
             
             // Actualiza en Sesión
-            user.setNivelNotificado(newLevel);
+            user.setNotifiedLevel(newLevel);
             session.setAttribute("usuarioLogueado", user);
             
             response.getWriter().write("{\"success\": true}");

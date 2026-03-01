@@ -102,7 +102,7 @@ public class MovieServlet extends HttpServlet {
                 case "eliminar":
                     int idEliminar = parseIntParam(request.getParameter("id"), "ID");
                     Movie deleteMovie = new Movie();
-                    deleteMovie.setId(idEliminar);
+                    deleteMovie.setMovieId(idEliminar);
                     movieController.removeMovie(deleteMovie);
                     break;
             }

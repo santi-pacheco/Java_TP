@@ -378,8 +378,8 @@
                     <% if (movie.getApiRating() != null && movie.getApiRating() > 0) { %>
                         <div class="rating-badge">⭐ TMDB: <%= String.format("%.1f", movie.getApiRating()) %>/10</div>
                     <% } %>
-                    <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
-                        <div class="rating-badge" style="background: #8B7355;">🍿 FatMovies: <%= String.format("%.1f", movie.getPromedioResenasLocal()) %>/5.0 (<%= movie.getCantidadResenasLocal() %> reseñas)</div>
+                    <% if (movie.getLocalRatingAvg() != null && movie.getLocalRatingAvg() > 0) { %>
+                        <div class="rating-badge" style="background: #8B7355;">🍿 FatMovies: <%= String.format("%.1f", movie.getLocalRatingAvg()) %>/5.0 (<%= movie.getLocalReviewsCount() %> reseñas)</div>
                     <% } %>
                 </div>
                 
@@ -444,8 +444,8 @@
                         <label>Visto el:</label>
                         <% 
                             String minDate = "";
-                            if (movie.getFechaEstreno() != null) {
-                                minDate = movie.getFechaEstreno().toString(); 
+                            if (movie.getReleaseDate() != null) {
+                                minDate = movie.getReleaseDate().toString(); 
                             } else if (movie.getReleaseYear() > 0) {
                                 minDate = movie.getReleaseYear() + "-01-01";
                             }
