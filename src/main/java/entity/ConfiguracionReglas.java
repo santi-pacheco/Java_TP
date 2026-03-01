@@ -4,48 +4,48 @@ import jakarta.validation.constraints.Min;
 
 public class ConfiguracionReglas {
 
-    private int configID;
-    
+    private int configId;
+
     @Min(value = 1, message = "El umbral del Nivel 2 debe ser al menos 1")
-    private int umbralKcalsNivel2;
-    
+    private int kcalsToLevel2;
+
     @Min(value = 1, message = "El umbral del Nivel 3 debe ser al menos 1")
-    private int umbralKcalsNivel3;
-    
+    private int kcalsToLevel3;
+
     @Min(value = 1, message = "El umbral del Nivel 4 debe ser al menos 1")
-    private int umbralKcalsNivel4;
-    
+    private int kcalsToLevel4;
+
     @Min(value = 1, message = "El límite de watchlist debe ser al menos 1")
-    private int limiteWatchlistNormal;
-    
+    private int normalWatchlistLimit;
+
     @Min(value = 1, message = "El límite de watchlist activo debe ser al menos 1")
-    private int limiteWatchlistActivo;
-    
-    private String fechaVigencia;
-    
-    private Integer usuarioAdminID;
+    private int activeWatchlistLimit;
 
-    public int getConfigID() { return configID; }
-    public void setConfigID(int configID) { this.configID = configID; }
+    private String effectiveDate;
 
-    public int getUmbralKcalsNivel2() { return umbralKcalsNivel2; }
-    public void setUmbralKcalsNivel2(int umbralKcalsNivel2) { this.umbralKcalsNivel2 = umbralKcalsNivel2; }
+    private Integer adminUserId;
 
-    public int getUmbralKcalsNivel3() { return umbralKcalsNivel3; }
-    public void setUmbralKcalsNivel3(int umbralKcalsNivel3) { this.umbralKcalsNivel3 = umbralKcalsNivel3; }
+    public int getConfigId() { return configId; }
+    public void setConfigId(int configId) { this.configId = configId; }
 
-    public int getUmbralKcalsNivel4() { return umbralKcalsNivel4; }
-    public void setUmbralKcalsNivel4(int umbralKcalsNivel4) { this.umbralKcalsNivel4 = umbralKcalsNivel4; }
+    public int getKcalsToLevel2() { return kcalsToLevel2; }
+    public void setKcalsToLevel2(int kcalsToLevel2) { this.kcalsToLevel2 = kcalsToLevel2; }
 
-    public int getLimiteWatchlistNormal() { return limiteWatchlistNormal; }
-    public void setLimiteWatchlistNormal(int limiteWatchlistNormal) { this.limiteWatchlistNormal = limiteWatchlistNormal; }
+    public int getKcalsToLevel3() { return kcalsToLevel3; }
+    public void setKcalsToLevel3(int kcalsToLevel3) { this.kcalsToLevel3 = kcalsToLevel3; }
 
-    public int getLimiteWatchlistActivo() { return limiteWatchlistActivo; }
-    public void setLimiteWatchlistActivo(int limiteWatchlistActivo) { this.limiteWatchlistActivo = limiteWatchlistActivo; }
+    public int getKcalsToLevel4() { return kcalsToLevel4; }
+    public void setKcalsToLevel4(int kcalsToLevel4) { this.kcalsToLevel4 = kcalsToLevel4; }
 
-    public String getFechaVigencia() { return fechaVigencia; }
-    public void setFechaVigencia(String fechaVigencia) { this.fechaVigencia = fechaVigencia; }
+    public int getNormalWatchlistLimit() { return normalWatchlistLimit; }
+    public void setNormalWatchlistLimit(int normalWatchlistLimit) { this.normalWatchlistLimit = normalWatchlistLimit; }
 
-    public Integer getUsuarioAdminID() { return usuarioAdminID; }
-    public void setUsuarioAdminID(Integer usuarioAdminID) { this.usuarioAdminID = usuarioAdminID; }
+    public int getActiveWatchlistLimit() { return activeWatchlistLimit; }
+    public void setActiveWatchlistLimit(int activeWatchlistLimit) { this.activeWatchlistLimit = activeWatchlistLimit; }
+
+    public String getEffectiveDate() { return effectiveDate; }
+    public void setEffectiveDate(String effectiveDate) { this.effectiveDate = effectiveDate; }
+
+    public Integer getAdminUserId() { return adminUserId; }
+    public void setAdminUserId(Integer adminUserId) { this.adminUserId = adminUserId; }
 }

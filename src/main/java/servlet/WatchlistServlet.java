@@ -105,7 +105,7 @@ public class WatchlistServlet extends HttpServlet {
             int cantidadPeliculas = movieIds.size();
             
             if (userAct.getNivelUsuario() >= 2) {
-                int limiteActivo = configController.getConfiguracionReglas().getLimiteWatchlistActivo();
+                int limiteActivo = configController.getConfiguracionReglas().getActiveWatchlistLimit();
                 
                 if (cantidadPeliculas >= limiteActivo) {
                     session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");
@@ -114,7 +114,7 @@ public class WatchlistServlet extends HttpServlet {
                 }
                 
             } else {
-                int limiteNormal = configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+                int limiteNormal = configController.getConfiguracionReglas().getNormalWatchlistLimit();
                 
                 if (cantidadPeliculas >= limiteNormal) {
                     session.setAttribute("watchlistError", "Has alcanzado el límite de películas en tu watchlist");

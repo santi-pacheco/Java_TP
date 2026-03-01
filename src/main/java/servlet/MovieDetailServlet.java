@@ -134,8 +134,8 @@ public class MovieDetailServlet extends HttpServlet {
                 
                 int cantidadPeliculas = watchlistMovies.size();
                 int limite = updatedUser.getNivelUsuario() >= 2 
-                    ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
-                    : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
+                    ? configController.getConfiguracionReglas().getActiveWatchlistLimit()
+                    : configController.getConfiguracionReglas().getNormalWatchlistLimit();
                 canAddToWatchlist = cantidadPeliculas < limite;
                 
                 List<User> followingList = userService.getFollowing(user.getId());

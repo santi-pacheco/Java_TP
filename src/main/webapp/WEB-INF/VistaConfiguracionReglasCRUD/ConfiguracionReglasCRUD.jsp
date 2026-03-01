@@ -53,19 +53,29 @@
         
         <form action="<%= request.getContextPath() %>/configuracion-reglas" method="POST">
             <div class="form-group">
-                <label>Umbral Reseñas Activo:</label>
-                <input type="number" name="umbralResenasActivo" class="form-control" required min="0" 
-                       value="${(configForm != null) ? configForm.umbralResenasActivo : ''}">
+                <label>Kcals Nivel 2:</label>
+                <input type="number" name="kcalsToLevel2" class="form-control" required min="1"
+                       value="${(configForm != null) ? configForm.kcalsToLevel2 : ''}">
+            </div>
+            <div class="form-group">
+                <label>Kcals Nivel 3:</label>
+                <input type="number" name="kcalsToLevel3" class="form-control" required min="1"
+                       value="${(configForm != null) ? configForm.kcalsToLevel3 : ''}">
+            </div>
+            <div class="form-group">
+                <label>Kcals Nivel 4:</label>
+                <input type="number" name="kcalsToLevel4" class="form-control" required min="1"
+                       value="${(configForm != null) ? configForm.kcalsToLevel4 : ''}">
             </div>
             <div class="form-group">
                 <label>Límite Watchlist Normal:</label>
-                <input type="number" name="limiteWatchlistNormal" class="form-control" required min="0"
-                       value="${(configForm != null) ? configForm.limiteWatchlistNormal : ''}">
+                <input type="number" name="normalWatchlistLimit" class="form-control" required min="1"
+                       value="${(configForm != null) ? configForm.normalWatchlistLimit : ''}">
             </div>
             <div class="form-group">
                 <label>Límite Watchlist Activo:</label>
-                <input type="number" name="limiteWatchlistActivo" class="form-control" required min="0"
-                       value="${(configForm != null) ? configForm.limiteWatchlistActivo : ''}">
+                <input type="number" name="activeWatchlistLimit" class="form-control" required min="1"
+                       value="${(configForm != null) ? configForm.activeWatchlistLimit : ''}">
             </div>
             <button type="submit" class="btn btn-success">Guardar Configuración</button>
         </form>
@@ -86,22 +96,26 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Umbral Reseñas Activo</th>
+                    <th>Kcals Nivel 2</th>
+                    <th>Kcals Nivel 3</th>
+                    <th>Kcals Nivel 4</th>
                     <th>Límite Watchlist Normal</th>
                     <th>Límite Watchlist Activo</th>
                     <th>Fecha Vigencia</th>
-                    <th>Usuario Admin ID</th>
+                    <th>Admin User ID</th>
                 </tr>
             </thead>
             <tbody>
                 <c:forEach var="config" items="${configuraciones}">
                     <tr>
-                        <td>${config.configID}</td>
-                        <td>${config.umbralResenasActivo}</td>
-                        <td>${config.limiteWatchlistNormal}</td>
-                        <td>${config.limiteWatchlistActivo}</td>
-                        <td>${config.fechaVigencia}</td>
-                        <td>${config.usuarioAdminID}</td>
+                        <td>${config.configId}</td>
+                        <td>${config.kcalsToLevel2}</td>
+                        <td>${config.kcalsToLevel3}</td>
+                        <td>${config.kcalsToLevel4}</td>
+                        <td>${config.normalWatchlistLimit}</td>
+                        <td>${config.activeWatchlistLimit}</td>
+                        <td>${config.effectiveDate}</td>
+                        <td>${config.adminUserId}</td>
                     </tr>
                 </c:forEach>
             </tbody>

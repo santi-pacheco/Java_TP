@@ -37,11 +37,11 @@ public class ConfiguracionReglasService {
             int kcals = user.getTotalKcals();
             int newLevel = 1;
             
-            if (kcals >= config.getUmbralKcalsNivel4()) {
+            if (kcals >= config.getKcalsToLevel4()) {
                 newLevel = 4;
-            } else if (kcals >= config.getUmbralKcalsNivel3()) {
+            } else if (kcals >= config.getKcalsToLevel3()) {
                 newLevel = 3;
-            } else if (kcals >= config.getUmbralKcalsNivel2()) {
+            } else if (kcals >= config.getKcalsToLevel2()) {
                 newLevel = 2;
             }
             

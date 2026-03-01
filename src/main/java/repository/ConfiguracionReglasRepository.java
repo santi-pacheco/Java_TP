@@ -14,78 +14,78 @@ public class ConfiguracionReglasRepository {
 
     public ConfiguracionReglas getLast() {
         ConfiguracionReglas config = null;
-        String sql = "SELECT configID, umbral_kcals_nivel_2, umbral_kcals_nivel_3, umbral_kcals_nivel_4, limiteWatchlistNormal, limiteWatchlistActivo, fechaEfectiva, usuarioAdminID FROM configuracionreglas ORDER BY configID DESC LIMIT 1";
+        String sql = "SELECT config_id, normal_watchlist_limit, active_watchlist_limit, effective_date, admin_user_id, kcals_to_level_2, kcals_to_level_3, kcals_to_level_4 FROM system_settings ORDER BY config_id DESC LIMIT 1";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-            
+
             if (rs.next()) {
                 config = new ConfiguracionReglas();
-                config.setConfigID(rs.getInt("configID"));
-                config.setUmbralKcalsNivel2(rs.getInt("umbral_kcals_nivel_2"));
-                config.setUmbralKcalsNivel3(rs.getInt("umbral_kcals_nivel_3"));
-                config.setUmbralKcalsNivel4(rs.getInt("umbral_kcals_nivel_4"));
-                config.setLimiteWatchlistNormal(rs.getInt("limiteWatchlistNormal"));
-                config.setLimiteWatchlistActivo(rs.getInt("limiteWatchlistActivo"));
-                config.setFechaVigencia(rs.getString("fechaEfectiva"));
-                Integer adminID = (Integer) rs.getObject("usuarioAdminID");
-                config.setUsuarioAdminID(adminID);
+                config.setConfigId(rs.getInt("config_id"));
+                config.setNormalWatchlistLimit(rs.getInt("normal_watchlist_limit"));
+                config.setActiveWatchlistLimit(rs.getInt("active_watchlist_limit"));
+                config.setEffectiveDate(rs.getString("effective_date"));
+                Integer adminID = (Integer) rs.getObject("admin_user_id");
+                config.setAdminUserId(adminID);
+                config.setKcalsToLevel2(rs.getInt("kcals_to_level_2"));
+                config.setKcalsToLevel3(rs.getInt("kcals_to_level_3"));
+                config.setKcalsToLevel4(rs.getInt("kcals_to_level_4"));
             }
-            
+
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error fetching configuration from database");
         }
         return config;
     }
-    
+
     public ConfiguracionReglas add(ConfiguracionReglas config) {
-        String sql = "INSERT INTO configuracionreglas (umbral_kcals_nivel_2, umbral_kcals_nivel_3, umbral_kcals_nivel_4, limiteWatchlistNormal, limiteWatchlistActivo, usuarioAdminID) VALUES (?, ?, ?, ?, ?, ?)";
-        
+        String sql = "INSERT INTO system_settings (normal_watchlist_limit, active_watchlist_limit, admin_user_id, kcals_to_level_2, kcals_to_level_3, kcals_to_level_4) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, config.getUmbralKcalsNivel2());
-            stmt.setInt(2, config.getUmbralKcalsNivel3());
-            stmt.setInt(3, config.getUmbralKcalsNivel4());
-            stmt.setInt(4, config.getLimiteWatchlistNormal());
-            stmt.setInt(5, config.getLimiteWatchlistActivo());
-            if (config.getUsuarioAdminID() != null) {
-                stmt.setInt(6, config.getUsuarioAdminID());
+
+            stmt.setInt(1, config.getNormalWatchlistLimit());
+            stmt.setInt(2, config.getActiveWatchlistLimit());
+            if (config.getAdminUserId() != null) {
+                stmt.setInt(3, config.getAdminUserId());
             } else {
-                stmt.setNull(6, java.sql.Types.INTEGER);
+                stmt.setNull(3, java.sql.Types.INTEGER);
             }
-            
+            stmt.setInt(4, config.getKcalsToLevel2());
+            stmt.setInt(5, config.getKcalsToLevel3());
+            stmt.setInt(6, config.getKcalsToLevel4());
+
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw ErrorFactory.internal("Error creating configuration in database");
         }
         return config;
     }
-    
+
     public List<ConfiguracionReglas> getAll() {
         List<ConfiguracionReglas> configs = new ArrayList<>();
-        String sql = "SELECT configID, umbral_kcals_nivel_2, umbral_kcals_nivel_3, umbral_kcals_nivel_4, limiteWatchlistNormal, limiteWatchlistActivo, fechaEfectiva, usuarioAdminID FROM configuracionreglas ORDER BY fechaEfectiva DESC";
+        String sql = "SELECT config_id, normal_watchlist_limit, active_watchlist_limit, effective_date, admin_user_id, kcals_to_level_2, kcals_to_level_3, kcals_to_level_4 FROM system_settings ORDER BY effective_date DESC";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-            
+
             while (rs.next()) {
                 ConfiguracionReglas config = new ConfiguracionReglas();
-                config.setConfigID(rs.getInt("configID"));
-                config.setUmbralKcalsNivel2(rs.getInt("umbral_kcals_nivel_2"));
-                config.setUmbralKcalsNivel3(rs.getInt("umbral_kcals_nivel_3"));
-                config.setUmbralKcalsNivel4(rs.getInt("umbral_kcals_nivel_4"));
-                config.setLimiteWatchlistNormal(rs.getInt("limiteWatchlistNormal"));
-                config.setLimiteWatchlistActivo(rs.getInt("limiteWatchlistActivo"));
-                config.setFechaVigencia(rs.getString("fechaEfectiva"));
-                Integer adminID = (Integer) rs.getObject("usuarioAdminID");
-                config.setUsuarioAdminID(adminID);
-                
+                config.setConfigId(rs.getInt("config_id"));
+                config.setNormalWatchlistLimit(rs.getInt("normal_watchlist_limit"));
+                config.setActiveWatchlistLimit(rs.getInt("active_watchlist_limit"));
+                config.setEffectiveDate(rs.getString("effective_date"));
+                Integer adminID = (Integer) rs.getObject("admin_user_id");
+                config.setAdminUserId(adminID);
+                config.setKcalsToLevel2(rs.getInt("kcals_to_level_2"));
+                config.setKcalsToLevel3(rs.getInt("kcals_to_level_3"));
+                config.setKcalsToLevel4(rs.getInt("kcals_to_level_4"));
+
                 configs.add(config);
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw ErrorFactory.internal("Error fetching configurations from database: " + e.getMessage());

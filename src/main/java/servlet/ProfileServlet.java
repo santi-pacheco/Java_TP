@@ -135,18 +135,18 @@ public class ProfileServlet extends HttpServlet {
             ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();
             int userKcals = profileUser.getTotalKcals();
             int userLevel = profileUser.getNivelUsuario();
-            int nextLevelMax = config.getUmbralKcalsNivel2();
+            int nextLevelMax = config.getKcalsToLevel2();
             int currentLevelMin = 0;
 
             if (userLevel == 2) {
-                currentLevelMin = config.getUmbralKcalsNivel2();
-                nextLevelMax = config.getUmbralKcalsNivel3();
+                currentLevelMin = config.getKcalsToLevel2();
+                nextLevelMax = config.getKcalsToLevel3();
             } else if (userLevel == 3) {
-                currentLevelMin = config.getUmbralKcalsNivel3();
-                nextLevelMax = config.getUmbralKcalsNivel4();
+                currentLevelMin = config.getKcalsToLevel3();
+                nextLevelMax = config.getKcalsToLevel4();
             } else if (userLevel >= 4) {
-                currentLevelMin = config.getUmbralKcalsNivel4();
-                nextLevelMax = config.getUmbralKcalsNivel4();
+                currentLevelMin = config.getKcalsToLevel4();
+                nextLevelMax = config.getKcalsToLevel4();
             }
 
             int progressPercentage = 100;

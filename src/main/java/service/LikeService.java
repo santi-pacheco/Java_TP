@@ -58,11 +58,11 @@ public class LikeService {
             int newLevel = 1;
 
             if (config != null) {
-                if (newKcals >= config.getUmbralKcalsNivel4()) {
+                if (newKcals >= config.getKcalsToLevel4()) {
                     newLevel = 4;
-                } else if (newKcals >= config.getUmbralKcalsNivel3()) {
+                } else if (newKcals >= config.getKcalsToLevel3()) {
                     newLevel = 3;
-                } else if (newKcals >= config.getUmbralKcalsNivel2()) {
+                } else if (newKcals >= config.getKcalsToLevel2()) {
                     newLevel = 2;
                 }
             }

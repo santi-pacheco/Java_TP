@@ -77,20 +77,20 @@ public class ConfiguracionReglasServlet extends HttpServlet {
         }
     }
     private void populateConfigFromRequest(ConfiguracionReglas config, HttpServletRequest request) {
-        
-        config.setUmbralKcalsNivel2(parseIntParam(request.getParameter("umbralKcalsNivel2"), "Umbral Nivel 2"));
-        config.setUmbralKcalsNivel3(parseIntParam(request.getParameter("umbralKcalsNivel3"), "Umbral Nivel 3"));
-        config.setUmbralKcalsNivel4(parseIntParam(request.getParameter("umbralKcalsNivel4"), "Umbral Nivel 4"));
-        config.setLimiteWatchlistNormal(parseIntParam(request.getParameter("limiteWatchlistNormal"), "Límite Watchlist Normal"));
-        config.setLimiteWatchlistActivo(parseIntParam(request.getParameter("limiteWatchlistActivo"), "Límite Watchlist Activo"));
-        
+
+        config.setKcalsToLevel2(parseIntParam(request.getParameter("kcalsToLevel2"), "Umbral Nivel 2"));
+        config.setKcalsToLevel3(parseIntParam(request.getParameter("kcalsToLevel3"), "Umbral Nivel 3"));
+        config.setKcalsToLevel4(parseIntParam(request.getParameter("kcalsToLevel4"), "Umbral Nivel 4"));
+        config.setNormalWatchlistLimit(parseIntParam(request.getParameter("normalWatchlistLimit"), "Límite Watchlist Normal"));
+        config.setActiveWatchlistLimit(parseIntParam(request.getParameter("activeWatchlistLimit"), "Límite Watchlist Activo"));
+
         HttpSession session = request.getSession(false);
 
-        if (session != null && session.getAttribute("usuarioLogueado") != null) { 
+        if (session != null && session.getAttribute("usuarioLogueado") != null) {
             User user = (User) session.getAttribute("usuarioLogueado");
-            config.setUsuarioAdminID(user.getId());
+            config.setAdminUserId(user.getId());
         } else {
-            config.setUsuarioAdminID(null); 
+            config.setAdminUserId(null);
         }
     }
 
