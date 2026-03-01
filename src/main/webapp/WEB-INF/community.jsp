@@ -538,7 +538,7 @@
         let burgerClass = level >= 3 ? 'burger-avatar-border' : '';
         let cheddarClass = level >= 4 ? 'cheddar-review-card' : '';
 
-        const isSpoiler = review.moderation_status === 'SPOILER';
+        const isSpoiler = review.moderationStatus === 'SPOILER';
         const spoilerCheckboxId = `spoiler-toggle-\${review.reviewId}`;
         const spoilerTextClass = isSpoiler ? 'review-spoiler-text' : '';
         
