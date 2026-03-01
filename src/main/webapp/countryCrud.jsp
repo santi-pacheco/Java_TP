@@ -114,14 +114,14 @@
                             for (Country country : countries) {
                     %>
                     <tr>
-                        <td><%= country.getId() %></td>
-                        <td><%= country.getIso_3166_1() != null ? country.getIso_3166_1() : "-" %></td>
-                        <td><%= country.getEnglish_name() != null ? country.getEnglish_name() : "-" %></td>
+                        <td><%= country.getCountryId() %></td>
+                        <td><%= country.getIsoCode() != null ? country.getIsoCode() : "-" %></td>
+                        <td><%= country.getName() != null ? country.getName() : "-" %></td>
                         <td>
-                            <a href="<%= request.getContextPath() %>/countries?accion=mostrarFormEditar&id=<%= country.getId() %>" class="btn btn-warning btn-xs">Editar</a>
+                            <a href="<%= request.getContextPath() %>/countries?accion=mostrarFormEditar&id=<%= country.getCountryId() %>" class="btn btn-warning btn-xs">Editar</a>
                             <form action="<%= request.getContextPath() %>/countries" method="POST" style="display:inline;">
                                 <input type="hidden" name="accion" value="eliminar">
-                                <input type="hidden" name="id" value="<%= country.getId() %>">
+                                <input type="hidden" name="id" value="<%= country.getCountryId() %>">
                                 <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Eliminar este país?')">Eliminar</button>
                             </form>
                         </td>

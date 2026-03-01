@@ -24,7 +24,7 @@
     <div class="form-wrapper">
     
         <% Country country = (Country) request.getAttribute("country"); %>
-        <h2><%= (country != null && country.getId() != 0) ? "Editar" : "Crear" %> País</h2>
+        <h2><%= (country != null && country.getCountryId() != 0) ? "Editar" : "Crear" %> País</h2>
         <% 
             Set<String> errors = (Set<String>) request.getAttribute("errors");
             if (errors != null && !errors.isEmpty()) {
@@ -49,23 +49,23 @@
         
         <form action="<%= request.getContextPath() %>/countries" method="POST">
          
-             <input type="hidden" name="accion" value="<%= (country != null && country.getId() != 0) ? "actualizar" : "crear" %>">
-            
+<input type="hidden" name="accion" value="<%= (country != null && country.getCountryId() != 0) ? "actualizar" : "crear" %>">
+
             <% if (country != null) { %>
-                <input type="hidden" name="id" value="<%= country.getId() %>">
+                <input type="hidden" name="id" value="<%= country.getCountryId() %>">
             <% } %>
             
             <div class="form-group">
                 <label>Código ISO:</label>
                 <input type="text" name="iso" class="form-control" maxlength="2" required
-                       value="<%= (country != null && country.getIso_3166_1() != null) ? country.getIso_3166_1() : "" %>"
-                       <%= (country != null && country.getId() != 0) ? "readonly" : "" %>>
+                       value="<%= (country != null && country.getIsoCode() != null) ? country.getIsoCode() : "" %>"
+                       <%= (country != null && country.getCountryId() != 0) ? "readonly" : "" %>>
             </div>
             
             <div class="form-group">
                 <label>Nombre:</label>
                 <input type="text" name="name" class="form-control" 
-                       value="<%= (country != null && country.getEnglish_name() != null) ? country.getEnglish_name() : "" %>" required>
+                       value="<%= (country != null && country.getName() != null) ? country.getName() : "" %>" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Guardar</button>

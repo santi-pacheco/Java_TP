@@ -143,8 +143,8 @@ public class DatosApiService {
 		
 		Map<String, entity.Country> uniqueCountries = new HashMap<>();
 	    for (var c : countries) {
-	        if (!uniqueCountries.containsKey(c.getIso_3166_1())) {
-	            uniqueCountries.put(c.getIso_3166_1(), c);
+	        if (!uniqueCountries.containsKey(c.getIsoCode())) {
+	            uniqueCountries.put(c.getIsoCode(), c);
 	        }
 	    }
 
@@ -194,7 +194,7 @@ public class DatosApiService {
 			List<entity.Country> peliPaises = mapMovieCountries.get(m.getApiId());
 	        if (peliPaises != null) {
 	            for (var c : peliPaises) {
-	                Integer dbCountryId = countryMap.get(c.getIso_3166_1());
+	                Integer dbCountryId = countryMap.get(c.getIsoCode());
 	                if (dbCountryId != null) {
 	                    batchCountries.add(new Object[]{ m.getMovieId(), dbCountryId });
 	                }

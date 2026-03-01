@@ -35,12 +35,12 @@ public class CountryService {
 	
 	public Country updateCountry(Country c) {
 		// 1. Primero, verifica que el país exista
-	    Country existingCountry = countryRepository.findOne(c.getId());
+	    Country existingCountry = countryRepository.findOne(c.getCountryId());
 	    if (existingCountry == null) {
-	        throw ErrorFactory.notFound("No se puede actualizar. País con ID " + c.getId() + " no encontrado.");
+	        throw ErrorFactory.notFound("No se puede actualizar. País con ID " + c.getCountryId() + " no encontrado.");
 	    }
-	    existingCountry.setEnglish_name(c.getEnglish_name());
-	    existingCountry.setIso_3166_1(c.getIso_3166_1());
+	    existingCountry.setName(c.getName());
+	    existingCountry.setIsoCode(c.getIsoCode());
 
 	    // 2. Si existe, ahora sí actualiza
 	    return countryRepository.update(existingCountry);

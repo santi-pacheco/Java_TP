@@ -184,7 +184,7 @@ public class DiscoverReflectionMain {
 
                 for (Country c : paisesPeli) {
                     CountryRepository cr = new CountryRepository();
-                    int co =  cr.findOneByISO(c.getIso_3166_1());
+                    int co =  cr.findOneByISO(c.getIsoCode());
                     System.out.println("   -> Guardando país: " + co + " para la película: " + movie.getTitle());
                     cr.saveCountryMovie(co, movie.getMovieId());
                 }

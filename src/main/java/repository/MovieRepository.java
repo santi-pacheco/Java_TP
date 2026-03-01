@@ -573,9 +573,9 @@ public class MovieRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Country country = new Country();
-                    country.setId(rs.getInt("country_id"));
-                    country.setIso_3166_1(rs.getString("iso_code"));
-                    country.setEnglish_name(rs.getString("name"));
+                    country.setCountryId(rs.getInt("country_id"));
+                    country.setIsoCode(rs.getString("iso_code"));
+                    country.setName(rs.getString("name"));
                     countries.add(country);
                 }
             }

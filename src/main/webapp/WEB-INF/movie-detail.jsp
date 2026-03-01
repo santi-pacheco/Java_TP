@@ -363,7 +363,7 @@
                         <span class="meta-label">Países</span>
                         <span class="meta-value">
                             <% for (int i = 0; i < countries.size(); i++) {
-                                out.print((i > 0 ? ", " : "") + countries.get(i).getIso_3166_1());
+                                out.print((i > 0 ? ", " : "") + countries.get(i).getIsoCode());
                             } %>
                         </span>
                     </div>

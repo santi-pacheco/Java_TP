@@ -88,7 +88,7 @@ public class CountryServlet extends HttpServlet {
 
 				case "actualizar":
 					countryFromForm = new Country();
-					countryFromForm.setId(parseIntParam(request.getParameter("id"), "ID"));
+					countryFromForm.setCountryId(parseIntParam(request.getParameter("id"), "ID"));
 					populateCountryFromRequest(countryFromForm, request);
 					
                     Set<ConstraintViolation<Country>> violationsUpdate = validator.validate(countryFromForm);
@@ -105,7 +105,7 @@ public class CountryServlet extends HttpServlet {
 				case "eliminar":
 					int idEliminar = parseIntParam(request.getParameter("id"), "ID");
 					Country deleteCountry = new Country();
-					deleteCountry.setId(idEliminar);
+					deleteCountry.setCountryId(idEliminar);
 					countryController.removeCountry(deleteCountry);
 					break;
 			}
@@ -132,8 +132,8 @@ public class CountryServlet extends HttpServlet {
       }
 	
 	private void populateCountryFromRequest(Country country, HttpServletRequest request) {
-        country.setIso_3166_1(request.getParameter("iso"));
-        country.setEnglish_name(request.getParameter("name"));
+        country.setIsoCode(request.getParameter("iso"));
+        country.setName(request.getParameter("name"));
     }
 	
 	private int parseIntParam(String param, String fieldName) {

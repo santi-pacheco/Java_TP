@@ -170,8 +170,8 @@ public class ExternalApiService {
         return tmdbCountries.stream()
                 .map(tmdbCountry -> {
                     entity.Country localCountry = new entity.Country();
-                    localCountry.setIso_3166_1(tmdbCountry.getIsoCode());
-                    localCountry.setEnglish_name(tmdbCountry.getName());
+                    localCountry.setIsoCode(tmdbCountry.getIsoCode());
+                    localCountry.setName(tmdbCountry.getName());
                     return localCountry;
                 })
                 .collect(Collectors.toList());
