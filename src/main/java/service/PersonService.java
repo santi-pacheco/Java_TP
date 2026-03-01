@@ -38,15 +38,15 @@ public class PersonService {
 	
 	public Person updatePerson(Person per) {
 		// 1. Primero, verifica que la persona exista
-	    Person existingPerson = personRepository.findOne(per.getId());
+	    Person existingPerson = personRepository.findOne(per.getPersonId());
 	    if (existingPerson == null) {
-	        throw ErrorFactory.notFound("No se puede actualizar. Persona con ID " + per.getId() + " no encontrada.");
+	        throw ErrorFactory.notFound("No se puede actualizar. Persona con ID " + per.getPersonId() + " no encontrada.");
 	    }
 	    
 	    existingPerson.setName(per.getName());
-	    existingPerson.setAlso_known_as(per.getAlso_known_as());
-	    existingPerson.setPlace_of_birth(per.getPlace_of_birth());
-	    existingPerson.setBirthDate(per.getBirthDate());
+	    existingPerson.setAlsoKnownAs(per.getAlsoKnownAs());
+	    existingPerson.setPlaceOfBirth(per.getPlaceOfBirth());
+	    existingPerson.setBirthdate(per.getBirthdate());
 	    
 	    // 2. Si existe, ahora sí actualiza
 	    return personRepository.update(existingPerson);
@@ -60,20 +60,20 @@ public class PersonService {
 		//Verificar que la persona no exista ya en la base de datos antes de guardarla
 		List<actorCharacter> actorCharacters = new ArrayList<>();
 		for (service.ExternalApiService.PersonWithCharacter pwc : personWithCharacter) {
-			Person existingPerson = personRepository.findByApiId(pwc.getId_api());
+			Person existingPerson = personRepository.findByApiId(pwc.getApiId());
 			if (existingPerson != null) {
-				actorCharacter ac = new actorCharacter(existingPerson.getId(), pwc.getCharacterName());
+				actorCharacter ac = new actorCharacter(existingPerson.getPersonId(), pwc.getCharacterName());
 				actorCharacters.add(ac);
 			} else {
 				Person newPerson = new Person();
-				newPerson.setId_api(pwc.getId_api());
+				newPerson.setApiId(pwc.getApiId());
 				newPerson.setName(pwc.getName());
-				newPerson.setAlso_known_as(pwc.getAlso_known_as());
-				newPerson.setPlace_of_birth(pwc.getPlace_of_birth());
-				newPerson.setBirthDate(pwc.getBirthDate());
+				newPerson.setAlsoKnownAs(pwc.getAlsoKnownAs());
+				newPerson.setPlaceOfBirth(pwc.getPlaceOfBirth());
+				newPerson.setBirthdate(pwc.getBirthdate());
 				System.out.println("Saving new person: " + newPerson);
 				Person savedPerson = personRepository.add(newPerson);
-				actorCharacter ac = new actorCharacter(savedPerson.getId(), pwc.getCharacterName());
+				actorCharacter ac = new actorCharacter(savedPerson.getPersonId(), pwc.getCharacterName());
 				actorCharacters.add(ac);
 			}
 		}
@@ -84,7 +84,7 @@ public class PersonService {
 			//Verificar que la persona no exista ya en la base de datos antes de guardarla
 			List<Person> savedDirectors = new ArrayList<>();
 			for (Person dir : directors) {
-				Person existingPerson = personRepository.findByApiId(dir.getId_api());
+				Person existingPerson = personRepository.findByApiId(dir.getApiId());
 				if (existingPerson != null) {
 					savedDirectors.add(existingPerson);
 				} else {

@@ -470,7 +470,7 @@
             <% for (ActorWithCharacter awc : actors) {
                 Person actor = awc.getActor();
                 if (actor != null) {
-                    String path = actor.getProfile_path();
+                    String path = actor.getProfilePath();
                     String photoUrl = (path != null && !path.trim().isEmpty() && !path.equals("null")) ? "https://image.tmdb.org/t/p/w185" + path : request.getContextPath() + "/utils/default_profile.png";
             %>
             <div class="person-card">
@@ -494,7 +494,7 @@
         <div class="persons-grid">
             <% if (directors != null && !directors.isEmpty()) {
                 for (Person director : directors) {
-                    String path = director.getProfile_path();
+                    String path = director.getProfilePath();
                     String photoUrl = (path != null && !path.trim().isEmpty() && !path.equals("null")) ? "https://image.tmdb.org/t/p/w185" + path : request.getContextPath() + "/utils/default_profile.png";
             %>
             <div class="person-card">

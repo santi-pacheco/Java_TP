@@ -128,13 +128,13 @@ public class DatosApiService {
 		Map<Integer, entity.Person> uniquePeople = new HashMap<>();
 		
 		for (var pwc : actors) {
-			if (!uniquePeople.containsKey(pwc.getId_api())) {
-			uniquePeople.put(pwc.getId_api(), externalApiService.toEntity(pwc));
+			if (!uniquePeople.containsKey(pwc.getApiId())) {
+			uniquePeople.put(pwc.getApiId(), externalApiService.toEntity(pwc));
 			}
 		}
 		for (var dir : directors) {
-			if (!uniquePeople.containsKey(dir.getId_api())) {
-			uniquePeople.put(dir.getId_api(), dir);
+			if (!uniquePeople.containsKey(dir.getApiId())) {
+			uniquePeople.put(dir.getApiId(), dir);
 			}
 		}
 		if (!uniquePeople.isEmpty()) {
@@ -166,7 +166,7 @@ public class DatosApiService {
 			List<service.ExternalApiService.PersonWithCharacter> movieCast = mapMovieActors.get(m.getApiId());
 			if (movieCast != null) {
 				for (var actor : movieCast) {
-				  Integer dbPersonId = peopleMap.get(actor.getId_api());
+				  Integer dbPersonId = peopleMap.get(actor.getApiId());
 				  if (dbPersonId != null) {
 				      batchCast.add(new Object[]{ 
 				          m.getMovieId(),
@@ -180,7 +180,7 @@ public class DatosApiService {
 			List<entity.Person> movieCrew = mapMovieDirectors.get(m.getApiId());
 			if (movieCrew != null) {
 				for (var dir : movieCrew) {
-				  Integer dbPersonId = peopleMap.get(dir.getId_api());
+				  Integer dbPersonId = peopleMap.get(dir.getApiId());
 				  
 				  if (dbPersonId != null) {
 				       batchCrew.add(new Object[]{ 
@@ -342,13 +342,13 @@ public class DatosApiService {
 	    for (entity.Person personaOriginal : allPersons) {
 	        contador++;
 	        
-	        if (personaOriginal.getId_api() == 0) {
+	        if (personaOriginal.getApiId() == 0) {
 	            continue;
 	        }
 	        
-	        if (personaOriginal.getBirthDate() != null && 
-	        	    personaOriginal.getProfile_path() != null &&
-	        	    personaOriginal.getAlso_known_as() != null) {
+	        if (personaOriginal.getBirthdate() != null && 
+	        	    personaOriginal.getProfilePath() != null &&
+	        	    personaOriginal.getAlsoKnownAs() != null) {
 	        	    continue; 
 	        }
 	        
@@ -356,17 +356,17 @@ public class DatosApiService {
 
 	        try {
 	        	if (contador % 50 == 0) {
-                    System.out.println("   -> Procesando persona " + contador + "/" + allPersons.size() + " (ID: " + personaOriginal.getId_api() + ")");
+                    System.out.println("   -> Procesando persona " + contador + "/" + allPersons.size() + " (ID: " + personaOriginal.getApiId() + ")");
                 }
 	        	
-	            PersonDb tmdbPerson = externalApiService.fetchBasicPersonDetails(personaOriginal.getId_api(), null);
+	            PersonDb tmdbPerson = externalApiService.fetchBasicPersonDetails(personaOriginal.getApiId(), null);
 	            entity.Person personaMapeada = externalApiService.mapTmdbToPersona(tmdbPerson);
 
 	            if (personaMapeada != null) {
-	                personaOriginal.setPlace_of_birth(personaMapeada.getPlace_of_birth());
-	                personaOriginal.setBirthDate(personaMapeada.getBirthDate());
-	                personaOriginal.setProfile_path(personaMapeada.getProfile_path());
-	                personaOriginal.setAlso_known_as(personaMapeada.getAlso_known_as());
+	                personaOriginal.setPlaceOfBirth(personaMapeada.getPlaceOfBirth());
+	                personaOriginal.setBirthdate(personaMapeada.getBirthdate());
+	                personaOriginal.setProfilePath(personaMapeada.getProfilePath());
+	                personaOriginal.setAlsoKnownAs(personaMapeada.getAlsoKnownAs());
 	                bufferPersons.add(personaOriginal);
 	            }
 	            if (bufferPersons.size() >= BATCH_SIZE) {
@@ -374,7 +374,7 @@ public class DatosApiService {
 	            }
 
 	        } catch (Exception e) {
-	        	System.err.println("   -> [WARN] Error con persona ID " + personaOriginal.getId_api() + ": " + e.getMessage());
+	        	System.err.println("   -> [WARN] Error con persona ID " + personaOriginal.getApiId() + ": " + e.getMessage());
 	        }
 	    }
 	    if (!bufferPersons.isEmpty()) {

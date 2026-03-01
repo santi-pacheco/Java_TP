@@ -3,21 +3,21 @@ package entity;
 import java.sql.Date;
 
 public class Person {
-	
-	private int id;
-	private int id_api;
-	private String name;
-	private String also_known_as;
-	private String place_of_birth;
-	private Date BirthDate;
-	private String profile_path;
 
-	public int getId() {
-		return id;
+	private int personId;
+	private int apiId;
+	private String name;
+	private String alsoKnownAs;
+	private String placeOfBirth;
+	private Date birthdate;
+	private String profilePath;
+
+	public int getPersonId() {
+		return personId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setPersonId(int personId) {
+		this.personId = personId;
 	}
 
 	public String getName() {
@@ -28,49 +28,49 @@ public class Person {
 		this.name = name;
 	}
 
-	public int getId_api() {
-		return id_api;
+	public int getApiId() {
+		return apiId;
 	}
 
-	public void setId_api(int id_api) {
-		this.id_api = id_api;
+	public void setApiId(int apiId) {
+		this.apiId = apiId;
 	}
 
-	public String getAlso_known_as() {
-		return also_known_as;
+	public String getAlsoKnownAs() {
+		return alsoKnownAs;
 	}
 
-	public void setAlso_known_as(String also_known_as) {
-		this.also_known_as = also_known_as;
+	public void setAlsoKnownAs(String alsoKnownAs) {
+		this.alsoKnownAs = alsoKnownAs;
 	}
 
-	public String getPlace_of_birth() {
-		return place_of_birth;
+	public String getPlaceOfBirth() {
+		return placeOfBirth;
 	}
 
-	public void setPlace_of_birth(String place_of_birth) {
-		this.place_of_birth = place_of_birth;
+	public void setPlaceOfBirth(String placeOfBirth) {
+		this.placeOfBirth = placeOfBirth;
 	}
 
-	public Date getBirthDate() {
-		return BirthDate;
+	public Date getBirthdate() {
+		return birthdate;
 	}
 
-	public void setBirthDate(Date BirthDate) {
-		this.BirthDate = BirthDate;
-	}
-	
-	public String getProfile_path() {
-		return profile_path;
+	public void setBirthdate(Date birthdate) {
+		this.birthdate = birthdate;
 	}
 
-	public void setProfile_path(String profile_path) {
-		this.profile_path = profile_path;
+	public String getProfilePath() {
+		return profilePath;
+	}
+
+	public void setProfilePath(String profilePath) {
+		this.profilePath = profilePath;
 	}
 
 	@Override
 	public String toString() {
-		return "Person [id=" + id + ", id_api=" + id_api + ", name=" + name + ", also_known_as=" + also_known_as
-				+ ", place_of_birth=" + place_of_birth + ", BirthDate=" + BirthDate + "]";
+		return "Person [personId=" + personId + ", apiId=" + apiId + ", name=" + name + ", alsoKnownAs=" + alsoKnownAs
+				+ ", placeOfBirth=" + placeOfBirth + ", birthdate=" + birthdate + "]";
 	}
 }

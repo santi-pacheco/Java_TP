@@ -443,13 +443,13 @@ public static void loadPersons() {
             
         	Person personaOriginal = listaPersonas.get(i);
             
-            if (personaOriginal.getId_api() == 0) {
+            if (personaOriginal.getApiId() == 0) {
                 System.err.println("Saltando persona (índice " + i + ") sin id_api.");
                 continue;
             }
 
             try {
-                int idApi = personaOriginal.getId_api();
+                int idApi = personaOriginal.getApiId();
                 System.out.println("Procesando: " + (i + 1) + "/" + listaPersonas.size() + " - ID: " + idApi);
 
                 // 1. Inicia el cronómetro ANTES de la llamada a la API
@@ -463,8 +463,8 @@ public static void loadPersons() {
 
                 // 4. "Une" los dos objetos
                 if (personaMapeada != null) {
-                    personaOriginal.setPlace_of_birth(personaMapeada.getPlace_of_birth());
-                    personaOriginal.setBirthDate(personaMapeada.getBirthDate());
+                    personaOriginal.setPlaceOfBirth(personaMapeada.getPlaceOfBirth());
+                    personaOriginal.setBirthdate(personaMapeada.getBirthdate());
                 }
 
                 // 5. Agrega a la lista para el lote (batch)
@@ -483,15 +483,15 @@ public static void loadPersons() {
                 // Si la API tardó MÁS de 25ms, no dormimos nada y continuamos.
 
             } catch (IllegalStateException e) {
-                System.err.println("Error al buscar persona (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+                System.err.println("Error al buscar persona (ID: " + personaOriginal.getApiId() + "): " + e.getMessage());
             } catch (TmdbException e) { 
-                System.err.println("Error de TMDB al buscar (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+                System.err.println("Error de TMDB al buscar (ID: " + personaOriginal.getApiId() + "): " + e.getMessage());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.err.println("El hilo fue interrumpido. Deteniendo la carga.");
                 break; // Sale del bucle for
             } catch (Exception e) {
-                System.err.println("Error inesperado procesando (ID: " + personaOriginal.getId_api() + "): " + e.getMessage());
+                System.err.println("Error inesperado procesando (ID: " + personaOriginal.getApiId() + "): " + e.getMessage());
                 e.printStackTrace();
             }
         }

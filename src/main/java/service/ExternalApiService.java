@@ -80,7 +80,7 @@ public class ExternalApiService {
 		return tmdbPersons.stream()
 				.map(tmdbPerson -> {
 					entity.Person localPerson = new entity.Person();
-					localPerson.setId(tmdbPerson.getId());
+					localPerson.setApiId(tmdbPerson.getId());
 					localPerson.setName(tmdbPerson.getName());
 					return localPerson;
 				})
@@ -303,7 +303,7 @@ public class ExternalApiService {
                 .map(tmdbPerson -> {
                     PersonWithCharacter personWithRole = new PersonWithCharacter();
 
-                    personWithRole.setId_api(tmdbPerson.getId());
+                    personWithRole.setApiId(tmdbPerson.getId());
                     personWithRole.setName(tmdbPerson.getName());
                     personWithRole.setCharacterName(tmdbPerson.getCharacter());
 
@@ -323,7 +323,7 @@ public class ExternalApiService {
                 .map(director -> {
                     entity.Person localPerson = new entity.Person();
                     localPerson.setName(director.getName());
-                    localPerson.setId_api(director.getId()); 
+                    localPerson.setApiId(director.getId()); 
                     return localPerson;
                 })
                 .collect(Collectors.toList());
@@ -345,8 +345,8 @@ public class ExternalApiService {
             return null;
         }
         Person personaDB = new Person();
-        personaDB.setId_api(tmdbPerson.getId());
-        personaDB.setPlace_of_birth(tmdbPerson.getPlaceOfBirth());
+        personaDB.setApiId(tmdbPerson.getId());
+        personaDB.setPlaceOfBirth(tmdbPerson.getPlaceOfBirth());
         java.sql.Date sqlBirthDate = null;
         String birthdayString = tmdbPerson.getBirthday();
         
@@ -358,22 +358,22 @@ public class ExternalApiService {
                 System.err.println("Error al parsear fecha de nacimiento: " + birthdayString);
             }
         }
-        personaDB.setBirthDate(sqlBirthDate);
-        personaDB.setProfile_path(tmdbPerson.getProfilePath());
+        personaDB.setBirthdate(sqlBirthDate);
+        personaDB.setProfilePath(tmdbPerson.getProfilePath());
         List<String> alsoKnownAs = tmdbPerson.getAlsoKnownAs();
         if (alsoKnownAs != null && !alsoKnownAs.isEmpty()) {
             String joinedAlias = String.join(", ", alsoKnownAs);
             if (joinedAlias.length() > 255) {
                 joinedAlias = joinedAlias.substring(0, 255);
             }
-            personaDB.setAlso_known_as(joinedAlias);
+            personaDB.setAlsoKnownAs(joinedAlias);
         } else {
-            personaDB.setAlso_known_as(null);
+            personaDB.setAlsoKnownAs(null);
         }
         if (tmdbPerson.getId() == 5542969) {
-        	System.out.println("DEBUG Persona TMDB ID 5542969 - Nombre: " + tmdbPerson.getName() + ", Alias: " + personaDB.getAlso_known_as()
-        	+ ", BirthDate: " + personaDB.getBirthDate() + ", Place of Birth: " + personaDB.getPlace_of_birth()
-        	+ ", Profile Path: " + personaDB.getProfile_path());
+        	System.out.println("DEBUG Persona TMDB ID 5542969 - Nombre: " + tmdbPerson.getName() + ", Alias: " + personaDB.getAlsoKnownAs()
+        	+ ", BirthDate: " + personaDB.getBirthdate() + ", Place of Birth: " + personaDB.getPlaceOfBirth()
+        	+ ", Profile Path: " + personaDB.getProfilePath());
         }
         return personaDB;
     }
@@ -381,11 +381,11 @@ public class ExternalApiService {
     public entity.Person toEntity(PersonWithCharacter pwc) {
         if (pwc == null) return null;
         entity.Person p = new entity.Person();
-        p.setId_api(pwc.getId_api());
+        p.setApiId(pwc.getApiId());
         p.setName(pwc.getName());
-        p.setAlso_known_as(pwc.getAlso_known_as());
-        p.setBirthDate(pwc.getBirthDate());
-        p.setPlace_of_birth(pwc.getPlace_of_birth());
+        p.setAlsoKnownAs(pwc.getAlsoKnownAs());
+        p.setBirthdate(pwc.getBirthdate());
+        p.setPlaceOfBirth(pwc.getPlaceOfBirth());
         return p;
     }
     
