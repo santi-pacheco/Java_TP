@@ -86,7 +86,7 @@ public class GenreServlet extends HttpServlet {
                     
                 case "actualizar":
                     genreFromForm = new Genre();
-                    genreFromForm.setId(parseIntParam(request.getParameter("id"), "ID"));
+                    genreFromForm.setGenreId(parseIntParam(request.getParameter("id"), "ID"));
                     populateGenreFromRequest(genreFromForm, request);
 
                     Set<ConstraintViolation<Genre>> violationsUpdate = validator.validate(genreFromForm);
@@ -102,7 +102,7 @@ public class GenreServlet extends HttpServlet {
                 case "eliminar":
                     int idEliminar = parseIntParam(request.getParameter("id"), "ID");
                     Genre deleteGenre = new Genre();
-                    deleteGenre.setId(idEliminar);
+                    deleteGenre.setGenreId(idEliminar);
                     genreController.removeGenre(deleteGenre);
                     break;
             }
@@ -128,7 +128,16 @@ public class GenreServlet extends HttpServlet {
     
     private void populateGenreFromRequest(Genre genre, HttpServletRequest request) {
         genre.setName(request.getParameter("name"));
-        genre.setId_api(parseIntParam(request.getParameter("id_api"), "ID API"));
+        String apiIdParam = request.getParameter("apiId");
+        if (apiIdParam != null && !apiIdParam.trim().isEmpty()) {
+            try {
+                genre.setApiId(Integer.valueOf(apiIdParam.trim()));
+            } catch (NumberFormatException e) {
+                genre.setApiId(null);
+            }
+        } else {
+            genre.setApiId(null);
+        }
     }
 
     private int parseIntParam(String param, String fieldName) {

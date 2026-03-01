@@ -60,7 +60,7 @@ public class ExternalApiService {
  
     public Genre convertToLocalGenre(info.movito.themoviedbapi.model.core.Genre tmdbGenre) {
         Genre localGenre = new Genre();
-        localGenre.setId_api(tmdbGenre.getId());
+        localGenre.setApiId(tmdbGenre.getId());
         localGenre.setName(tmdbGenre.getName());
         return localGenre;
     }
@@ -97,7 +97,8 @@ public class ExternalApiService {
         final long initialRetryDelayMs = 500L;
 
         List<Integer> genreIds = genre.stream()
-                .map(g -> g.getId_api())
+                .map(g -> g.getApiId())
+                .filter(id -> id != null)
                 .collect(Collectors.toList());
 
         DiscoverMovieParamBuilder builder = new DiscoverMovieParamBuilder()

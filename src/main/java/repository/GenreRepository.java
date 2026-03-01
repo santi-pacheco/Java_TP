@@ -18,7 +18,7 @@ public class GenreRepository {
 
     public List<Genre> findAll() {
         List<Genre> genres = new ArrayList<>();
-        String sql = "SELECT id_genero, name, id_api FROM generos ORDER BY name";
+        String sql = "SELECT genre_id, name, api_id FROM genres ORDER BY name";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
         		PreparedStatement stmt = conn.prepareStatement(sql);
@@ -26,9 +26,9 @@ public class GenreRepository {
         	
             while (rs.next()) {
                 Genre genre = new Genre();
-                genre.setId(rs.getInt("id_genero"));
+                genre.setGenreId(rs.getInt("genre_id"));
                 genre.setName(rs.getString("name"));
-                genre.setId_api(rs.getInt("id_api"));
+                genre.setApiId(rs.getObject("api_id") != null ? rs.getInt("api_id") : null);
                 genres.add(genre);
             }
         } catch (SQLException e) {
@@ -40,7 +40,7 @@ public class GenreRepository {
     
     public Genre findOne(int id) {
     	Genre genre = null;
-    	String sql = "SELECT id_genero, name, id_api FROM generos WHERE id_genero = ?";
+    	String sql = "SELECT genre_id, name, api_id FROM genres WHERE genre_id = ?";
     	
     	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
     	     PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -49,9 +49,9 @@ public class GenreRepository {
     		try (ResultSet rs = stmt.executeQuery()) {
     			if (rs.next()) {
     				genre = new Genre();
-    				genre.setId(rs.getInt("id_genero"));
+    				genre.setGenreId(rs.getInt("genre_id"));
     				genre.setName(rs.getString("name"));
-    				genre.setId_api(rs.getInt("id_api"));
+    				genre.setApiId(rs.getObject("api_id") != null ? rs.getInt("api_id") : null);
     			}
     		}
     	} catch (SQLException e) {
@@ -61,19 +61,19 @@ public class GenreRepository {
     }
     
     public Genre add(Genre g) {
-    	String sql = "INSERT INTO generos (name, id_api) VALUES (?, ?)";
+    	String sql = "INSERT INTO genres (name, api_id) VALUES (?, ?)";
     	
     	try (Connection conn = DataSourceProvider.getDataSource().getConnection();
     	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
     		
     		stmt.setString(1, g.getName());
-    		stmt.setInt(2, g.getId_api());
+    		stmt.setObject(2, g.getApiId());
     		
     		int affectedRows = stmt.executeUpdate();
     		if (affectedRows > 0) {
     			try (ResultSet keyResultSet = stmt.getGeneratedKeys()) {
     				if (keyResultSet.next()) {
-    					g.setId(keyResultSet.getInt(1));
+    					g.setGenreId(keyResultSet.getInt(1));
     				}
     			}
     		}
@@ -89,14 +89,14 @@ public class GenreRepository {
     }
     
     public Genre update(Genre g) {
-		String sql = "UPDATE generos SET name = ?, id_api = ? WHERE id_genero = ?";
+		String sql = "UPDATE genres SET name = ?, api_id = ? WHERE genre_id = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 			PreparedStatement stmt = conn.prepareStatement(sql)) {
 			
 			stmt.setString(1, g.getName());
-			stmt.setInt(2, g.getId_api());
-			stmt.setInt(3, g.getId());
+			stmt.setObject(2, g.getApiId());
+			stmt.setInt(3, g.getGenreId());
 			stmt.executeUpdate();
 			
 		} catch (SQLException e) {
@@ -110,11 +110,11 @@ public class GenreRepository {
 	}
 	
 	public Genre delete(Genre g) {
-		String sql = "DELETE FROM generos WHERE id_genero = ?";
+		String sql = "DELETE FROM genres WHERE genre_id = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setInt(1, g.getId());
+			stmt.setInt(1, g.getGenreId());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw ErrorFactory.internal("Error deleting person from database");
@@ -123,13 +123,13 @@ public class GenreRepository {
 	}
     
     public void saveAll(List<Genre> genres) {
-        String sql = "INSERT INTO generos (name, id_api) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), id_api = VALUES(id_api)";
+        String sql = "INSERT INTO genres (name, api_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), api_id = VALUES(api_id)";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
        	     PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             for (Genre genre : genres) {
                 stmt.setString(1, genre.getName());
-                stmt.setInt(2, genre.getId_api());
+                stmt.setObject(2, genre.getApiId());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -139,24 +139,20 @@ public class GenreRepository {
     }
     
     public Integer findByIdApi(Integer idApi) {
-		//Cambia el metodo... Ahora busca por idApi, y devuelve el id. (La PK de mi BD)
-		Integer generoId = null;
-		String sql = "SELECT id_genero FROM generos WHERE id_api = ?";
+		Integer genreId = null;
+		String sql = "SELECT genre_id FROM genres WHERE api_id = ?";
 		
 		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
 		     PreparedStatement stmt = conn.prepareStatement(sql)) {
 			stmt.setInt(1, idApi);
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
-					generoId = rs.getInt("id_genero");
-					System.out.println("Género encontrado: ID API = " + idApi + ", ID BD = " + generoId);
+					genreId = Integer.valueOf(rs.getInt("genre_id"));
 				}
-				//Pasar a Integer
-				generoId = Integer.valueOf(rs.getInt("id_genero"));
 			}
 		} catch (SQLException e) {
 				throw ErrorFactory.internal("Error fetching genre by API ID");
 		}
-		return generoId;
+		return genreId;
 	} 
 }

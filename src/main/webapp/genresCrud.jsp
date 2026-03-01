@@ -113,13 +113,13 @@
                             for (Genre genre : genres) {
                     %>
                     <tr>
-                        <td><%= genre.getId() %></td>
+                        <td><%= genre.getGenreId() %></td>
                         <td><%= genre.getName() != null ? genre.getName() : "-" %></td>
                         <td>
-                            <a href="<%= request.getContextPath() %>/genres?accion=mostrarFormEditar&id=<%= genre.getId() %>" class="btn btn-warning btn-xs">Editar</a>
+                            <a href="<%= request.getContextPath() %>/genres?accion=mostrarFormEditar&id=<%= genre.getGenreId() %>" class="btn btn-warning btn-xs">Editar</a>
                             <form action="<%= request.getContextPath() %>/genres" method="POST" style="display:inline;">
                                 <input type="hidden" name="accion" value="eliminar">
-                                <input type="hidden" name="id" value="<%= genre.getId() %>">
+                                <input type="hidden" name="id" value="<%= genre.getGenreId() %>">
                                 <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Eliminar este género?')">Eliminar</button>
                             </form>
                         </td>

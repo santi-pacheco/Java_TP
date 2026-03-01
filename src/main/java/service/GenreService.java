@@ -30,11 +30,12 @@ public class GenreService {
 	}
     
     public Genre updateGenre(Genre genre) {
-	    Genre existingGenre = genreRepository.findOne(genre.getId());
+	    Genre existingGenre = genreRepository.findOne(genre.getGenreId());
 	    if (existingGenre == null) {
-	        throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getId() + " no encontrado.");
+	        throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getGenreId() + " no encontrado.");
 	    }
 	    existingGenre.setName(genre.getName());
+	    existingGenre.setApiId(genre.getApiId());
 	    return genreRepository.update(existingGenre);
     }
     
