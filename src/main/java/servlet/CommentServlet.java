@@ -66,13 +66,13 @@ public class CommentServlet extends HttpServlet {
 
             
                 boolean isFollowing = false;
-                if (loggedUser != null && loggedUser.getId() != c.getIdUsuario()) {
-                    isFollowing = userService.isFollowing(loggedUser.getId(), c.getIdUsuario());
+                if (loggedUser != null && loggedUser.getId() != c.getUserId()) {
+                    isFollowing = userService.isFollowing(loggedUser.getId(), c.getUserId());
                 }
                 
                 json.append("{")
-                    .append("\"idComment\":").append(c.getIdComment()).append(",")
-                    .append("\"idUsuario\":").append(c.getIdUsuario()).append(",") 
+                    .append("\"commentId\":").append(c.getCommentId()).append(",")
+                    .append("\"userId\":").append(c.getUserId()).append(",") 
                     .append("\"username\":\"").append(safeUser).append("\",")
                     .append("\"createdAt\":\"").append(dateStr).append("\",")
                     .append("\"status\":\"").append(status).append("\",")
@@ -130,7 +130,7 @@ public class CommentServlet extends HttpServlet {
                 String createdAt = comment.getCreatedAt() != null ? sdf.format(comment.getCreatedAt()) : sdf.format(new java.util.Date());
                 String status = comment.getModerationStatus() != null ? comment.getModerationStatus().getValue() : "APPROVED";
                 
-                resp.getWriter().write("{\"success\":true,\"idComment\":" + comment.getIdComment() + ",\"idUsuario\":" + user.getId() + ",\"username\":\"" + user.getUsername() + "\",\"createdAt\":\"" + createdAt + "\",\"status\":\"" + status + "\"}");
+                resp.getWriter().write("{\"success\":true,\"commentId\":" + comment.getCommentId() + ",\"userId\":" + user.getId() + ",\"username\":\"" + user.getUsername() + "\",\"createdAt\":\"" + createdAt + "\",\"status\":\"" + status + "\"}");
             }
 
         } catch (BanException e) {

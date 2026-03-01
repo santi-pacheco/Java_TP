@@ -3,32 +3,28 @@ package entity;
 import java.sql.Timestamp;
 
 public class ReviewComment {
-    private int idComment;
-    private int idReview;
-    private int idUsuario;
+    private int commentId;
+    private int reviewId;
+    private int userId;
     private String commentText;
     private Timestamp createdAt;
     private ModerationStatus moderationStatus;
     private String moderationReason;
     private String username;
-
     private String profileImage;
 
     public ReviewComment() {
         this.moderationStatus = ModerationStatus.PENDING_MODERATION;
     }
 
-    public int getIdComment() { return idComment; }
-    public void setIdComment(int idComment) { this.idComment = idComment; }
+    public int getCommentId() { return commentId; }
+    public void setCommentId(int commentId) { this.commentId = commentId; }
 
-    public int getIdReview() { return idReview; }
-    public void setIdReview(int idReview) { this.idReview = idReview; }
+    public int getReviewId() { return reviewId; }
+    public void setReviewId(int reviewId) { this.reviewId = reviewId; }
 
-    public int getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
-    
-
-    public int getUserId() { return idUsuario; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public String getCommentText() { return commentText; }
     public void setCommentText(String commentText) { this.commentText = commentText; }
@@ -44,14 +40,7 @@ public class ReviewComment {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-    
 
-    public String getProfileImage() {
-        return profileImage;
-    }
-
-    public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
-    }
-    
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
 }

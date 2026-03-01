@@ -926,7 +926,7 @@
                 if (!Array.isArray(data) || data.length === 0) { listContainer.innerHTML = '<div style="text-align:center; color:#888; padding: 10px;">Sin comentarios.</div>'; return; }
                 
                 data.forEach(comment => {
-                    appendCommentToDOM(reviewId, comment.idComment, comment.idUsuario, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
+                    appendCommentToDOM(reviewId, comment.commentId, comment.userId, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
                 });
             });
     }

@@ -43,8 +43,8 @@ public class CommentService {
         String moviePlot = movie != null ? movie.getSynopsis() : "";
 
         ReviewComment comment = new ReviewComment();
-        comment.setIdUsuario(userId);
-        comment.setIdReview(reviewId);
+        comment.setUserId(userId);
+        comment.setReviewId(reviewId);
         comment.setCommentText(commentText.trim());
         comment.setModerationStatus(ModerationStatus.PENDING_MODERATION);
 
@@ -59,9 +59,9 @@ public class CommentService {
         if (newText == null || newText.trim().isEmpty()) throw new IllegalArgumentException("El texto no puede estar vacío");
 
         ReviewComment comment = commentRepository.findById(commentId);
-        if (comment == null || comment.getIdUsuario() != userId) throw new IllegalArgumentException("No tienes permiso para editar este comentario");
+        if (comment == null || comment.getUserId() != userId) throw new IllegalArgumentException("No tienes permiso para editar este comentario");
 
-        Review review = reviewRepository.findOne(comment.getIdReview());
+        Review review = reviewRepository.findOne(comment.getReviewId());
         Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
@@ -74,7 +74,7 @@ public class CommentService {
     // NUEVO: Eliminar propio comentario
     public void deleteOwnComment(int userId, int commentId) {
         ReviewComment comment = commentRepository.findById(commentId);
-        if (comment != null && comment.getIdUsuario() == userId) {
+        if (comment != null && comment.getUserId() == userId) {
             commentRepository.delete(commentId);
         } else {
             throw new IllegalArgumentException("No tienes permiso para eliminar este comentario");
@@ -94,9 +94,9 @@ public class CommentService {
             }
 
             if (isEdit) {
-                commentRepository.updateTextAndStatus(comment.getIdComment(), text, status, result.getReason());
+                commentRepository.updateTextAndStatus(comment.getCommentId(), text, status, result.getReason());
             } else {
-                commentRepository.updateModerationStatus(comment.getIdComment(), status, result.getReason());
+                commentRepository.updateModerationStatus(comment.getCommentId(), status, result.getReason());
             }
             comment.setModerationStatus(ModerationStatus.fromString(status));
             comment.setModerationReason(result.getReason());
