@@ -48,7 +48,7 @@ public class GenreServlet extends HttpServlet {
                 request.getRequestDispatcher("/genreCrud.jsp").forward(request, response);
                 break;
             case "mostrarFormEditar":
-            	int idEditar = parseIntParam(request.getParameter("id"), "ID");
+                int idEditar = parseIntParam(request.getParameter("id"), "ID");
                 Genre genre = genreController.getGenreById(idEditar);
                 request.setAttribute("genre", genre);
                 request.getRequestDispatcher("/genreForm.jsp").forward(request, response);
@@ -56,73 +56,64 @@ public class GenreServlet extends HttpServlet {
             case "mostrarFormCrear":
                 request.getRequestDispatcher("/genreForm.jsp").forward(request, response);
                 break;
+            default:
+                throw ErrorFactory.badRequest("Acción inválida");
         }
     }
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String accion = request.getParameter("accion");
-        
-        String jspTarget = "/genreForm.jsp";
-        Genre genreFromForm = null;
-        
-        try {
-            switch (accion) {
-                case "crear":
-                    genreFromForm = new Genre();
-                    populateGenreFromRequest(genreFromForm, request);
+        if (accion == null) throw ErrorFactory.badRequest("Acción requerida");
 
-                    // NUEVO: Validar
-                    Set<ConstraintViolation<Genre>> violationsCreate = validator.validate(genreFromForm);
-                    if (!violationsCreate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsCreate));
-                        request.setAttribute("genre", genreFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-                    
-                    genreController.createGenre(genreFromForm);
-                    break;
-                    
-                case "actualizar":
-                    genreFromForm = new Genre();
-                    genreFromForm.setGenreId(parseIntParam(request.getParameter("id"), "ID"));
-                    populateGenreFromRequest(genreFromForm, request);
-
-                    Set<ConstraintViolation<Genre>> violationsUpdate = validator.validate(genreFromForm);
-                    if (!violationsUpdate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsUpdate));
-                        request.setAttribute("genre", genreFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-                    genreController.modifyGenre(genreFromForm);
-                    break;
-                    
-                case "eliminar":
-                    int idEliminar = parseIntParam(request.getParameter("id"), "ID");
-                    Genre deleteGenre = new Genre();
-                    deleteGenre.setGenreId(idEliminar);
-                    genreController.removeGenre(deleteGenre);
-                    break;
-            }
+        if ("eliminar".equals(accion)) {
+            int idEliminar = parseIntParam(request.getParameter("id"), "ID");
+            Genre deleteGenre = new Genre();
+            deleteGenre.setGenreId(idEliminar);
+            genreController.removeGenre(deleteGenre);
             
             response.sendRedirect(request.getContextPath() + "/genres?accion=listar&exito=true");
+            return;
+        }
+        
+        String jspTarget = "/genreForm.jsp";
+        Genre genreFromForm = new Genre();
+        
+        try {
+            if ("crear".equals(accion)) {
+                populateGenreFromRequest(genreFromForm, request);
 
+                Set<ConstraintViolation<Genre>> violationsCreate = validator.validate(genreFromForm);
+                if (!violationsCreate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsCreate));
+                    request.setAttribute("genre", genreFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }  
+                genreController.createGenre(genreFromForm);
+            } else if ("actualizar".equals(accion)) {
+                genreFromForm.setGenreId(parseIntParam(request.getParameter("id"), "ID"));
+                populateGenreFromRequest(genreFromForm, request);
+                Set<ConstraintViolation<Genre>> violationsUpdate = validator.validate(genreFromForm);
+                if (!violationsUpdate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsUpdate));
+                    request.setAttribute("genre", genreFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }
+                genreController.modifyGenre(genreFromForm); 
+            } else {
+                throw ErrorFactory.badRequest("Acción desconocida");
+            }  
+            response.sendRedirect(request.getContextPath() + "/genres?accion=listar&exito=true");
         } catch (AppException e) {
-            if (e.getErrorType().equals("DUPLICATE_ERROR")) {
+            if (e.getErrorType().equals("DUPLICATE_ERROR") || e.getErrorType().equals("VALIDATION_ERROR")) {
                 request.setAttribute("appError", e.getMessage());
                 request.setAttribute("genre", genreFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
             } else {
                 throw e;
             }
-        
-        } catch (Exception e) {
-            Set<String> errors = Set.of(e.getMessage());
-            request.setAttribute("errors", errors);
-            request.setAttribute("genre", genreFromForm); 
-            request.getRequestDispatcher(jspTarget).forward(request, response);
         }
     }
     
