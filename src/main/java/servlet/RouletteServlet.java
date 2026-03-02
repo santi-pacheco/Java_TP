@@ -23,6 +23,7 @@ import repository.FollowRepository;
 import service.UserService;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import exception.ErrorFactory;
 
 @WebServlet("/roulette")
 public class RouletteServlet extends HttpServlet {
@@ -50,28 +51,26 @@ public class RouletteServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        User user = (User) session.getAttribute("usuarioLogueado");
-        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getUserId());
         
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("usuarioLogueado");
+        List<String> movieIds = watchlistController.getMoviesInWatchlist(user.getUserId());    
         if (movieIds.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/watchlist");
             return;
         }
-        
         List<Movie> movies = new ArrayList<>();
         for (String idStr : movieIds) {
             try {
                 Movie movie = movieController.getMovieById(Integer.parseInt(idStr));
                 if (movie != null) movies.add(movie);
             } catch (Exception e) {
-                System.err.println("Error loading movie: " + idStr);
+                System.err.println("Error loading movie para ruleta: " + idStr);
             }
+        }
+
+        if (movies.isEmpty()) {
+            throw ErrorFactory.internal("No se pudieron cargar las películas de tu watchlist en este momento.");
         }
         
         Random random = new Random(System.nanoTime());
@@ -81,8 +80,6 @@ public class RouletteServlet extends HttpServlet {
         double degreesPerSlice = 360.0 / movies.size();
         double maxOffset = degreesPerSlice * 0.3;
         double randomOffset = -maxOffset + (random.nextDouble() * (maxOffset * 2));
-        
-        System.out.println("Roulette - Total movies: " + movies.size() + ", Selected index: " + selectedIndex + ", Movie: " + selectedMovie.getTitle() + ", Extra spins: " + extraSpins + ", DegreesPerSlice: " + degreesPerSlice + ", Offset: " + randomOffset + ", Max offset: " + maxOffset);
         
         request.setAttribute("movies", movies);
         request.setAttribute("selectedMovie", selectedMovie);

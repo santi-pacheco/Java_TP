@@ -11,7 +11,8 @@ import entity.User;
 import service.UserService;
 import repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
+import exception.ErrorFactory;
+import exception.AppException;
 import repository.BlockRepository;
 import repository.FollowRepository;
 
@@ -33,31 +34,37 @@ public class PlatoPrincipalServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+       
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
         User loggedUser = (User) session.getAttribute("usuarioLogueado");
         String action = request.getParameter("action");
-
         try {
             if ("set".equals(action)) {
-                int movieId = Integer.parseInt(request.getParameter("movieId"));
+                String movieIdStr = request.getParameter("movieId");
+                if (movieIdStr == null || movieIdStr.isEmpty()) throw ErrorFactory.badRequest("ID de película requerido.");
+                
+                int movieId = Integer.parseInt(movieIdStr);
                 userService.updatePlatoPrincipal(loggedUser.getUserId(), movieId);
                 loggedUser.setMainDishMovieId(movieId);
+                session.setAttribute("flashMessage", "¡Plato principal actualizado!");
+                session.setAttribute("flashType", "success");
+                
             } else if ("remove".equals(action)) {
                 userService.updatePlatoPrincipal(loggedUser.getUserId(), null);
                 loggedUser.setMainDishMovieId(null);
+                session.setAttribute("flashMessage", "Plato principal removido.");
+                session.setAttribute("flashType", "info");
+            } else {
+                throw ErrorFactory.badRequest("Acción no válida.");
             }
-            
             session.setAttribute("usuarioLogueado", loggedUser);
-            response.sendRedirect(request.getContextPath() + "/profile");
-            
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/profile?error=true");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + loggedUser.getUserId());
+        } catch (NumberFormatException e) {
+            throw ErrorFactory.badRequest("El ID de la película debe ser un número entero.");
+        } catch (AppException e) {
+            session.setAttribute("flashMessage", "⚠️ " + e.getMessage());
+            session.setAttribute("flashType", "danger");
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + loggedUser.getUserId());
         }
     }
 }

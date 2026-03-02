@@ -27,34 +27,13 @@ public class SearchApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private MovieController movieController;
-    private Gson gson;
     
     @Override
     public void init() throws ServletException {
         super.init();
-        try {
-            MovieRepository movieRepository = new MovieRepository();
-            MovieService movieService = new MovieService(movieRepository);
-            this.movieController = new MovieController(movieService);
-            
-            this.gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
-                    @Override
-                    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
-                        return new JsonPrimitive(src.toString());
-                    }
-                })
-                .registerTypeAdapter(Time.class, new JsonSerializer<Time>() {
-                    @Override
-                    public JsonElement serialize(Time src, Type typeOfSrc, JsonSerializationContext context) {
-                        return new JsonPrimitive(src.toString());
-                    }
-                })
-                .create();
-                
-        } catch (Exception e) {
-            throw new ServletException("Failed to initialize SearchApiServlet", e);
-        }
+        MovieRepository movieRepository = new MovieRepository();
+        MovieService movieService = new MovieService(movieRepository);
+        this.movieController = new MovieController(movieService);
     }
     
     @Override
@@ -62,22 +41,13 @@ public class SearchApiServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String query = request.getParameter("q");
-        
-        response.setContentType("application/json;charset=UTF-8");
-        
+
         if (query == null || query.trim().isEmpty()) {
-            response.getWriter().write("[]");
+            response.sendRedirect(request.getContextPath() + "/");
             return;
         }
-        
-        try {
-            List<Movie> movies = movieController.searchMoviesByName(query);
-            String json = gson.toJson(movies);
-            response.getWriter().write(json);
-        } catch (Exception e) {
-            System.err.println("Error en SearchApiServlet: " + e.getMessage()); 
-            e.printStackTrace();
-            response.getWriter().write("[]");
-        }
+        List<Movie> movies = movieController.searchMoviesByName(query);
+        request.setAttribute("movies", movies);
+        request.getRequestDispatcher("/WEB-INF/search-results.jsp").forward(request, response);
     }
 }

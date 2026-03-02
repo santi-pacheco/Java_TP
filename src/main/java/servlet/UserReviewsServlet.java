@@ -28,11 +28,14 @@ import service.MovieService;
 import service.SystemSettingsService;
 
 public class UserReviewsServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    
     private ReviewService reviewService;
     private MovieService movieService;
 
     @Override
     public void init() throws ServletException {
+        super.init();
         ReviewRepository reviewRepository = new ReviewRepository();
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
@@ -49,15 +52,10 @@ public class UserReviewsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
 
-        User user = (User) session.getAttribute("usuarioLogueado");
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("usuarioLogueado"); 
         List<Review> reviews = reviewService.getReviewsByUser(user.getUserId());
-        
         Map<Integer, Movie> moviesMap = reviews.stream()
             .map(Review::getMovieId)
             .distinct()
@@ -65,7 +63,6 @@ public class UserReviewsServlet extends HttpServlet {
                 movieId -> movieId,
                 movieId -> movieService.getMovieById(movieId)
             ));
-        
         request.setAttribute("reviews", reviews);
         request.setAttribute("moviesMap", moviesMap);
         request.getRequestDispatcher("/WEB-INF/views/userReviews.jsp").forward(request, response);

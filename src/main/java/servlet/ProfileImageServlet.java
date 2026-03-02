@@ -191,19 +191,15 @@ public class ProfileImageServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());
 
         } catch (AppException e) {
-            e.printStackTrace();
             request.getSession().setAttribute("flashMessage", e.getMessage());
             request.getSession().setAttribute("flashType", "danger");
-            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());
-        } catch (Exception e) {
-            e.printStackTrace();
-            String msg = "Ocurrió un error inesperado.";
-            if (e instanceof IllegalStateException) {
-                msg = "El archivo es demasiado grande (Máx 10MB).";
-            }
-            request.getSession().setAttribute("flashMessage", msg);
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());   
+        } catch (IllegalStateException e) {
+            request.getSession().setAttribute("flashMessage", "El archivo es demasiado grande (Máx 10MB).");
             request.getSession().setAttribute("flashType", "danger");
-            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId()); 
+        } catch (Exception e) {
+            throw new ServletException("Error crítico procesando la imagen de perfil", e);
         }
     }
     

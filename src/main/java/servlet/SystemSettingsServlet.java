@@ -33,27 +33,25 @@ public class SystemSettingsServlet extends HttpServlet {
         SystemSettingsRepository repository = new SystemSettingsRepository();
         SystemSettingsService service = new SystemSettingsService(repository);
         this.controller = new SystemSettingsController(service);
-
         ServletContext context = getServletContext();
         this.validator = (Validator) context.getAttribute("miValidador");
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<SystemSettings> configuraciones = controller.getAllSystemSettings();
         request.setAttribute("configuraciones", configuraciones);
         request.getRequestDispatcher("/WEB-INF/views/system-settings/SystemSettingsCRUD.jsp").forward(request, response);
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String jspTarget = "/WEB-INF/views/system-settings/SystemSettingsCRUD.jsp";
-        SystemSettings configFromForm = null;
-
+        SystemSettings configFromForm = new SystemSettings();
         try {
-            configFromForm = new SystemSettings();
             populateConfigFromRequest(configFromForm, request);
             Set<ConstraintViolation<SystemSettings>> violations = validator.validate(configFromForm);
-
             if (!violations.isEmpty()) {
                 request.setAttribute("errors", getErrorMessages(violations));
                 request.setAttribute("configForm", configFromForm);
@@ -63,38 +61,29 @@ public class SystemSettingsServlet extends HttpServlet {
             }
             controller.addSystemSettings(configFromForm);
             response.sendRedirect(request.getContextPath() + "/system-settings?exito=true");
-
         } catch (AppException e) {
-            Set<String> errors = Set.of(e.getMessage());
-            request.setAttribute("errors", errors);
-            request.setAttribute("configForm", configFromForm);
-            request.setAttribute("configuraciones", controller.getAllSystemSettings());
-            request.getRequestDispatcher(jspTarget).forward(request, response);
-
-        } catch (Exception e) {
-            System.err.println("Error no esperado en SystemSettingsServlet: " + e.getMessage());
-            throw e;
+            if (e.getErrorType().equals("VALIDATION_ERROR") || e.getErrorType().equals("DUPLICATE_ERROR")) {
+                Set<String> errors = Set.of(e.getMessage());
+                request.setAttribute("errors", errors);
+                request.setAttribute("configForm", configFromForm);
+                request.setAttribute("configuraciones", controller.getAllSystemSettings());
+                request.getRequestDispatcher(jspTarget).forward(request, response);
+            } else {
+                throw e;
+            }
         }
     }
 
     private void populateConfigFromRequest(SystemSettings config, HttpServletRequest request) {
-
         config.setKcalsToLevel2(parseIntParam(request.getParameter("kcalsToLevel2"), "Umbral Nivel 2"));
         config.setKcalsToLevel3(parseIntParam(request.getParameter("kcalsToLevel3"), "Umbral Nivel 3"));
         config.setKcalsToLevel4(parseIntParam(request.getParameter("kcalsToLevel4"), "Umbral Nivel 4"));
         config.setNormalWatchlistLimit(parseIntParam(request.getParameter("normalWatchlistLimit"), "Límite Watchlist Normal"));
         config.setActiveWatchlistLimit(parseIntParam(request.getParameter("activeWatchlistLimit"), "Límite Watchlist Activo"));
-
         HttpSession session = request.getSession(false);
-
-        if (session != null && session.getAttribute("usuarioLogueado") != null) {
-            User user = (User) session.getAttribute("usuarioLogueado");
-            config.setAdminUserId(user.getUserId());
-        } else {
-            config.setAdminUserId(null);
-        }
+        User user = (User) session.getAttribute("usuarioLogueado");
+        config.setAdminUserId(user.getUserId());
     }
-
     private int parseIntParam(String param, String fieldName) {
         if (param == null || param.isEmpty()) {
              throw ErrorFactory.validation("El campo '" + fieldName + "' no puede estar vacío.");
@@ -105,7 +94,6 @@ public class SystemSettingsServlet extends HttpServlet {
             throw ErrorFactory.validation("El campo '" + fieldName + "' debe ser un número entero.");
         }
     }
-
     private Set<String> getErrorMessages(Set<ConstraintViolation<SystemSettings>> violations) {
         return violations.stream()
                 .map(ConstraintViolation::getMessage)

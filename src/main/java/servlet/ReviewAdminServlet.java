@@ -2,8 +2,10 @@ package servlet;
 
 import java.io.IOException;
 import repository.BlockRepository;
-import java.sql.SQLException;
 import java.util.List;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,10 +15,17 @@ import controller.ReviewController;
 import entity.ModerationStatus;
 import entity.Review;
 import repository.ReviewRepository;
+import repository.SystemSettingsRepository;
+import repository.UserRepository;
 import repository.WatchlistRepository;
+import service.MovieService;
 import service.ReviewService;
+import service.SystemSettingsService;
+import service.UserService;
 import service.WatchlistService;
 import repository.FollowRepository;
+import repository.MovieRepository;
+import exception.ErrorFactory;
 
 @WebServlet("/reviews-admin")
 public class ReviewAdminServlet extends HttpServlet {
@@ -28,15 +37,15 @@ public class ReviewAdminServlet extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 		this.reviewRepository = new ReviewRepository();
-		repository.UserRepository userRepository = new repository.UserRepository();
-		repository.MovieRepository movieRepository = new repository.MovieRepository();
-		repository.SystemSettingsRepository configRepository = new repository.SystemSettingsRepository();
+		UserRepository userRepository = new UserRepository();
+		MovieRepository movieRepository = new MovieRepository();
+		SystemSettingsRepository configRepository = new SystemSettingsRepository();
 		FollowRepository followRepository = new FollowRepository();
 		BlockRepository blockRepository = new BlockRepository();
-		org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-		service.UserService userService = new service.UserService(userRepository, passwordEncoder, followRepository, blockRepository);
-		service.MovieService movieService = new service.MovieService(movieRepository);
-		service.SystemSettingsService configService = new service.SystemSettingsService(configRepository);
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
+		MovieService movieService = new MovieService(movieRepository);
+		SystemSettingsService configService = new SystemSettingsService(configRepository);
 		WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
 		ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configService, watchlistService);
@@ -46,82 +55,75 @@ public class ReviewAdminServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    String accion = request.getParameter("accion");
-	    if (accion == null) accion = "listar";
-	    
-	    try {
-	        switch (accion) {
-	            case "listar":
-	                String statusParam = request.getParameter("status");
-	                List<Review> reviews;
-	                
-	                if (statusParam != null && !statusParam.isEmpty()) {
-	                    try {
-	                        // Validar que el status exista
-	                        ModerationStatus status = ModerationStatus.fromString(statusParam);
-	                        reviews = reviewRepository.getReviewsByModerationStatus(status);
-	                    } catch (IllegalArgumentException e) {
-	                        reviews = reviewController.getAllReviews();
-	                        request.setAttribute("error", "Estado de filtro inválido: " + statusParam);
-	                    }
-	                } else {
-	                    reviews = reviewController.getAllReviews();
-	                }
-	                
-	                request.setAttribute("reviews", reviews);
-	                request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
-	                break;
-	                
-	            case "detalle":
-	                String idStr = request.getParameter("id");
-	                if (idStr != null && !idStr.isEmpty()) {
-	                    int idDetalle = Integer.parseInt(idStr);
-	                    Review review = reviewController.getReviewById(idDetalle);
-	                    request.setAttribute("review", review);
-	                    request.getRequestDispatcher("/reviewDetail.jsp").forward(request, response);
-	                } else {
-	                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de reseña faltante");
-	                }
-	                break;
-	            default:
-	                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción desconocida");
-	                break;
-	        }
-	    } catch (Exception e) {
-	        throw new ServletException("Error al procesar la solicitud: " + e.getMessage(), e);
-	    }
+	    if (accion == null) accion = "listar";  
+        switch (accion) {
+            case "listar":
+                String statusParam = request.getParameter("status");
+                List<Review> reviews;  
+                if (statusParam != null && !statusParam.isEmpty()) {
+                    try {
+                        ModerationStatus status = ModerationStatus.fromString(statusParam);
+                        reviews = reviewRepository.getReviewsByModerationStatus(status);
+                    } catch (IllegalArgumentException e) {
+                        reviews = reviewController.getAllReviews();
+                        request.setAttribute("error", "Estado de filtro inválido: " + statusParam);
+                    }
+                } else {
+                    reviews = reviewController.getAllReviews();
+                }         
+                request.setAttribute("reviews", reviews);
+                request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
+                break;
+            case "detalle":
+                String idStr = request.getParameter("id");
+                if (idStr == null || idStr.isEmpty()) {
+                    throw ErrorFactory.badRequest("ID de reseña faltante");
+                }
+                try {
+                    int idDetalle = Integer.parseInt(idStr);
+                    Review review = reviewController.getReviewById(idDetalle);
+                    if (review == null) throw ErrorFactory.notFound("La reseña solicitada no existe.");
+                    
+                    request.setAttribute("review", review);
+                    request.getRequestDispatcher("/reviewDetail.jsp").forward(request, response);
+                } catch (NumberFormatException e) {
+                    throw ErrorFactory.badRequest("El ID de la reseña debe ser un número.");
+                }
+                break;  
+            default:
+                throw ErrorFactory.badRequest("Acción desconocida");
+        }
 	}
-	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    String accion = request.getParameter("accion");
+        if (accion == null) throw ErrorFactory.badRequest("Acción requerida");
 	    
 	    if ("actualizarModeracion".equals(accion)) {
 	    	try {
-	        int reviewId = Integer.parseInt(request.getParameter("id"));
-	        String statusStr = request.getParameter("status");
-	        String reason = request.getParameter("reason");
-	       
-	        if (statusStr == null || statusStr.isBlank()) {
-	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el parámetro status");
-	            return;
-	        }
-	        
-	        ModerationStatus status = ModerationStatus.fromString(statusStr);
-	        
-	        if (status == ModerationStatus.REJECTED && (reason == null || reason.trim().isEmpty())) {
-	            request.setAttribute("error", "Debes escribir una razón para rechazar la reseña.");
-	            request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
-	            return; 
-	        }
-	        reviewController.updateModerationStatus(reviewId, status, reason);
-	        response.sendRedirect(request.getContextPath() + "/reviews-admin?accion=listar&exito=true");
-	       } catch (IllegalArgumentException e) {
-	           response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Status inválido: " + e.getMessage());
-	       } catch (Exception e) {
-	           response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error procesando solicitud");
-	       }
-	    	   	        
-	       }
-	    }
-	}
+                int reviewId = Integer.parseInt(request.getParameter("id"));
+                String statusStr = request.getParameter("status");
+                String reason = request.getParameter("reason");
+                if (statusStr == null || statusStr.isBlank()) {
+                    throw ErrorFactory.badRequest("Falta el parámetro status");
+                }     
+                ModerationStatus status = ModerationStatus.fromString(statusStr);
+                if (status == ModerationStatus.REJECTED && (reason == null || reason.trim().isEmpty())) {
+                    request.setAttribute("error", "Debes escribir una razón para rechazar la reseña.");
+                    request.setAttribute("reviews", reviewController.getAllReviews()); 
+                    request.getRequestDispatcher("/reviewAdminCrud.jsp").forward(request, response);
+                    return; 
+                }
+                reviewController.updateModerationStatus(reviewId, status, reason);
+                response.sendRedirect(request.getContextPath() + "/reviews-admin?accion=listar&exito=true");
 
+            } catch (NumberFormatException e) {
+                throw ErrorFactory.badRequest("El ID proporcionado es inválido.");
+            } catch (IllegalArgumentException e) {
+                throw ErrorFactory.badRequest("Status de moderación inválido.");
+            }
+	    } else {
+            throw ErrorFactory.badRequest("Acción desconocida");
+        }
+	}
+}

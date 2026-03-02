@@ -28,6 +28,7 @@ import controller.UserController;
 import entity.Review;
 import entity.User;
 import repository.ReviewRepository;
+import repository.SystemSettingsRepository;
 import repository.UserRepository;
 import repository.WatchlistRepository;
 import repository.MovieRepository;
@@ -62,9 +63,8 @@ public class ReviewServlet extends HttpServlet {
         ReviewRepository reviewRepository = new ReviewRepository();
         UserRepository userRepository = new UserRepository();
         MovieRepository movieRepository = new MovieRepository();
-        repository.SystemSettingsRepository configuracionRepository = new repository.SystemSettingsRepository();
+        SystemSettingsRepository configuracionRepository = new SystemSettingsRepository();
 
-        // Inicializar servicios
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
         BlockRepository blockRepository = new BlockRepository();
@@ -75,15 +75,12 @@ public class ReviewServlet extends HttpServlet {
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
         
-        // Inicializar controller
         this.userController = new UserController(userService);
         this.reviewController = new ReviewController(reviewService);
-        
-        // Inicializar validador
+
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         this.validator = factory.getValidator();
-        
-        // Inicializar Gson con formato de fecha
+
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
                     @Override
@@ -101,7 +98,6 @@ public class ReviewServlet extends HttpServlet {
                 .create();
     }
     
- // Método helper para obtener usuario logueado
     private User getLoggedUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("usuarioLogueado") == null) {

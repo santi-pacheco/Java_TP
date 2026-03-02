@@ -14,6 +14,8 @@ import controller.UserController;
 import repository.FollowRepository;
 import repository.UserRepository;
 import service.UserService;
+import exception.AppException;
+import exception.ErrorFactory;
 
 @WebServlet("/reset-password")
 public class ResetPasswordServlet extends HttpServlet {
@@ -48,26 +50,19 @@ public class ResetPasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         String token = request.getParameter("token");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword"); 
-
-        if (password == null || !password.equals(confirmPassword)) {
-            request.setAttribute("error", "Las contraseñas no coinciden.");
-            request.setAttribute("token", token);
-            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);
-            return;
-        }
-
         try {
+            if (password == null || !password.equals(confirmPassword)) {
+                throw ErrorFactory.validation("Las contraseñas no coinciden.");
+            }
             userController.resetPasswordWithToken(token, password);
             response.sendRedirect(request.getContextPath() + "/login?success=password_reset");
-
-        } catch (Exception e) {
-            request.setAttribute("error", "Error al cambiar la contraseña. El enlace pudo haber expirado.");
+        } catch (AppException e) {
+            request.setAttribute("error", e.getMessage());
             request.setAttribute("token", token);
-            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);     
         }
     }
 }

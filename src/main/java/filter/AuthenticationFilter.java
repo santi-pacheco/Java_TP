@@ -25,7 +25,7 @@ public class AuthenticationFilter implements Filter {
         
         boolean isLoginServlet = requestURI.endsWith("/login");
         boolean isRegisterServlet = requestURI.endsWith("/register");
-        boolean isLandingServlet = requestURI.endsWith("/landing");
+        boolean isLandingServlet = requestURI.endsWith("/home") || requestURI.endsWith("/landing");
         boolean isForgotPasswordServlet = requestURI.endsWith("/forgot-password");
         boolean isResetPasswordServlet = requestURI.endsWith("/reset-password");
         boolean isPublicResource = requestURI.startsWith(httpRequest.getContextPath() + "/css/") ||
@@ -51,6 +51,7 @@ public class AuthenticationFilter implements Filter {
                               requestURI.contains("/users") ||
                               requestURI.contains("/reviews-admin") ||
                               requestURI.contains("/system-settings") ||
+                              requestURI.contains("/data-load") ||
                               requestURI.contains("/admin/data-load");;
         
         String acceptHeader = httpRequest.getHeader("Accept");

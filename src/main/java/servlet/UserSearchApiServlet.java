@@ -14,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import controller.UserController;
 import entity.User;
@@ -29,6 +30,7 @@ public class UserSearchApiServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        super.init();
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
@@ -42,42 +44,30 @@ public class UserSearchApiServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String query = request.getParameter("q");
-        
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-
-        jakarta.servlet.http.HttpSession session = request.getSession(false);
-        entity.User loggedUser = (session != null) ? (entity.User) session.getAttribute("usuarioLogueado") : null;
+        HttpSession session = request.getSession(false);
+        User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
         int loggedUserId = (loggedUser != null) ? loggedUser.getUserId() : -1;
         
-        if (query == null || query.trim().length() < 1) {
+        if (query == null || query.trim().isEmpty()) {
             out.print("[]");
             out.flush();
             return;
         }
+        List<User> foundUsers = userController.searchUsers(query.trim(), loggedUserId);
 
-        try {
-            List<User> foundUsers = userController.searchUsers(query.trim(), loggedUserId);
-
-            JsonArray jsonArray = new JsonArray();
-            for (User u : foundUsers) {
-                JsonObject userJson = new JsonObject();
-                userJson.addProperty("id", u.getUserId());
-                userJson.addProperty("username", u.getUsername());
-                userJson.addProperty("profileImage", u.getProfileImage() != null ? u.getProfileImage() : "");
-                userJson.addProperty("userLevel", u.getUserLevel()); 
-                jsonArray.add(userJson);
-            }
-
-            out.print(new Gson().toJson(jsonArray));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.print("[]");
-        } finally {
-            out.flush();
+        JsonArray jsonArray = new JsonArray();
+        for (User u : foundUsers) {
+            JsonObject userJson = new JsonObject();
+            userJson.addProperty("id", u.getUserId());
+            userJson.addProperty("username", u.getUsername());
+            userJson.addProperty("profileImage", u.getProfileImage() != null ? u.getProfileImage() : "");
+            userJson.addProperty("userLevel", u.getUserLevel()); 
+            jsonArray.add(userJson);
         }
+        out.print(new Gson().toJson(jsonArray));
+        out.flush();
     }
 }

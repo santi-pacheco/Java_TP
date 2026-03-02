@@ -17,17 +17,11 @@ public class AdminServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         User user = (User) session.getAttribute("usuarioLogueado");
         if (!"admin".equals(user.getRole())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso denegado");
             return;
         }
-
         response.sendRedirect(request.getContextPath() + "/index.html");
     }
 }

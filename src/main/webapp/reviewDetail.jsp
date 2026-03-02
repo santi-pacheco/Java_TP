@@ -166,7 +166,7 @@
 
     async function fetchLikes() {
         try {
-            const response = await fetch(`${contextPath}/likes?reviewId=${reviewId}`);
+            const response = await fetch(`\${contextPath}/likes?reviewId=\${reviewId}`);
             const data = await response.json();
             if (response.ok) {
                 updateLikeState(data.likes, data.userHasLiked);
@@ -178,7 +178,7 @@
 
     async function fetchComments() {
         try {
-            const response = await fetch(`${contextPath}/comments?reviewId=${reviewId}`);
+            const response = await fetch(`\${contextPath}/comments?reviewId=\${reviewId}`);
             const comments = await response.json();
             if (response.ok) {
                 const commentsList = document.getElementById('commentsList');
@@ -187,9 +187,9 @@
                     const commentEl = document.createElement('div');
                     commentEl.className = 'comment';
                     commentEl.innerHTML = `
-                        <p class="comment-author">${comment.username || 'Usuario'}</p>
-                        <p class="comment-text">${comment.comment_text}</p>
-                        <small class="comment-date">${new Date(comment.created_at).toLocaleString()}</small>
+                        <p class="comment-author">\${comment.username || 'Usuario'}</p>
+                        <p class="comment-text">\${comment.comment_text}</p>
+                        <small class="comment-date">\${new Date(comment.created_at).toLocaleString()}</small>
                     `;
                     commentsList.appendChild(commentEl);
                 });
@@ -200,7 +200,7 @@
     }
 
     function updateLikeState(likeCount, userHasLiked) {
-        document.getElementById('likeCount').textContent = `${likeCount} Likes`;
+        document.getElementById('likeCount').textContent = `\${likeCount} Likes`;
         const likeBtn = document.getElementById('likeBtn');
         const likeBtnText = document.getElementById('likeBtnText');
         if (userHasLiked) {
@@ -214,11 +214,11 @@
 
     async function toggleLike() {
         if (!userId) {
-            window.location.href = `${contextPath}/login`;
+            window.location.href = `\${contextPath}/login`;
             return;
         }
         try {
-            const response = await fetch(`${contextPath}/likes`, {
+            const response = await fetch(`\${contextPath}/likes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reviewId: reviewId, userId: userId })
@@ -241,7 +241,7 @@
             return;
         }
         try {
-            const response = await fetch(`${contextPath}/comments`, {
+            const response = await fetch(`\${contextPath}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
