@@ -27,7 +27,7 @@ public class BlockRepository {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            if (e.getErrorCode() != 1062) {
+            if (e.getErrorCode() != 1062) { 
                 throw ErrorFactory.internal("Error al bloquear al usuario en la base de datos.");
             }
         }
@@ -56,6 +56,7 @@ public class BlockRepository {
             
             stmt.setInt(1, blockerId);
             stmt.setInt(2, blockedId);
+            
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next();
             }
@@ -73,7 +74,9 @@ public class BlockRepository {
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
             stmt.setInt(1, blockerId);
+            
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     User user = new User();

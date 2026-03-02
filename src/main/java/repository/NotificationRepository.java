@@ -97,7 +97,6 @@ public class NotificationRepository {
                     notif.setMovieTitle(rs.getString("movie_title"));
                     notif.setCommentText(rs.getString("comment_text"));
                     notif.setExtraCount(rs.getInt("extra_count"));
-
                     notif.setUserLevel(rs.getInt("user_level"));
 
                     java.sql.Timestamp fechaTs = rs.getTimestamp("fecha");
@@ -116,8 +115,7 @@ public class NotificationRepository {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error ejecutando UNION de notificaciones: " + e.getMessage());
-            throw ErrorFactory.internal("Error fetching notifications");
+            throw ErrorFactory.internal("Error obteniendo el listado de notificaciones.");
         }
 
         return notifications;
