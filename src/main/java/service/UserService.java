@@ -67,22 +67,12 @@ User existingUser = userRepository.findOne(user.getUserId());
     
     public User authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-
         if (user == null) {
             throw ErrorFactory.unauthorized("Invalid username or password");
         }
-
-	    // --- 3. Validar la contraseña ---
-	    // Usamos el passwordEncoder (como en createUser) para comparar
-	    // la clave plana (password) con la hasheada (user.getPassword())
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-	        // ERROR RECUPERABLE (401)
-	        // Usamos el *mismo* mensaje para no dar pistas
 			throw ErrorFactory.unauthorized("Invalid username or password");
 		}
-	    // --- 4. ÉXITO: Preparar el retorno ---
-	    // Siguiendo el patrón de getUserById, quitamos la contraseña
-	    // antes de devolver el objeto.
 		user.setPassword(null);	
 		return user;
 	}
