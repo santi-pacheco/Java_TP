@@ -4,15 +4,24 @@ import repository.SystemSettingsRepository;
 import repository.UserRepository;
 import entity.SystemSettings;
 import entity.User;
+import exception.ErrorFactory;
 
 import java.util.List;
 
 public class SystemSettingsService {
 
-    private SystemSettingsRepository systemSettingsRepository;
+    private final SystemSettingsRepository systemSettingsRepository;
+    private final UserRepository userRepository;
+
+    public SystemSettingsService(SystemSettingsRepository systemSettingsRepository, UserRepository userRepository) {
+        this.systemSettingsRepository = systemSettingsRepository;
+        this.userRepository = userRepository;
+    }
+    
 
     public SystemSettingsService(SystemSettingsRepository systemSettingsRepository) {
         this.systemSettingsRepository = systemSettingsRepository;
+        this.userRepository = new UserRepository(); // Fallback temporal para no romper código antiguo
     }
 
     public SystemSettings getSystemSettings() {
@@ -20,6 +29,16 @@ public class SystemSettingsService {
     }
 
     public SystemSettings addSystemSettings(SystemSettings config) {
+        if (config == null) {
+            throw ErrorFactory.badRequest("La configuración no puede ser nula.");
+        }
+        if (config.getNormalWatchlistLimit() <= 0 || config.getActiveWatchlistLimit() <= 0) {
+            throw ErrorFactory.badRequest("Los límites de la watchlist deben ser mayores a 0.");
+        }
+        if (config.getKcalsToLevel2() < 0 || config.getKcalsToLevel3() < 0 || config.getKcalsToLevel4() < 0) {
+            throw ErrorFactory.badRequest("Los requisitos de calorías no pueden ser negativos.");
+        }
+        
         SystemSettings result = systemSettingsRepository.add(config);
         revalidateAllUsers(config);
         return result;
@@ -30,8 +49,9 @@ public class SystemSettingsService {
     }
 
     private void revalidateAllUsers(SystemSettings config) {
-        UserRepository userRepo = new UserRepository();
-        List<User> allUsers = userRepo.findAll();
+        if (config == null) return;
+        
+        List<User> allUsers = userRepository.findAll();
 
         for (User user : allUsers) {
             int kcals = user.getTotalKcals();
@@ -46,7 +66,7 @@ public class SystemSettingsService {
             }
 
             if (user.getUserLevel() != newLevel) {
-                userRepo.updateUserVolume(user.getUserId(), kcals, newLevel);
+                userRepository.updateUserVolume(user.getUserId(), kcals, newLevel);
             }
         }
     }
