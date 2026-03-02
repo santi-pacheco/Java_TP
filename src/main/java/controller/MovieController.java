@@ -92,4 +92,8 @@ public class MovieController {
 		movieService.updateBatchMovies(movies);
 	}
 	
+	public List<Movie> getRandomMovies(int limit) {
+		return movieService.getRandomMovies(limit);
+	}
+	
 }

@@ -172,4 +172,8 @@ public class MovieService {
 		movieRepository.updateBatch(movies);
 	}
 	
+	public List<Movie> getRandomMovies(int limit) {
+		return movieRepository.findRandom(limit);
+	}
+	
 }
