@@ -1,67 +1,74 @@
 package service;
 
-import repository.MovieRepository;
 import repository.WatchlistRepository;
-import java.util.List;
 import entity.Watchlist;
 import exception.ErrorFactory;
-import service.UserService;
 import entity.User;
 import entity.Movie;
-import service.MovieService;
 
 public class WatchlistService {
-	
-	private WatchlistRepository watchlistRepository;
-	private UserService userService;
-	private MovieService movieService;
-	private MovieRepository movieRepository;
-	
-	
-	public WatchlistService(WatchlistRepository watchlistRepository, UserService userService, MovieService movieService) {
-		this.watchlistRepository = watchlistRepository;
-		this.userService = userService;
-		this.movieService = movieService;
-	}
-	
+    
+    private WatchlistRepository watchlistRepository;
+    private UserService userService;
+    private MovieService movieService;
+    
+
+    public WatchlistService(WatchlistRepository watchlistRepository, UserService userService, MovieService movieService) {
+        this.watchlistRepository = watchlistRepository;
+        this.userService = userService;
+        this.movieService = movieService;
+    }
+    
     public Watchlist getWatchlist(int userId) {
-        System.out.println("ID USUARIO EN SERVICE: " + userId);
-
+        if (userId <= 0) {
+            throw ErrorFactory.badRequest("ID de usuario inválido.");
+        }
+        
         User user = userService.getUserById(userId);
-		if (user != null) {
-			Watchlist wl = watchlistRepository.findOne(userId);
-			return wl;
-		} else {
-			throw ErrorFactory.notFound("User with ID " + userId + " does not exist.");
-		}
-		
-	}
-	
-	
-	
-	
-	public void addMovie(int userId, String movieId) {
-		Movie movie = movieService.getMovieById(Integer.parseInt(movieId));
+        if (user != null) {
+            return watchlistRepository.findOne(userId);
+        } else {
+            throw ErrorFactory.notFound("User with ID " + userId + " does not exist.");
+        }
+    }
+    
+    public void addMovie(int userId, String movieId) {
+        if (movieId == null || movieId.trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El ID de la película es inválido.");
+        }
 
-		User user = userService.getUserById(userId);
-		if (user != null && movie != null) {
+        try {
+            int parsedMovieId = Integer.parseInt(movieId);
+            Movie movie = movieService.getMovieById(parsedMovieId);
+            User user = userService.getUserById(userId);
+            
+            if (user != null && movie != null) {
+                watchlistRepository.addMovie(parsedMovieId, userId);
+            } else {
+                throw ErrorFactory.notFound("Usuario o Película no encontrados.");
+            }
+        } catch (NumberFormatException e) {
+            throw ErrorFactory.badRequest("El ID de la película debe ser un número válido.");
+        }
+    }
 
-			Watchlist wl = watchlistRepository.addMovie(Integer.parseInt(movieId), userId);
-
-		} else {
-			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
-		}
-	}
-
-	public void removeMovie(int userId, String movieId) {
-		Movie movie = movieService.getMovieById(Integer.parseInt(movieId));
-		User user = userService.getUserById(userId);
-		if (user != null && movie != null) {
-
-			watchlistRepository.deleteMovie(userId, movieId);
-
-		} else {
-			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
-		}
-	}
+    public void removeMovie(int userId, String movieId) {
+        if (movieId == null || movieId.trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El ID de la película es inválido.");
+        }
+        
+        try {
+            int parsedMovieId = Integer.parseInt(movieId);
+            Movie movie = movieService.getMovieById(parsedMovieId);
+            User user = userService.getUserById(userId);
+            
+            if (user != null && movie != null) {
+                watchlistRepository.deleteMovie(userId, movieId);
+            } else {
+                throw ErrorFactory.notFound("Usuario o Película no encontrados.");
+            }
+        } catch (NumberFormatException e) {
+            throw ErrorFactory.badRequest("El ID de la película debe ser un número válido.");
+        }
+    }
 }
