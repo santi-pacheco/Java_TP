@@ -4,207 +4,208 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import entity.Country;
 import exception.ErrorFactory;
 import util.DataSourceProvider;
-import java.util.Map;
-import java.util.HashMap;
 
 public class CountryRepository {
 
-	public List<Country> findAll() {
-		List<Country> countries = new ArrayList<>();
-		String sql = "SELECT country_id, iso_code, name FROM countries ORDER BY country_id";
+    private static final String BASE_SELECT = "SELECT country_id, iso_code, name FROM countries";
 
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql);
-				ResultSet rs = stmt.executeQuery()) {
+    public List<Country> findAll() {
+        List<Country> countries = new ArrayList<>();
+        String sql = BASE_SELECT + " ORDER BY country_id";
 
-			while (rs.next()) {
-				Country country = new Country();
-				country.setCountryId(rs.getInt("country_id"));
-				country.setName(rs.getString("name"));
-				country.setIsoCode(rs.getString("iso_code"));
-				countries.add(country);
-			}
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error fetching countries from database");
-		}
-		return countries;
-	}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-	public Country findOne(int id) {
-		Country country = null;
-		String sql = "SELECT country_id, iso_code, name FROM countries WHERE country_id = ?";
+            while (rs.next()) {
+                countries.add(mapResultSetToCountry(rs));
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching countries from database");
+        }
+        return countries;
+    }
 
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public Country findOne(int id) {
+        Country country = null;
+        String sql = BASE_SELECT + " WHERE country_id = ?";
 
-			stmt.setInt(1, id);
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					country = new Country();
-					country.setCountryId(rs.getInt("country_id"));
-					country.setName(rs.getString("name"));
-					country.setIsoCode(rs.getString("iso_code"));
-				}
-			}
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error fetching country by ID");
-		}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-		return country;
-	}
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    country = mapResultSetToCountry(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching country by ID");
+        }
+        return country;
+    }
 
-	public int findOneByISO(String iso) {
-		System.out.println("Buscando país por código ISO: " + iso);
-		int idCountry = -1;
-		String sql = "SELECT country_id FROM countries WHERE iso_code = ?";
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public int findOneByISO(String iso) {
+        int idCountry = -1;
+        String sql = "SELECT country_id FROM countries WHERE iso_code = ?";
+        
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-			stmt.setString(1, iso);
+            stmt.setString(1, iso);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    idCountry = rs.getInt("country_id");
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error fetching country by ISO code");
+        }
+        return idCountry;
+    }
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					idCountry = rs.getInt("country_id");
-					System.out.println("ID del país encontrado: " + idCountry);
-				}
-			}
+    public Country add(Country c) {
+        String sql = "INSERT INTO countries (iso_code, name) VALUES (?, ?)";
 
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error fetching country by ISO code");
-		}
-		return idCountry;
-	}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-	public Country add(Country c) {
-		String sql = "INSERT INTO countries (iso_code, name) VALUES (?, ?)";
+            stmt.setString(1, c.getIsoCode());
+            stmt.setString(2, c.getName());
 
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        c.setCountryId(generatedKeys.getInt(1));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) {
+                throw ErrorFactory.duplicate("El país ya existe en la base de datos.");
+            }
+            throw ErrorFactory.internal("Error adding country to database");
+        }
+        return c;
+    }
 
-			stmt.setString(1, c.getIsoCode());
-			stmt.setString(2, c.getName());
+    public Country update(Country c) {
+        String sql = "UPDATE countries SET name = ?, iso_code = ? WHERE country_id = ?";
 
-			int affectedRows = stmt.executeUpdate();
-			if (affectedRows > 0) {
-				try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-					if (generatedKeys.next()) {
-						c.setCountryId(generatedKeys.getInt(1));
-					}
-				}
-			}
-		} catch (SQLException e) {
-			if (e.getErrorCode() == 1062) {
-				throw ErrorFactory.duplicate("Country already exists");
-			} else {
-				throw ErrorFactory.internal("Error adding country to database");
-			}
-		}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-		return c;
-	}
+            stmt.setString(1, c.getName());
+            stmt.setString(2, c.getIsoCode());
+            stmt.setInt(3, c.getCountryId());
 
-	public Country update(Country c) {
-		String sql = "UPDATE countries SET name = ? WHERE country_id = ?";
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) {
+                throw ErrorFactory.duplicate("El código ISO ya está en uso por otro país.");
+            }
+            throw ErrorFactory.internal("Error updating country in database");
+        }
+        return c;
+    }
 
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public Country delete(Country c) {
+        String sql = "DELETE FROM countries WHERE country_id = ?";
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-			stmt.setString(1, c.getName());
-			stmt.setInt(2, c.getCountryId());
+            stmt.setInt(1, c.getCountryId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error deleting country");
+        }
+        return c;
+    }
 
-			int rowsAffected = stmt.executeUpdate();
-			if (rowsAffected == 0) {
-				throw ErrorFactory.internal("No country found with ID: " + c.getCountryId());
-			}
-		} catch (SQLException e) {
-			if (e.getErrorCode() == 1062) {
-				throw ErrorFactory.duplicate("Country already exists");
-			} else {
-				throw ErrorFactory.internal("Error updating country in database");
-			}
-		}
+    public void saveAll(List<Country> countries) {
+        if (countries == null || countries.isEmpty()) return;
+        
+        String sql = "INSERT IGNORE INTO countries (iso_code, name) VALUES (?, ?)";
 
-		return c;
-	}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            for (Country c : countries) {
+                stmt.setString(1, c.getIsoCode());
+                stmt.setString(2, c.getName());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error saving countries in batch");
+        }
+    }
 
-	public Country delete(Country c) {
-		String sql = "DELETE FROM countries WHERE country_id = ?";
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public Map<String, Integer> getMapIds(List<String> isoCodes) {
+        if (isoCodes == null || isoCodes.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        StringBuilder sql = new StringBuilder("SELECT iso_code, country_id FROM countries WHERE iso_code IN (");
+        for (int i = 0; i < isoCodes.size(); i++) {
+            sql.append(i == 0 ? "?" : ", ?");
+        }
+        sql.append(")");
+        
+        Map<String, Integer> map = new HashMap<>();
 
-			stmt.setInt(1, c.getCountryId());
-			stmt.executeUpdate();
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error deleting country");
-		}
-		return c;
-	}
+            for (int i = 0; i < isoCodes.size(); i++) {
+                stmt.setString(i + 1, isoCodes.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getString("iso_code"), rs.getInt("country_id"));
+                }
+            }
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error recuperando mapa de IDs de países");
+        }
+        return map;
+    }
 
-	public void saveAll(List<Country> countries) {
-		String sql = "INSERT IGNORE INTO countries (iso_code, name) VALUES (?, ?)";
+    public void saveBatchRelations(List<Object[]> relations) {
+        if (relations == null || relations.isEmpty()) return;
+        
+        String sql = "INSERT IGNORE INTO movie_countries (movie_id, country_id) VALUES (?, ?)";
 
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
-			for (Country g : countries) {
-				stmt.setString(1, g.getIsoCode());
-				stmt.setString(2, g.getName());
-				stmt.addBatch();
-			}
-			stmt.executeBatch();
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error saving countries in batch");
-		}
-	}
+        try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            for (Object[] row : relations) {
+                stmt.setInt(1, (Integer) row[0]);
+                stmt.setInt(2, (Integer) row[1]);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            throw ErrorFactory.internal("Error guardando batch de relaciones Película-País");
+        }
+    }
 
-	public Map<String, Integer> getMapIds(List<String> isoCodes) {
-		if (isoCodes == null || isoCodes.isEmpty()) {
-			return new HashMap<>();
-		}
-		StringBuilder sql = new StringBuilder("SELECT iso_code, country_id FROM countries WHERE iso_code IN (");
-
-		for (int i = 0; i < isoCodes.size(); i++) {
-			sql.append(i == 0 ? "?" : ", ?");
-		}
-		sql.append(")");
-		Map<String, Integer> map = new HashMap<>();
-
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-			for (int i = 0; i < isoCodes.size(); i++) {
-				stmt.setString(i + 1, isoCodes.get(i));
-			}
-			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					map.put(rs.getString("iso_code"), rs.getInt("country_id"));
-				}
-			}
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error recuperando mapa de IDs de países");
-		}
-		return map;
-	}
-
-	public void saveBatchRelations(List<Object[]> relations) {
-		String sql = "INSERT IGNORE INTO movie_countries (movie_id, country_id) VALUES (?, ?)";
-
-		try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
-			for (Object[] row : relations) {
-				stmt.setInt(1, (Integer) row[0]);
-				stmt.setInt(2, (Integer) row[1]);
-				stmt.addBatch();
-			}
-			stmt.executeBatch();
-		} catch (SQLException e) {
-			throw ErrorFactory.internal("Error guardando batch de relaciones Película-País");
-		}
-	}
+    // ÚNICO PUNTO DE MAPEO
+    private Country mapResultSetToCountry(ResultSet rs) throws SQLException {
+        Country country = new Country();
+        country.setCountryId(rs.getInt("country_id"));
+        country.setIsoCode(rs.getString("iso_code"));
+        country.setName(rs.getString("name"));
+        return country;
+    }
 }
