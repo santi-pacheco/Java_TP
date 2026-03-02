@@ -12,64 +12,52 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import repository.MovieRepository;
 import service.MovieService;
+import exception.ErrorFactory;
 
 @WebServlet("/movie/filter")
-public class MovieFilterServlet extends HttpServlet{
+public class MovieFilterServlet extends HttpServlet {
 
-
+	private static final long serialVersionUID = 1L;
 	private MovieController movieController;
 	
 	@Override
-	public void init() {
-	
-		// Inicialización del servicio y validador si es necesario
+	public void init() throws ServletException {
+		super.init();
 		MovieRepository movieRepository = new MovieRepository();
 		MovieService movieService = new MovieService(movieRepository);
 		this.movieController = new MovieController(movieService);
-		
 	}
 	
-	
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Lógica para manejar la solicitud de filtrado de películas
 		String pathInfo = request.getPathInfo();
+		if (pathInfo != null && !pathInfo.equals("/")) {
+			throw ErrorFactory.notFound("La ruta de filtrado no existe.");
+		}	
+		String genre = request.getParameter("genre");
+		String sinceStr = request.getParameter("since");
+		String untilStr = request.getParameter("until");
+		String name = request.getParameter("name");
 		
-		if (pathInfo == null || pathInfo.equals("/")) {
-			
-			String genre = request.getParameter("genre");
-			String sinceStr = request.getParameter("since");
-			String untilStr = request.getParameter("until");
-			String name = request.getParameter("name");
-			
-			int since = 0;
-			int until = 0;
-			
-			try {
-				if (sinceStr != null && !sinceStr.isEmpty()) {
-					since = Integer.parseInt(sinceStr);
-				}
-				if (untilStr != null && !untilStr.isEmpty()) {
-					until = Integer.parseInt(untilStr);
-				}
-			} catch (NumberFormatException e) {
-				System.err.println("Error parsing year parameters: " + e.getMessage());
+		int since = 0;
+		int until = 0;
+		
+		try {
+			if (sinceStr != null && !sinceStr.isEmpty()) {
+				since = Integer.parseInt(sinceStr);
 			}
-			
-			List<Movie> filteredMovies;
-			if (name != null && !name.trim().isEmpty()) {
-				filteredMovies = movieController.searchMoviesByName(name.trim());
-			} else {
-				filteredMovies = movieController.getMovieByFilter(name, genre, since, until);
+			if (untilStr != null && !untilStr.isEmpty()) {
+				until = Integer.parseInt(untilStr);
 			}
-			
-			request.setAttribute("movies", filteredMovies);
-			request.getRequestDispatcher("/WEB-INF/movie-list.jsp").forward(request, response);
-			
+		} catch (NumberFormatException e) {
+		}	
+		List<Movie> filteredMovies;
+		if (name != null && !name.trim().isEmpty()) {
+			filteredMovies = movieController.searchMoviesByName(name.trim());
 		} else {
-			// Manejar otros casos si es necesario
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			filteredMovies = movieController.getMovieByFilter(name, genre, since, until);
 		}
-		
+		request.setAttribute("movies", filteredMovies);
+		request.getRequestDispatcher("/WEB-INF/movie-list.jsp").forward(request, response);
 	}
-	
 }
