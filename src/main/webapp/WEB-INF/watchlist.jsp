@@ -141,19 +141,19 @@
                 <%
                     for (Movie movie : movies) {
                 %>
-                <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'">
+                <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>'">
                     <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
                         <input type="hidden" name="action" value="remove">
-                        <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                        <input type="hidden" name="movieId" value="<%= movie.getMovieId() %>">
                         <button type="submit" class="btn-remove" title="Eliminar" onclick="event.stopPropagation();">×</button>
                     </form>
                     <img src="https://image.tmdb.org/t/p/w300<%= movie.getPosterPath() %>" 
-                         alt="<%= movie.getTitulo() %>" 
+                         alt="<%= movie.getTitle() %>" 
                          class="movie-poster"
                          onerror="this.src='https://via.placeholder.com/200x300?text=Sin+Imagen'">
                     <div class="movie-info">
-                        <div class="movie-title"><%= movie.getTitulo() %></div>
-                        <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                        <div class="movie-title"><%= movie.getTitle() %></div>
+                        <div class="movie-year"><%= movie.getReleaseYear() %></div>
                     </div>
                 </div>
                 <%

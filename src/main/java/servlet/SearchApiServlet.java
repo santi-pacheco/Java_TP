@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.sql.Time;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -70,14 +71,8 @@ public class SearchApiServlet extends HttpServlet {
             return;
         }
         
-        try {
-            List<Movie> movies = movieController.searchMoviesByName(query);
-            String json = gson.toJson(movies);
-            response.getWriter().write(json);
-        } catch (Exception e) {
-            System.err.println("Error en SearchApiServlet: " + e.getMessage()); 
-            e.printStackTrace();
-            response.getWriter().write("[]");
-        }
+        List<Movie> movies = movieController.searchMoviesByName(query);
+        String json = gson.toJson(movies);
+        response.getWriter().write(json);
     }
 }

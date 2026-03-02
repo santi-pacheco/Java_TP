@@ -13,8 +13,8 @@ import java.util.ResourceBundle;
 import exception.ErrorFactory;
 
 public class EmailService {
-	
-	private static final String remitente;
+    
+    private static final String remitente;
     private static final String password;
 
     static {
@@ -25,23 +25,23 @@ public class EmailService {
     private final Session session;
 
     public EmailService() {
-    	Properties props = new Properties();
-    	props.put("mail.smtp.auth", "true");
-    	props.put("mail.smtp.starttls.enable", "true");
-    	props.put("mail.smtp.starttls.required", "true");
-    	props.put("mail.smtp.host", "smtp.gmail.com");
-    	props.put("mail.smtp.port", "587");
-    	props.put("mail.smtp.connectiontimeout", "10000");
-    	props.put("mail.smtp.timeout", "10000");
-    	props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-    	props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
-    	this.session = Session.getInstance(props, new Authenticator() {
-    	    @Override
-    	    protected PasswordAuthentication getPasswordAuthentication() {
-    	        return new PasswordAuthentication(remitente, password);
-    	    }
-    	});
+        this.session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(remitente, password);
+            }
+        });
     }
 
     public void sendEmail(String destinatario, String asunto, String cuerpoHtml) {
@@ -53,10 +53,9 @@ public class EmailService {
             message.setContent(cuerpoHtml, "text/html; charset=utf-8");
 
             Transport.send(message);
-            System.out.println("Correo enviado con éxito a: " + destinatario);
 
         } catch (Exception e) {
-            throw ErrorFactory.internal("Error al enviar correo");
+            throw ErrorFactory.internal("Error al enviar correo electrónico al usuario.");
         }
     }
 }

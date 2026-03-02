@@ -25,18 +25,11 @@ public class LandingServlet extends HttpServlet {
         this.movieController = new MovieController(movieService);
     }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        try {
-            MovieRepository repo = new MovieRepository();
-            List<Movie> movies = repo.findRandom(72);
-            System.out.println("Movies loaded: " + movies.size());
-            request.setAttribute("movies", movies);
-        } catch (Exception e) {
-            System.err.println("Error loading movies: " + e.getMessage());
-            e.printStackTrace();
-            request.setAttribute("movies", new java.util.ArrayList<>());
-        }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException { 
+        List<Movie> movies = movieController.getRandomMovies(72);
+        request.setAttribute("movies", movies);
         request.getRequestDispatcher("/landing.jsp").forward(request, response);
     }
 }

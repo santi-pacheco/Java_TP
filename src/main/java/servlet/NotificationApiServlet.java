@@ -39,7 +39,6 @@ public class NotificationApiServlet extends HttpServlet {
         this.notificationRepository = new NotificationRepository();
         this.userRepository = new UserRepository();
         
-       
         this.gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
                 @Override
@@ -53,60 +52,26 @@ public class NotificationApiServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         response.setContentType("application/json;charset=UTF-8");
         HttpSession session = request.getSession(false);
-        
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("[]");
-            return;
-        }
-
         User sessionUser = (User) session.getAttribute("usuarioLogueado");
-        
-        try {
-            
-            User freshUser = userRepository.findOne(sessionUser.getId());
-            
-            List<Notification> notifications = notificationRepository.getNotificationsForUser(
-                freshUser.getId(), 
-                freshUser.getUltimaRevisionNotificaciones()
-            );
-            
-            response.getWriter().write(gson.toJson(notifications));
-        } catch (Exception e) {
-            System.err.println("Error obteniendo notificaciones: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("[]");
-        }
+        User freshUser = userRepository.findOne(sessionUser.getUserId());
+        List<Notification> notifications = notificationRepository.getNotificationsForUser(
+            freshUser.getUserId(), 
+            freshUser.getLastNotificationCheck()
+        );
+        response.getWriter().write(gson.toJson(notifications));
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         response.setContentType("application/json;charset=UTF-8");
         HttpSession session = request.getSession(false);
-        
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\": false}");
-            return;
-        }
-
         User sessionUser = (User) session.getAttribute("usuarioLogueado");
-        
-        try {
-            userRepository.updateNotificacionesLeidas(sessionUser.getId());
-            
-            User updatedUser = userRepository.findOne(sessionUser.getId());
-            session.setAttribute("usuarioLogueado", updatedUser);
-            
-            response.getWriter().write("{\"success\": true}");
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false}");
-        }
+        userRepository.updateNotificacionesLeidas(sessionUser.getUserId());
+        User updatedUser = userRepository.findOne(sessionUser.getUserId());
+        session.setAttribute("usuarioLogueado", updatedUser);
+        response.getWriter().write("{\"success\": true}");
     }
 }

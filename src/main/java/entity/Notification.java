@@ -3,26 +3,26 @@ package entity;
 import java.time.LocalDateTime;
 
 public class Notification {
-    private String tipo; // "LIKE", "COMMENT", "FOLLOW"
-    private int actorId; 
+    private String type;
+    private int actorId;
     private Integer movieId;
     private String actorUsername;
     private String actorProfileImage;
-    
-    // Datos opcionales según el tipo
-    private Integer reviewId; 
+
+    private Integer reviewId;
     private String movieTitle;
-    private String commentText; 
-    
-    private int extraCount; 
-    
-    private LocalDateTime fecha;
+    private String commentText;
+
+    private int extraCount;
+
+    private LocalDateTime createdAt;
     private boolean unread;
+    private int userLevel;
 
     public Notification() {}
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
     public int getActorId() { return actorId; }
     public void setActorId(int actorId) { this.actorId = actorId; }
@@ -45,19 +45,15 @@ public class Notification {
     public int getExtraCount() { return extraCount; }
     public void setExtraCount(int extraCount) { this.extraCount = extraCount; }
 
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public boolean isUnread() { return unread; }
     public void setUnread(boolean unread) { this.unread = unread; }
 
-	public Integer getMovieId() {
-		return movieId;
-	}
+    public Integer getMovieId() { return movieId; }
+    public void setMovieId(Integer movieId) { this.movieId = movieId; }
 
-	public void setMovieId(Integer movieId) {
-		this.movieId = movieId;
-	}
-
-	
+    public int getUserLevel() { return userLevel; }
+    public void setUserLevel(int userLevel) { this.userLevel = userLevel; }
 }

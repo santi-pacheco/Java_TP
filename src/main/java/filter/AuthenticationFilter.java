@@ -25,7 +25,7 @@ public class AuthenticationFilter implements Filter {
         
         boolean isLoginServlet = requestURI.endsWith("/login");
         boolean isRegisterServlet = requestURI.endsWith("/register");
-        boolean isLandingServlet = requestURI.endsWith("/landing");
+        boolean isLandingServlet = requestURI.endsWith("/home") || requestURI.endsWith("/landing");
         boolean isForgotPasswordServlet = requestURI.endsWith("/forgot-password");
         boolean isResetPasswordServlet = requestURI.endsWith("/reset-password");
         boolean isPublicResource = requestURI.startsWith(httpRequest.getContextPath() + "/css/") ||
@@ -50,9 +50,13 @@ public class AuthenticationFilter implements Filter {
                               (requestURI.contains("/movies") && !requestURI.contains("/movies-page")) ||
                               requestURI.contains("/users") ||
                               requestURI.contains("/reviews-admin") ||
-                              requestURI.contains("/configuracion-reglas") ||
+                              requestURI.contains("/system-settings") ||
+                              requestURI.contains("/data-load") ||
                               requestURI.contains("/admin/data-load");;
         
+        String acceptHeader = httpRequest.getHeader("Accept");
+        String requestedWithHeader = httpRequest.getHeader("X-Requested-With");
+        boolean isAjaxRequest = (acceptHeader != null && acceptHeader.contains("application/json")) || "XMLHttpRequest".equals(requestedWithHeader);
         if (isLoginServlet || isRegisterServlet || isLandingServlet || isForgotPasswordServlet || isResetPasswordServlet || isPublicResource) {
             chain.doFilter(request, response);
         } else if (isAdminRoute) {
@@ -64,8 +68,15 @@ public class AuthenticationFilter implements Filter {
         } else if (isLoggedIn) {
             chain.doFilter(request, response);
         } else {
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
-        }
+            if (isAjaxRequest) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.setCharacterEncoding("UTF-8");
+                httpResponse.getWriter().write("{\"success\":false, \"message\":\"Tu sesión ha expirado. Por favor, inicia sesión nuevamente.\"}");
+            } else {
+                httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
+            }
+       }
     }
 
     @Override

@@ -36,7 +36,7 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
         <form action="<%= request.getContextPath() %>/genres" method="POST">
             <input type="hidden" name="accion" value="<%= genre != null ? "actualizar" : "crear" %>">
             <% if (genre != null) { %>
-                <input type="hidden" name="id" value="<%= genre.getId() %>">
+                <input type="hidden" name="id" value="<%= genre.getGenreId() %>">
             <% } %>
             <div class="form-group">
                 <label>Nombre:</label>
@@ -44,7 +44,7 @@ body { background: #FAF8F3; font-family: 'Poppins', sans-serif; }
             </div>
             <div class="form-group">
                 <label>ID API:</label>
-                <input type="number" name="id_api" class="form-control" value="<%= genre != null ? genre.getId_api() : "" %>" required>
+                <input type="number" name="apiId" class="form-control" value="<%= genre != null && genre.getApiId() != null ? genre.getApiId() : "" %>">
             </div>
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a href="<%= request.getContextPath() %>/genres" class="btn btn-default">Cancelar</a>

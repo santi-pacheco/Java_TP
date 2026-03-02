@@ -6,6 +6,8 @@ import repository.FollowRepository;
 import repository.UserRepository;
 import service.UserService;
 import entity.User;
+import exception.ErrorFactory;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.servlet.ServletException;
@@ -22,37 +24,29 @@ public class BlockServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        this.userService = new UserService(new UserRepository(), new BCryptPasswordEncoder(), new FollowRepository(), new BlockRepository());
+    	UserRepository userRepository = new UserRepository();
+    	BCryptPasswordEncoder bcryptPasswordEncoder = new BCryptPasswordEncoder();
+    	FollowRepository followRepository = new FollowRepository();
+    	BlockRepository blockRepository = new BlockRepository();
+        this.userService = new UserService(userRepository, bcryptPasswordEncoder, followRepository, blockRepository);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
+    	response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\":false, \"message\":\"No autenticado\"}");
-            return;
-        }
-
+        
+    	HttpSession session = request.getSession(false);
         User loggedUser = (User) session.getAttribute("usuarioLogueado");
+        
         String targetIdStr = request.getParameter("targetId");
-
         if (targetIdStr == null || targetIdStr.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\":false, \"message\":\"ID requerido\"}");
-            return;
+            throw ErrorFactory.badRequest("El ID del usuario a bloquear es requerido");
         }
 
-        try {
-            int targetId = Integer.parseInt(targetIdStr);
-            userService.toggleBlock(loggedUser.getId(), targetId);
-            response.getWriter().write("{\"success\":true}");
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\":false, \"message\":\"Error interno\"}");
-        }
+        int targetId = Integer.parseInt(targetIdStr);
+        userService.toggleBlock(loggedUser.getUserId(), targetId);
+
+        response.getWriter().write("{\"success\":true}");
     }
 }

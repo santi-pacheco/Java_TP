@@ -12,25 +12,24 @@ public class WatchlistController {
 		this.watchlistService = watchlistService;
 	}
 	
-	public Watchlist getWatchlists(int id_user) {
-		Watchlist wl = watchlistService.getWatchlist(id_user );
+	public Watchlist getWatchlists(int userId) {
+		Watchlist wl = watchlistService.getWatchlist(userId);
 		System.out.println("Watchlists retrieved successfully: " + wl.getMovies() + " records");
 		return wl;
 	}
-	
-	public List<String> getMoviesInWatchlist(int id_user) {
-		System.out.println("Fetching from controller " + id_user);
-		Watchlist wl = watchlistService.getWatchlist(id_user);
+
+	public List<String> getMoviesInWatchlist(int userId) {
+		Watchlist wl = watchlistService.getWatchlist(userId);
 		return wl.getMovies();
 	}
-	
-	public void addMovie(int id_user, String id_pelicula) {
-		watchlistService.addMovie(id_user, id_pelicula);
+
+	public void addMovie(int userId, String movieId) {
+		watchlistService.addMovie(userId, movieId);
 		System.out.println("Movie added to watchlist successfully.");
 	}
-	
-	public void removeMovie(int id_user, String id_pelicula) {
-		watchlistService.removeMovie(id_user, id_pelicula);
+
+	public void removeMovie(int userId, String movieId) {
+		watchlistService.removeMovie(userId, movieId);
 		System.out.println("Movie removed from watchlist successfully.");
 	}
 	

@@ -36,7 +36,6 @@ public class RegisterServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        
         UserRepository userRepository = new UserRepository();
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepository = new FollowRepository();
@@ -61,71 +60,53 @@ public class RegisterServlet extends HttpServlet {
         User userFromForm = new User();
         
         try {
-        	
             userFromForm.setUsername(request.getParameter("username"));
             userFromForm.setEmail(request.getParameter("email"));
             userFromForm.setPassword(request.getParameter("password"));
             userFromForm.setBirthDate(parseDate(request.getParameter("birthDate")));
-            
             userFromForm.setRole("user"); 
-
             String confirmPassword = request.getParameter("confirmPassword");
             if (userFromForm.getPassword() == null || !userFromForm.getPassword().equals(confirmPassword)) {
-                request.setAttribute("appError", "Las contraseñas no coinciden.");
-                request.setAttribute("user", userFromForm);
-                request.getRequestDispatcher(jspTarget).forward(request, response);
-                return;
+                throw ErrorFactory.validation("Las contraseñas no coinciden.");
             }
-
             Set<ConstraintViolation<User>> violations = validator.validate(userFromForm, Default.class, OnCreate.class);
-            
             if (!violations.isEmpty()) {
                 request.setAttribute("errors", getErrorMessages(violations));
                 request.setAttribute("user", userFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
                 return;
             }
-
             User createdUser = userService.CreateUser(userFromForm);
-            
             try {
-                repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository(new repository.MovieRepository());
-                watchlistRepo.addWatchlist(createdUser.getId());
+                repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository();
+                watchlistRepo.addWatchlist(createdUser.getUserId());
             } catch (Exception e) {
-                System.err.println("Error creating watchlist for new user: " + e.getMessage());
+                System.err.println("Error creando watchlist para el nuevo usuario: " + e.getMessage());
             }
-            
             request.getSession().setAttribute("usuarioLogueado", createdUser);
-
             response.sendRedirect(request.getContextPath() + "/");
-
         } catch (AppException e) {
-            if (e.getErrorType().equals("DUPLICATE_ERROR")) {
+            if (e.getErrorType().equals("DUPLICATE_ERROR") || e.getErrorType().equals("VALIDATION_ERROR")) {
                 request.setAttribute("appError", e.getMessage());
                 request.setAttribute("user", userFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
             } else {
-            	throw e;
+                throw e;
             }
         }
     }
 
     private Date parseDate(String dateString) {
-        if (dateString == null || dateString.isEmpty()) {
-            return null;
-        }
+        if (dateString == null || dateString.isEmpty()) return null;
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            java.util.Date utilDate = sdf.parse(dateString);
-            return new java.sql.Date(utilDate.getTime());
+            return new java.sql.Date(sdf.parse(dateString).getTime());
         } catch (ParseException e) {
             throw ErrorFactory.validation("Formato de fecha inválido. Usar yyyy-MM-dd.");
         }
     }
 
     private Set<String> getErrorMessages(Set<ConstraintViolation<User>> violations) {
-        return violations.stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.toSet());
+        return violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet());
     }
 }

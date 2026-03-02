@@ -22,8 +22,7 @@ public class MovieController {
 	}
 	
 	public Movie getMovieById(int id) {
-		Movie movie = movieService.getMovieById(id);
-		return movie;
+		return movieService.getMovieById(id);
 	}
 	
 	
@@ -90,6 +89,10 @@ public class MovieController {
 	
 	public void updateBatchMovies(List<Movie> movies) {
 		movieService.updateBatchMovies(movies);
+	}
+	
+	public List<Movie> getRandomMovies(int limit) {
+		return movieService.getRandomMovies(limit);
 	}
 	
 }

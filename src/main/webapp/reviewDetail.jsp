@@ -55,15 +55,15 @@
         %>
         <% if (review != null) { %>
         
-        <div class="info-row"><span class="info-label">ID:</span><span><%= review.getId() %></span></div>
-        <div class="info-row"><span class="info-label">Usuario:</span><span><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getId_user() %></span></div>
-        <div class="info-row"><span class="info-label">Película:</span><span><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getId_movie() %></span></div>
+        <div class="info-row"><span class="info-label">ID:</span><span><%= review.getReviewId() %></span></div>
+        <div class="info-row"><span class="info-label">Usuario:</span><span><%= review.getUsername() != null ? review.getUsername() : "Usuario " + review.getUserId() %></span></div>
+        <div class="info-row"><span class="info-label">Película:</span><span><%= review.getMovieTitle() != null ? review.getMovieTitle() : "Película #" + review.getMovieId() %></span></div>
         <div class="info-row"><span class="info-label">Rating (kcal):</span><span><%= String.format("%.1f", review.getRating()) %> / 5.0</span></div>
-        <div class="info-row"><span class="info-label">Fecha de creación:</span><span><%= review.getCreated_at() %></span></div>
-        <div class="info-row"><span class="info-label">Visto el:</span><span><%= review.getWatched_on() %></span></div>
+        <div class="info-row"><span class="info-label">Fecha de creación:</span><span><%= review.getCreatedAt() %></span></div>
+        <div class="info-row"><span class="info-label">Visto el:</span><span><%= review.getWatchedOn() %></span></div>
         
         <h4 style="margin-top: 30px;">Texto de la Reseña:</h4>
-        <div class="review-text"><%= review.getReview_text() %></div>
+        <div class="review-text"><%= review.getReviewText() %></div>
 
         <!-- Barra de Acciones: Likes y Comentarios -->
         <div class="actions-bar">
@@ -126,7 +126,7 @@
                 
                 <form action="<%= request.getContextPath() %>/reviews-admin" method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="accion" value="actualizarModeracion">
-                    <input type="hidden" name="id" value="<%= review.getId() %>">
+                    <input type="hidden" name="id" value="<%= review.getReviewId() %>">
                     
                     <div class="form-group">
                         <label><input type="radio" name="status" value="PENDING_MODERATION" <%= review.getModerationStatus() == ModerationStatus.PENDING_MODERATION ? "checked" : "" %>> Pendiente</label>
@@ -154,8 +154,8 @@
 
 <script>
     const contextPath = '<%= request.getContextPath() %>';
-    const reviewId = <%= review != null ? review.getId() : "null" %>;
-    const userId = <%= loggedUser != null ? loggedUser.getId() : "null" %>;
+    const reviewId = <%= review != null ? review.getReviewId() : "null" %>;
+    const userId = <%= loggedUser != null ? loggedUser.getUserId() : "null" %>;
 
     document.addEventListener('DOMContentLoaded', function() {
         if (reviewId) {
@@ -166,7 +166,7 @@
 
     async function fetchLikes() {
         try {
-            const response = await fetch(`${contextPath}/likes?reviewId=${reviewId}`);
+            const response = await fetch(`\${contextPath}/likes?reviewId=\${reviewId}`);
             const data = await response.json();
             if (response.ok) {
                 updateLikeState(data.likes, data.userHasLiked);
@@ -178,7 +178,7 @@
 
     async function fetchComments() {
         try {
-            const response = await fetch(`${contextPath}/comments?reviewId=${reviewId}`);
+            const response = await fetch(`\${contextPath}/comments?reviewId=\${reviewId}`);
             const comments = await response.json();
             if (response.ok) {
                 const commentsList = document.getElementById('commentsList');
@@ -187,9 +187,9 @@
                     const commentEl = document.createElement('div');
                     commentEl.className = 'comment';
                     commentEl.innerHTML = `
-                        <p class="comment-author">${comment.username || 'Usuario'}</p>
-                        <p class="comment-text">${comment.comment_text}</p>
-                        <small class="comment-date">${new Date(comment.created_at).toLocaleString()}</small>
+                        <p class="comment-author">\${comment.username || 'Usuario'}</p>
+                        <p class="comment-text">\${comment.comment_text}</p>
+                        <small class="comment-date">\${new Date(comment.created_at).toLocaleString()}</small>
                     `;
                     commentsList.appendChild(commentEl);
                 });
@@ -200,7 +200,7 @@
     }
 
     function updateLikeState(likeCount, userHasLiked) {
-        document.getElementById('likeCount').textContent = `${likeCount} Likes`;
+        document.getElementById('likeCount').textContent = `\${likeCount} Likes`;
         const likeBtn = document.getElementById('likeBtn');
         const likeBtnText = document.getElementById('likeBtnText');
         if (userHasLiked) {
@@ -214,11 +214,11 @@
 
     async function toggleLike() {
         if (!userId) {
-            window.location.href = `${contextPath}/login`;
+            window.location.href = `\${contextPath}/login`;
             return;
         }
         try {
-            const response = await fetch(`${contextPath}/likes`, {
+            const response = await fetch(`\${contextPath}/likes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reviewId: reviewId, userId: userId })
@@ -241,7 +241,7 @@
             return;
         }
         try {
-            const response = await fetch(`${contextPath}/comments`, {
+            const response = await fetch(`\${contextPath}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

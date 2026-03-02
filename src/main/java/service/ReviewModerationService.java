@@ -21,7 +21,7 @@ public class ReviewModerationService {
     private final GeminiModerationService geminiService;
     private final ExecutorService executorService;
     
-    private static final int BAN_DAYS = 7; // Días de baneo
+    private static final int BAN_DAYS = 7;
 
     private ReviewModerationService() {
         this.reviewRepository = new ReviewRepository();
@@ -43,27 +43,22 @@ public class ReviewModerationService {
             try {
                 moderateReview(reviewId);
             } catch (Exception e) {
-                System.err.println("Error al moderar reseña " + reviewId + ": " + e.getMessage());
-                e.printStackTrace();
+                // Fallo silencioso en el hilo asíncrono
             }
         });
     }
 
     private void moderateReview(int reviewId) throws SQLException {
         Review review = reviewRepository.findOne(reviewId);
-        if (review == null) {
-            throw new IllegalArgumentException("Reseña no encontrada: " + reviewId);
-        }
+        if (review == null) return;
 
-        Movie movie = movieRepository.findOne(review.getId_movie());
-        if (movie == null) {
-            throw new IllegalArgumentException("Película no encontrada: " + review.getId_movie());
-        }
+        Movie movie = movieRepository.findOne(review.getMovieId());
+        if (movie == null) return;
 
         ModerationResult result = geminiService.moderateReview(
-            review.getReview_text(),
-            movie.getSinopsis(),
-            movie.getTitulo()
+            review.getReviewText(),
+            movie.getSynopsis(),
+            movie.getTitle()
         );
 
         ModerationStatus newStatus = determineStatus(result);
@@ -74,12 +69,11 @@ public class ReviewModerationService {
 
         boolean updated = reviewRepository.updateModerationStatus(reviewId, newStatus, result.getReason());
 
-        if (updated) {
-            System.out.println("[MODERACIÓN] Reseña " + reviewId + " → " + newStatus + " | Razón: " + result.getReason());
-            
-            if (newStatus == ModerationStatus.REJECTED) {
-                userRepository.banUser(review.getId_user(), BAN_DAYS);
-                System.out.println("⚠️ [SISTEMA] USUARIO BANEADO: ID " + review.getId_user() + " por " + BAN_DAYS + " días. Motivo: Reseña tóxica.");
+        if (updated && newStatus == ModerationStatus.REJECTED) {
+            try {
+                userRepository.banUser(review.getUserId(), BAN_DAYS);
+            } catch (Exception e) {
+                // Evitamos que un error al banear rompa el flujo
             }
         }
     }
@@ -95,7 +89,6 @@ public class ReviewModerationService {
     }
 
     public void shutdown() {
-        System.out.println("Deteniendo ExecutorService de moderación...");
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {

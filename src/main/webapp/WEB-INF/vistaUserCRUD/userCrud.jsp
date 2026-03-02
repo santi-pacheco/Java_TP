@@ -87,7 +87,7 @@
                             </c:choose>
                         </td>
                         
-                        <td>${user.id}</td>
+                        <td>${user.userId}</td>
                         <td>${user.username}</td>
                         <td>${user.email}</td>
                         <td>
@@ -101,7 +101,7 @@
                         <td>
                             <c:url var="editUrl" value="/users">
                                 <c:param name="accion" value="mostrarFormEditar" />
-                                <c:param name="id" value="${user.id}" />
+                                <c:param name="id" value="${user.userId}" />
                             </c:url>
                             <a href="${editUrl}" class="btn btn-warning btn-xs" title="Editar">
                                 <span class="glyphicon glyphicon-pencil"></span> Modificar
@@ -110,7 +110,7 @@
                             <c:url var="deleteActionUrl" value="/users" />
                             <form action="${deleteActionUrl}" method="POST" style="display:inline;">
                                 <input type="hidden" name="accion" value="eliminar">
-                                <input type="hidden" name="id" value="${user.id}">
+                                <input type="hidden" name="id" value="${user.userId}">
                                 <button type="submit" class="btn btn-danger btn-xs" title="Eliminar"
                                         onclick="return confirm('¿Está seguro de que desea eliminar a ${user.username}? Esta acción borrará también sus reseñas y foto.')">
                                     <span class="glyphicon glyphicon-trash"></span> Eliminar

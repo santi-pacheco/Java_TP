@@ -3,22 +3,22 @@ package entity;
 import java.sql.Timestamp;
 
 public class ReviewLike {
-    private int idUsuario;
-    private int idReview;
+    private int userId;
+    private int reviewId;
     private Timestamp createdAt;
 
     public ReviewLike() {}
 
-    public ReviewLike(int idUsuario, int idReview) {
-        this.idUsuario = idUsuario;
-        this.idReview = idReview;
+    public ReviewLike(int userId, int reviewId) {
+        this.userId = userId;
+        this.reviewId = reviewId;
     }
 
-    public int getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
-    public int getIdReview() { return idReview; }
-    public void setIdReview(int idReview) { this.idReview = idReview; }
+    public int getReviewId() { return reviewId; }
+    public void setReviewId(int reviewId) { this.reviewId = reviewId; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }

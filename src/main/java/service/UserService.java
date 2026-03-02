@@ -1,29 +1,29 @@
 package service;
 
 import java.util.List;
-import repository.BlockRepository;
 import java.util.UUID;
+import java.io.File;
 
 import entity.User;
-import repository.FollowRepository;
 import repository.UserRepository;
+import repository.FollowRepository;
+import repository.BlockRepository;
 import exception.ErrorFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import java.io.File;
 
 public class UserService {
 
-	private UserRepository userRepository;
-	private BCryptPasswordEncoder passwordEncoder;
-	private FollowRepository followRepository;
-	private BlockRepository blockRepository;
-	
-	public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository, BlockRepository blockRepository) {
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.followRepository = followRepository;
-		this.blockRepository = blockRepository;
-	}
+    private UserRepository userRepository;
+    private BCryptPasswordEncoder passwordEncoder;
+    private FollowRepository followRepository;
+    private BlockRepository blockRepository;
+    
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, FollowRepository followRepository, BlockRepository blockRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.followRepository = followRepository;
+        this.blockRepository = blockRepository;
+    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -32,9 +32,9 @@ public class UserService {
     public User getUserById(int id) {
         User user = userRepository.findOne(id);
         if (user == null) {
-            throw ErrorFactory.notFound("User not found with ID: " + id);
+            throw ErrorFactory.notFound("Usuario no encontrado con ID: " + id);
         }
-        user.setPassword(null);
+        user.setPassword(null); // Seguridad
         return user;
     }
     
@@ -45,10 +45,11 @@ public class UserService {
     }
     
     public User updateUser(User user) {
-        User existingUser = userRepository.findOne(user.getId());    
+        User existingUser = userRepository.findOne(user.getUserId());
         if (existingUser == null) {
-            throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getId() + " no encontrado.");
+             throw ErrorFactory.notFound("No se puede actualizar. Usuario con ID " + user.getUserId() + " no encontrado.");
         }
+        
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
         existingUser.setRole(user.getRole());
@@ -58,6 +59,7 @@ public class UserService {
             String hashedPassword = this.passwordEncoder.encode(user.getPassword());
             existingUser.setPassword(hashedPassword);
         }
+        
         return userRepository.update(existingUser);
     }
     
@@ -67,37 +69,27 @@ public class UserService {
     
     public User authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-
-        if (user == null) {
-            throw ErrorFactory.unauthorized("Invalid username or password");
+        
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            throw ErrorFactory.unauthorized("Usuario o contraseña inválidos.");
         }
-
-	    // --- 3. Validar la contraseña ---
-	    // Usamos el passwordEncoder (como en createUser) para comparar
-	    // la clave plana (password) con la hasheada (user.getPassword())
-		if (!passwordEncoder.matches(password, user.getPassword())) {
-	        // ERROR RECUPERABLE (401)
-	        // Usamos el *mismo* mensaje para no dar pistas
-			throw ErrorFactory.unauthorized("Invalid username or password");
-		}
-	    // --- 4. ÉXITO: Preparar el retorno ---
-	    // Siguiendo el patrón de getUserById, quitamos la contraseña
-	    // antes de devolver el objeto.
-		user.setPassword(null);	
-		return user;
-	}
-	
-	
-	public void toggleFollow(int currentUserId, int targetUserId) {
-		if (currentUserId == targetUserId) {
-	        throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
-	    }
-	    if (blockRepository.isBlocking(currentUserId, targetUserId) || 
-	        blockRepository.isBlocking(targetUserId, currentUserId)) {
-	        throw ErrorFactory.badRequest("No puedes seguir a este usuario debido a un bloqueo mutuo.");
-	    }
+        
+        // Se quitó la validación del BAN de aquí. El usuario puede iniciar sesión en modo "solo lectura".
+        
+        user.setPassword(null); 
+        return user;
+    }
+    
+    public void toggleFollow(int currentUserId, int targetUserId) {
+        if (currentUserId == targetUserId) {
+            throw ErrorFactory.badRequest("No puedes seguirte a ti mismo.");
+        }
+        if (blockRepository.isBlocking(currentUserId, targetUserId) || 
+            blockRepository.isBlocking(targetUserId, currentUserId)) {
+            throw ErrorFactory.badRequest("No puedes seguir a este usuario debido a un bloqueo mutuo.");
+        }
+        
         boolean isFollowing = followRepository.isFollowing(currentUserId, targetUserId);
-
         if (isFollowing) {
             followRepository.removeFollow(currentUserId, targetUserId);
         } else {
@@ -119,13 +111,11 @@ public class UserService {
     
     public void updateProfileImage(int userId, String newFileName, String uploadDir) {
         User user = userRepository.findOne(userId);
+        
         if (user != null && user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { 
             File oldFile = new File(uploadDir + File.separator + user.getProfileImage());
             if (oldFile.exists()) {
-                boolean deleted = oldFile.delete();
-                if (!deleted) {
-                    System.err.println("ADVERTENCIA: No se pudo borrar la imagen vieja: " + oldFile.getAbsolutePath());
-                }
+                oldFile.delete(); // Borrado silencioso sin ensuciar la consola
             }
         }
         userRepository.updateProfileImage(userId, newFileName);
@@ -133,7 +123,7 @@ public class UserService {
 
     public void removeProfileImage(int userId, String uploadDir) {
         User user = userRepository.findOne(userId);
-
+        
         if (user != null && user.getProfileImage() != null) {
             File file = new File(uploadDir + File.separator + user.getProfileImage());
             if (file.exists()) {
@@ -144,22 +134,25 @@ public class UserService {
     }
     
     public List<User> searchUsers(String query, int loggedUserId) {
-        return userRepository.searchUsersByUsername(query, loggedUserId);
-	}
+        if (query == null || query.trim().isEmpty()) {
+            throw ErrorFactory.badRequest("La búsqueda no puede estar vacía.");
+        }
+        return userRepository.searchUsersByUsername(query.trim(), loggedUserId);
+    }
 
     public String generatePasswordResetToken(String email) {
         User user = userRepository.findByEmail(email);
-        System.out.println("Usuario encontrado para email " + email + ": " + (user != null ? user.getUsername() : "null"));
         if (user == null) {
-            return null; 
+            return null;
         }
+        
         String token = UUID.randomUUID().toString();
-        userRepository.savePasswordResetToken(user.getId(), token);
+        userRepository.savePasswordResetToken(user.getUserId(), token);
         return token;
     }
     
     public boolean validateResetToken(String token) {
-        if (token == null || token.isEmpty()) return false;
+        if (token == null || token.trim().isEmpty()) return false;
         return userRepository.getUserIdByValidToken(token) != null;
     }
     
@@ -184,6 +177,7 @@ public class UserService {
             blockRepository.removeBlock(blockerId, blockedId);
         } else {
             blockRepository.addBlock(blockerId, blockedId);
+            
             if (followRepository.isFollowing(blockerId, blockedId)) {
                 followRepository.removeFollow(blockerId, blockedId);
             }
@@ -192,21 +186,25 @@ public class UserService {
             }
         }
     }
-	
-	public boolean isBlocking(int blockerId, int blockedId) {
+    
+    public boolean isBlocking(int blockerId, int blockedId) {
         return blockRepository.isBlocking(blockerId, blockedId);
     }
-	
-	public List<User> getBlockedUsers(int blockerId) {
-	    return blockRepository.getBlockedUsers(blockerId);
+    
+    public List<User> getBlockedUsers(int blockerId) {
+        return blockRepository.getBlockedUsers(blockerId);
     }
 
     public void updatePlatoPrincipal(int userId, Integer movieId) {
-    	User u = userRepository.findOne(userId);
-    	if (u != null && u.getNivelUsuario() > 2) {
-    		userRepository.updatePlatoPrincipal(userId, movieId);
-    	} else {
-			throw ErrorFactory.unauthorized("No tienes permiso para actualizar el plato principal.");
-		}  
+        User u = userRepository.findOne(userId);
+        if (u != null && u.getUserLevel() >= 3) {
+            userRepository.updatePlatoPrincipal(userId, movieId);
+        } else {
+            throw ErrorFactory.unauthorized("Necesitas ser Nivel 3 o superior para elegir un Plato Principal.");
+        }  
+    }
+    
+    public void markLevelAsNotified(int userId, int newLevel) {
+        userRepository.markLevelAsNotified(userId, newLevel);
     }
 }

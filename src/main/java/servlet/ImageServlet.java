@@ -26,6 +26,11 @@ public class ImageServlet extends HttpServlet {
             return;
         }
         File file = new File(uploadPath, requestedFile);
+        File uploadDir = new File(uploadPath);
+        if (!file.getCanonicalPath().startsWith(uploadDir.getCanonicalPath())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         if (file.exists() && file.isFile()) {
             String contentType = getServletContext().getMimeType(file.getName());
             if (contentType == null) {

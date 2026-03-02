@@ -98,13 +98,13 @@
                     for (Movie movie : movies) {
                 %>
                     <div class="movie-card">
-                        <a href="${pageContext.request.contextPath}/movie/<%= movie.getId() %>" class="movie-link">
+                        <a href="${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>" class="movie-link">
                             <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
-                                 alt="<%= movie.getTitulo() %>" 
+                                 alt="<%= movie.getTitle() %>" 
                                  class="movie-poster"
                                  onerror="this.src='https://via.placeholder.com/200x280?text=Sin+Imagen'">
-                            <div class="movie-title"><%= movie.getTitulo() %></div>
-                            <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                            <div class="movie-title"><%= movie.getTitle() %></div>
+                            <div class="movie-year"><%= movie.getReleaseYear() %></div>
                         </a>
                     </div>
                 <%
