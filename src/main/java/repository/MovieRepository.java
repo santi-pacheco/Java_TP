@@ -223,27 +223,6 @@ public class MovieRepository {
         }
     }
 
-    public float getMovieRating(String movieId) {
-        try {
-            URL url = new URL("https://api.imdbapi.dev/titles/" + movieId);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                Gson gson = new Gson();
-                JsonObject json = gson.fromJson(reader.readLine(), JsonObject.class);
-                
-                if (json != null && json.has("rating") && !json.get("rating").isJsonNull()) {
-                    JsonObject ratingObj = json.getAsJsonObject("rating");
-                    return ratingObj.get("aggregateRating").getAsFloat();
-                }
-            }
-        } catch (IOException e) {
-            // Falla silenciosa permitida para APIs de rating
-        }
-        return 0.0f;
-    }
-
     public void updateMovieActors(List<Object[]> relations) {
         if (relations == null || relations.isEmpty()) return;
         

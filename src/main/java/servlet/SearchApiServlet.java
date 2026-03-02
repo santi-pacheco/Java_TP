@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.sql.Time;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,13 +28,34 @@ public class SearchApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private MovieController movieController;
+    private Gson gson;
     
     @Override
     public void init() throws ServletException {
         super.init();
-        MovieRepository movieRepository = new MovieRepository();
-        MovieService movieService = new MovieService(movieRepository);
-        this.movieController = new MovieController(movieService);
+        try {
+            MovieRepository movieRepository = new MovieRepository();
+            MovieService movieService = new MovieService(movieRepository);
+            this.movieController = new MovieController(movieService);
+            
+            this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+                    @Override
+                    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(src.toString());
+                    }
+                })
+                .registerTypeAdapter(Time.class, new JsonSerializer<Time>() {
+                    @Override
+                    public JsonElement serialize(Time src, Type typeOfSrc, JsonSerializationContext context) {
+                        return new JsonPrimitive(src.toString());
+                    }
+                })
+                .create();
+                
+        } catch (Exception e) {
+            throw new ServletException("Failed to initialize SearchApiServlet", e);
+        }
     }
     
     @Override
@@ -41,13 +63,16 @@ public class SearchApiServlet extends HttpServlet {
             throws ServletException, IOException {
         
         String query = request.getParameter("q");
-
+        
+        response.setContentType("application/json;charset=UTF-8");
+        
         if (query == null || query.trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/");
+            response.getWriter().write("[]");
             return;
         }
+        
         List<Movie> movies = movieController.searchMoviesByName(query);
-        request.setAttribute("movies", movies);
-        request.getRequestDispatcher("/WEB-INF/search-results.jsp").forward(request, response);
+        String json = gson.toJson(movies);
+        response.getWriter().write(json);
     }
 }
