@@ -14,44 +14,56 @@ public class GenreService {
     }
     
     public List<Genre> getAllGenres() {
-    	return genreRepository.findAll();
+        return genreRepository.findAll();
     }
 
     public Genre getGenreById(int id) {
-		Genre genre = genreRepository.findOne(id);
-		if (genre == null) {
-			throw ErrorFactory.notFound("Genre not found with ID: " + id);
-		}
-		return genre;
-	}
+        Genre genre = genreRepository.findOne(id);
+        if (genre == null) {
+            throw ErrorFactory.notFound("Genre not found with ID: " + id);
+        }
+        return genre;
+    }
     
     public Genre CreateGenre(Genre genre) {
-    	return genreRepository.add(genre);
-	}
+        if (genre.getName() == null || genre.getName().trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El nombre del género es obligatorio.");
+        }
+        return genreRepository.add(genre);
+    }
     
     public Genre updateGenre(Genre genre) {
-	    Genre existingGenre = genreRepository.findOne(genre.getGenreId());
-	    if (existingGenre == null) {
-	        throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getGenreId() + " no encontrado.");
-	    }
-	    existingGenre.setName(genre.getName());
-	    existingGenre.setApiId(genre.getApiId());
-	    return genreRepository.update(existingGenre);
+        if (genre.getName() == null || genre.getName().trim().isEmpty()) {
+            throw ErrorFactory.badRequest("El nombre del género no puede estar vacío.");
+        }
+        
+        Genre existingGenre = genreRepository.findOne(genre.getGenreId());
+        if (existingGenre == null) {
+            throw ErrorFactory.notFound("No se puede actualizar. Género con ID " + genre.getGenreId() + " no encontrado.");
+        }
+        
+        existingGenre.setName(genre.getName().trim());
+        existingGenre.setApiId(genre.getApiId());
+        return genreRepository.update(existingGenre);
     }
     
     public Genre deleteGenre(Genre genre) {
-		return genreRepository.delete(genre);
+        if (genre == null || genre.getGenreId() <= 0) {
+            throw ErrorFactory.badRequest("Género inválido para eliminar.");
+        }
+        return genreRepository.delete(genre);
     }
     
     public void saveAllGenres(List<Genre> genres) {
-    	genreRepository.saveAll(genres);
+        if (genres != null && !genres.isEmpty()) {
+            genreRepository.saveAll(genres);
+        }
     }
     
     public Integer getGeneresByIdApi(Integer idApi) {
-    	Integer genreId = genreRepository.findByIdApi(idApi);
-		if (genreId == null) {
-			System.out.println("Genre not found with idApi: " + idApi);
-		}
-		return genreId;
+        if (idApi == null) {
+            throw ErrorFactory.badRequest("El ID de API no puede ser nulo.");
+        }
+        return genreRepository.findByIdApi(idApi);
     }
 }
