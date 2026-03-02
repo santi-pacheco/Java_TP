@@ -7,6 +7,7 @@ import repository.SystemSettingsRepository;
 import entity.Review;
 import entity.SystemSettings;
 import entity.User;
+import exception.ErrorFactory;
 
 public class LikeService {
     private final ReviewLikeRepository likeRepository;
@@ -22,17 +23,25 @@ public class LikeService {
     }
 
     public LikeResponse toggleLike(int userId, int reviewId) {
+        if (userId <= 0 || reviewId <= 0) {
+            throw ErrorFactory.badRequest("IDs de usuario o reseña inválidos.");
+        }
+        
         boolean liked = likeRepository.toggleLike(userId, reviewId);
         int currentCount = likeRepository.getLikesCount(reviewId);
+        
         updateAuthorVolume(userId, reviewId, liked);
+        
         return new LikeResponse(liked, currentCount);
     }
 
     public boolean hasUserLiked(int userId, int reviewId) {
+        if (userId <= 0 || reviewId <= 0) return false;
         return likeRepository.existsLike(userId, reviewId);
     }
 
     public int getLikesCount(int reviewId) {
+        if (reviewId <= 0) return 0;
         return likeRepository.getLikesCount(reviewId);
     }
 
@@ -42,6 +51,7 @@ public class LikeService {
 
         int authorId = review.getUserId();
 
+        // El autor no gana/pierde kcals por darse like a sí mismo
         if (actorId != authorId) {
             int kcalsModifier = isAddingLike ? 500 : -500;
             
@@ -67,7 +77,7 @@ public class LikeService {
             userRepository.updateUserVolume(authorId, newKcals, newLevel);
         }
     }
-
+    //Clase interna para devolver la respuesta
     public static class LikeResponse {
         private final boolean liked;
         private final int likesCount;

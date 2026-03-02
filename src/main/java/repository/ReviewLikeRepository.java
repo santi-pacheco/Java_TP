@@ -9,18 +9,16 @@ import exception.ErrorFactory;
 
 public class ReviewLikeRepository {
 
-    /**
-     * Toggle like: Returns true if like was ADDED, false if REMOVED
-     */
+
     public boolean toggleLike(int userId, int reviewId) {
         if (existsLike(userId, reviewId)) {
             removeLike(userId, reviewId);
             updateLikesCount(reviewId, -1);
-            return false; // Like removed
+            return false; // Like removido
         } else {
             addLike(userId, reviewId);
             updateLikesCount(reviewId, 1);
-            return true; // Like added
+            return true; // Like agregado
         }
     }
 
@@ -37,7 +35,7 @@ public class ReviewLikeRepository {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error checking like existence");
+            throw ErrorFactory.internal("Error al verificar la existencia del like.");
         }
     }
 
@@ -53,10 +51,10 @@ public class ReviewLikeRepository {
             
         } catch (SQLException e) {
             if (e.getErrorCode() == 1062) {
-                // Duplicate entry - ignore, like already exists
+                //lo ignoramos porque el like ya existe
                 return;
             }
-            throw ErrorFactory.internal("Error adding like");
+            throw ErrorFactory.internal("Error al agregar el like en la base de datos.");
         }
     }
 
@@ -71,7 +69,7 @@ public class ReviewLikeRepository {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error removing like");
+            throw ErrorFactory.internal("Error al remover el like en la base de datos.");
         }
     }
 
@@ -86,7 +84,7 @@ public class ReviewLikeRepository {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error updating likes count");
+            throw ErrorFactory.internal("Error al actualizar el contador de likes de la reseña.");
         }
     }
 
@@ -103,7 +101,7 @@ public class ReviewLikeRepository {
                 }
             }
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error fetching likes count");
+            throw ErrorFactory.internal("Error al obtener la cantidad total de likes.");
         }
         return 0;
     }
