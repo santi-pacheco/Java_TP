@@ -23,6 +23,7 @@ public class ReviewService {
     private WatchlistService watchlistService;
     private SystemSettingsService configuracionService;
     private final UserRepository userRepository;
+    
     private static final int BAN_DAYS = 7;
 
     public ReviewService(ReviewRepository reviewRepository, UserService userService, MovieService movieService, SystemSettingsService configuracionService, WatchlistService watchlistService) {
@@ -35,6 +36,10 @@ public class ReviewService {
     }
 
     public Review createReview(Review review) {
+        if (review == null) {
+            throw ErrorFactory.badRequest("Datos de reseña inválidos.");
+        }
+        
         checkUserBanStatus(review.getUserId());
         
         Movie movie = movieService.getMovieById(review.getMovieId());
@@ -69,6 +74,8 @@ public class ReviewService {
     }
 
     public Review getReviewById(int id) {
+        if (id <= 0) throw ErrorFactory.badRequest("ID de reseña inválido.");
+        
         Review review = reviewRepository.findOne(id);
         if (review == null) {
             throw ErrorFactory.notFound("Reseña no encontrada con ID: " + id);
@@ -77,10 +84,15 @@ public class ReviewService {
     }
 
     public Review getReviewByUserAndMovie(int userId, int movieId) {
+        if (userId <= 0 || movieId <= 0) return null;
         return reviewRepository.findByUserAndMovie(userId, movieId);
     }
 
     public Review updateReview(Review review) {
+        if (review == null || review.getReviewId() <= 0) {
+            throw ErrorFactory.badRequest("Datos de reseña inválidos para actualizar.");
+        }
+        
         checkUserBanStatus(review.getUserId());
         
         Review existingReview = reviewRepository.findOne(review.getReviewId());
@@ -110,6 +122,8 @@ public class ReviewService {
     }
 
     public void deleteReview(int reviewId) {
+        if (reviewId <= 0) throw ErrorFactory.badRequest("ID de reseña inválido.");
+        
         Review existingReview = reviewRepository.findOne(reviewId);
         if (existingReview == null) {
             throw ErrorFactory.notFound("No se puede eliminar. Reseña con ID " + reviewId + " no encontrada");
@@ -120,6 +134,7 @@ public class ReviewService {
     }
 
     public List<Review> getReviewsByMovie(int movieId, int idLector) {
+        if (movieId <= 0) return new ArrayList<>();
         return reviewRepository.findByMovie(movieId, idLector);
     }
 
@@ -128,15 +143,18 @@ public class ReviewService {
     }
 
     public List<Review> getReviewsByUser(int userId) {
+        if (userId <= 0) return new ArrayList<>();
         return reviewRepository.findByUser(userId);
     }
 
     public boolean hasUserReviewedMovie(int userId, int movieId) {
+        if (userId <= 0 || movieId <= 0) return false;
         return reviewRepository.existsByUserAndMovie(userId, movieId);
     }
 
     public Review createOrUpdateReview(Review review) {
-
+        if (review == null) throw ErrorFactory.badRequest("La reseña no puede ser nula.");
+        
         Review existingReview = reviewRepository.findAnyByUserAndMovie(review.getUserId(), review.getMovieId());
         
         if (existingReview != null) {
@@ -148,6 +166,8 @@ public class ReviewService {
     }
     
     public boolean updateModerationStatus(int reviewId, ModerationStatus status, String reason) {
+        if (reviewId <= 0) throw ErrorFactory.badRequest("ID de reseña inválido.");
+        
         Review review = reviewRepository.findOne(reviewId);
         if (review == null) {
             throw ErrorFactory.notFound("Reseña no encontrada con ID: " + reviewId);
@@ -171,8 +191,8 @@ public class ReviewService {
         }
     }
     
-    
     public List<Review> getReviewsByMovieSortedByLikes(int movieId, int idLector) {
+        if (movieId <= 0) return new ArrayList<>();
         return reviewRepository.findByMovieSortedByLikes(movieId, idLector);
     }
     
@@ -183,6 +203,7 @@ public class ReviewService {
         if (offset < friendsCount) {
             List<FeedReviewDTO> friendsReviews = reviewRepository.getFriendsFeedPaginated(userId, offset, limit);
             result.addAll(friendsReviews);
+            
             if (result.size() < limit) {
                 int needed = limit - result.size();
                 List<FeedReviewDTO> popularReviews = reviewRepository.getPopularFeedPaginated(userId, 0, needed);
