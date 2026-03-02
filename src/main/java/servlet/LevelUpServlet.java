@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import entity.User;
 import repository.UserRepository;
+import exception.ErrorFactory;
 
 @WebServlet("/api/level-notified")
 public class LevelUpServlet extends HttpServlet {
@@ -24,28 +25,23 @@ public class LevelUpServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-    	String origen = request.getHeader("Referer");
-        System.out.println("El Servlet LevelUp fue llamado desde: " + origen);
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("usuarioLogueado") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
         User user = (User) session.getAttribute("usuarioLogueado");
+        
         try {
-            int newLevel = Integer.parseInt(request.getParameter("level"));
-            
-            // Actualiza en BD
+            String levelParam = request.getParameter("level");
+            if (levelParam == null || levelParam.isEmpty()) {
+                throw ErrorFactory.badRequest("El nivel es requerido.");
+            }
+            int newLevel = Integer.parseInt(levelParam);
             userRepository.markLevelAsNotified(user.getUserId(), newLevel);
-            
-            // Actualiza en Sesión
             user.setNotifiedLevel(newLevel);
-            session.setAttribute("usuarioLogueado", user);
-            
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
             response.getWriter().write("{\"success\": true}");
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            
+        } catch (NumberFormatException e) {
+            throw ErrorFactory.badRequest("El nivel debe ser un número válido.");
         }
     }
 }
