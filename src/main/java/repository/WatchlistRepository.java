@@ -1,5 +1,6 @@
 package repository;
 import entity.Watchlist;
+import exception.ErrorFactory;
 
 import java.util.ArrayList;
 import java.sql.Connection;
@@ -37,7 +38,7 @@ public class WatchlistRepository {
 				wl.setUserId(rs.getInt("user_id"));
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching watchlists from database", e);
+			throw ErrorFactory.internal("Error fetching watchlists from database");
 		}
 
 		return wl;
@@ -69,7 +70,7 @@ public class WatchlistRepository {
 				wl.setUserId(userId);
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching watchlists from database", e);
+			throw ErrorFactory.internal("Error fetching watchlists from database");
 		}
 		return wl;
 	}
@@ -87,7 +88,7 @@ public class WatchlistRepository {
 				System.out.println("Watchlist created successfully.");
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error creating watchlist", e);
+			throw ErrorFactory.internal("Error creating watchlist");
 		}
 	}
 
@@ -109,7 +110,7 @@ public class WatchlistRepository {
 				addWatchlist(userId);
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error checking watchlist", e);
+			throw ErrorFactory.internal("Error checking watchlist");
 		}
 
 		if (watchlistId == 0) {
@@ -121,7 +122,7 @@ public class WatchlistRepository {
 					watchlistId = rs.getInt("watchlist_id");
 				}
 			} catch (SQLException e) {
-				throw new RuntimeException("Error retrieving watchlist after creation", e);
+				throw ErrorFactory.internal("Error retrieving watchlist after creation");
 			}
 		}
 
@@ -136,7 +137,7 @@ public class WatchlistRepository {
 					"Movie with ID " + movieId + " added to watchlist for user ID " + userId + "." + rowsAffected);
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error adding movie to watchlist", e);
+			throw ErrorFactory.internal("Error adding movie to watchlist");
 		}
 		return wl;
 
@@ -162,7 +163,7 @@ public class WatchlistRepository {
 				stmt.executeUpdate();
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("Error removing movie from watchlist", e);
+			throw ErrorFactory.internal("Error removing movie from watchlist");
 		}
 	}
 }

@@ -22,8 +22,7 @@ public class MovieController {
 	}
 	
 	public Movie getMovieById(int id) {
-		Movie movie = movieService.getMovieById(id);
-		return movie;
+		return movieService.getMovieById(id);
 	}
 	
 	

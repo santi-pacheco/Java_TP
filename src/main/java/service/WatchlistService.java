@@ -4,6 +4,7 @@ import repository.MovieRepository;
 import repository.WatchlistRepository;
 import java.util.List;
 import entity.Watchlist;
+import exception.ErrorFactory;
 import service.UserService;
 import entity.User;
 import entity.Movie;
@@ -31,7 +32,7 @@ public class WatchlistService {
 			Watchlist wl = watchlistRepository.findOne(userId);
 			return wl;
 		} else {
-			throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
+			throw ErrorFactory.notFound("User with ID " + userId + " does not exist.");
 		}
 		
 	}

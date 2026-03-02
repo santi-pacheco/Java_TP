@@ -19,7 +19,6 @@ public class WatchlistController {
 	}
 
 	public List<String> getMoviesInWatchlist(int userId) {
-		System.out.println("Fetching from controller " + userId);
 		Watchlist wl = watchlistService.getWatchlist(userId);
 		return wl.getMovies();
 	}
