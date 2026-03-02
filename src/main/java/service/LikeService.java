@@ -22,12 +22,9 @@ public class LikeService {
     }
 
     public LikeResponse toggleLike(int userId, int reviewId) {
-        
         boolean liked = likeRepository.toggleLike(userId, reviewId);
         int currentCount = likeRepository.getLikesCount(reviewId);
-        
         updateAuthorVolume(userId, reviewId, liked);
-        
         return new LikeResponse(liked, currentCount);
     }
 

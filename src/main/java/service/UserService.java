@@ -209,4 +209,8 @@ User existingUser = userRepository.findOne(user.getUserId());
 			throw ErrorFactory.unauthorized("No tienes permiso para actualizar el plato principal.");
 		}  
     }
+    
+    public void markLevelAsNotified(int userId, int newLevel) {
+		userRepository.markLevelAsNotified(userId, newLevel);
+	}
 }
