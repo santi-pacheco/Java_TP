@@ -374,7 +374,7 @@
             var html = '';
             for (var i = 0; i < Math.min(movies.length, 8); i++) {
                 var movie = movies[i];
-                html += '<div style="padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center;" onclick="selectMovie(' + movie.id + ')">';
+                html += '<div style="padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center;" onclick="selectMovie(' + movie.movieId + ')">';
                 if (movie.posterPath) {
                     html += '<img src="https://image.tmdb.org/t/p/w92' + movie.posterPath + '" style="width: 35px; height: 52px; margin-right: 12px; border-radius: 4px;" onerror="this.style.display=\'none\'">';
                 }
