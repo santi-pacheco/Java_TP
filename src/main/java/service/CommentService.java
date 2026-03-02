@@ -38,10 +38,12 @@ public class CommentService {
         if (commentText == null || commentText.trim().isEmpty()) {
             throw ErrorFactory.badRequest("El texto del comentario no puede estar vacío.");
         }
+        
         Review review = reviewRepository.findOne(reviewId);
         if (review == null) {
             throw ErrorFactory.notFound("La reseña a la que intentas comentar no existe.");
         }
+        
         Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
@@ -51,8 +53,11 @@ public class CommentService {
         comment.setReviewId(reviewId);
         comment.setCommentText(commentText.trim());
         comment.setModerationStatus(ModerationStatus.PENDING_MODERATION);
+        
         comment = commentRepository.add(comment);
-        moderateAndSaveComment(comment, commentText, review.getReviewText(), moviePlot, movieTitle, userId, false); 
+        
+        moderateAndSaveComment(comment, commentText.trim(), review.getReviewText(), moviePlot, movieTitle, userId, false); 
+        
         return comment;
     }
 
@@ -60,28 +65,34 @@ public class CommentService {
         checkUserBanStatus(userId);
         
         if (newText == null || newText.trim().isEmpty()) {
-            throw ErrorFactory.badRequest("El texto no puede estar vacío");
+            throw ErrorFactory.badRequest("El texto no puede estar vacío.");
         }
+        
         ReviewComment comment = commentRepository.findById(commentId);
         if (comment == null) {
-            throw ErrorFactory.notFound("El comentario que intentas editar no existe");
+            throw ErrorFactory.notFound("El comentario que intentas editar no existe.");
         }
         if (comment.getUserId() != userId) {
-            throw ErrorFactory.forbidden("No tienes permiso para editar este comentario");
+            throw ErrorFactory.forbidden("No tienes permiso para editar este comentario.");
         }
+        
         Review review = reviewRepository.findOne(comment.getReviewId());
+        if (review == null) {
+            throw ErrorFactory.notFound("La reseña original ya no existe.");
+        }
+        
         Movie movie = movieRepository.findOne(review.getMovieId());
         String movieTitle = movie != null ? movie.getOriginalTitle() : "";
         String moviePlot = movie != null ? movie.getSynopsis() : "";
 
         moderateAndSaveComment(comment, newText.trim(), review.getReviewText(), moviePlot, movieTitle, userId, true); 
+        
         comment.setCommentText(newText.trim());
         return comment;
     }
 
-
     public void deleteOwnComment(int userId, int commentId) {
-    	ReviewComment comment = commentRepository.findById(commentId);
+        ReviewComment comment = commentRepository.findById(commentId);
         if (comment == null) {
             throw ErrorFactory.notFound("El comentario que intentas eliminar no existe.");
         }
@@ -95,19 +106,23 @@ public class CommentService {
         try {
             ModerationResult result = moderationService.moderateComment(text, reviewText, moviePlot, movieTitle);
             String status = "APPROVED";  
+            
             if (result.hasOffensiveContent()) {
                 status = "REJECTED";
-                userRepository.banUser(userId, BAN_DAYS); // Cuidado: asegúrate de que BAN_DAYS esté definido en tu clase
+                userRepository.banUser(userId, BAN_DAYS);
             } else if (result.hasSpoilers()) {
                 status = "SPOILER";
             }
+            
             if (isEdit) {
                 commentRepository.updateTextAndStatus(comment.getCommentId(), text, status, result.getReason());
             } else {
                 commentRepository.updateModerationStatus(comment.getCommentId(), status, result.getReason());
             } 
-            comment.setModerationStatus(ModerationStatus.valueOf(status)); // Usar valueOf suele ser más estándar que fromString
+            
+            comment.setModerationStatus(ModerationStatus.valueOf(status)); 
             comment.setModerationReason(result.getReason()); 
+            
         } catch (Exception e) {
             throw ErrorFactory.internal("Ocurrió un error al analizar el comentario con nuestra IA. Por favor, intenta de nuevo.");
         }

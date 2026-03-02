@@ -370,7 +370,6 @@ public class UserRepository {
         }
     }
 
-    // ÚNICO PUNTO DE MAPEO (Restaurado a su nombre original)
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setUserId(rs.getInt("user_id"));
