@@ -233,7 +233,7 @@ public class UserRepository {
     public void banUser(int userId, int daysToban) {
         String sql = "UPDATE users SET banned_until = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE user_id = ?";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-             PreparedStatement stmt =prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, daysToban);
             stmt.setInt(2, userId);

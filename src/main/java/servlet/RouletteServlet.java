@@ -43,7 +43,7 @@ public class RouletteServlet extends HttpServlet {
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         
-        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         this.watchlistController = new WatchlistController(watchlistService);
     }

@@ -270,7 +270,7 @@ public class MovieRepository {
         String sql = "INSERT IGNORE INTO movie_directors (movie_id, director_id) VALUES (?, ?)";
 
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
-             PreparedStatement stmt =prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
              
             for (Object[] row : relations) {
                 stmt.setInt(1, (Integer) row[0]);

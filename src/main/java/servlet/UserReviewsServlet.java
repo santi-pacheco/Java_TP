@@ -45,7 +45,7 @@ public class UserReviewsServlet extends HttpServlet {
         UserService userService = new UserService(userRepository, new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(), followRepository, blockRepository);
         movieService = new MovieService(movieRepository);
         SystemSettingsService configuracionService = new SystemSettingsService(configuracionRepository);
-        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
     }

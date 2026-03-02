@@ -55,7 +55,7 @@ public class ProfileServlet extends HttpServlet {
         this.movieService = new MovieService(movieRepository);
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
-        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionReglasService, watchlistService);
         

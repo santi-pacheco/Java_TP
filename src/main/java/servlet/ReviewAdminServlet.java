@@ -46,7 +46,7 @@ public class ReviewAdminServlet extends HttpServlet {
 		UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
 		MovieService movieService = new MovieService(movieRepository);
 		SystemSettingsService configService = new SystemSettingsService(configRepository);
-		WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+		WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
 		ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configService, watchlistService);
 		this.reviewController = new ReviewController(reviewService);

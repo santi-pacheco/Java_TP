@@ -71,7 +71,7 @@ public class ReviewServlet extends HttpServlet {
         UserService userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
         MovieService movieService = new MovieService(movieRepository);
         SystemSettingsService configuracionService = new SystemSettingsService(configuracionRepository);
-        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionService, watchlistService);
         

@@ -66,7 +66,7 @@ public class MovieDetailServlet extends HttpServlet {
             BlockRepository blockRepository = new BlockRepository();
             this.userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
             
-            WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+            WatchlistRepository watchlistRepository = new WatchlistRepository();
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, this.userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);
             

@@ -78,7 +78,7 @@ public class RegisterServlet extends HttpServlet {
             }
             User createdUser = userService.CreateUser(userFromForm);
             try {
-                repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository(new repository.MovieRepository());
+                repository.WatchlistRepository watchlistRepo = new repository.WatchlistRepository();
                 watchlistRepo.addWatchlist(createdUser.getUserId());
             } catch (Exception e) {
                 System.err.println("Error creando watchlist para el nuevo usuario: " + e.getMessage());

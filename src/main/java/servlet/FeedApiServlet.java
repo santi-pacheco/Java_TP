@@ -48,7 +48,7 @@ public class FeedApiServlet extends HttpServlet {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         FollowRepository followRepo = new FollowRepository();
         UserService userService = new UserService(userRepo, passwordEncoder, followRepo, blockRepository);
-        WatchlistRepository watchlistRepo = new WatchlistRepository(movieRepo);
+        WatchlistRepository watchlistRepo = new WatchlistRepository();
         WatchlistService watchServ = new WatchlistService(watchlistRepo, userService, movieServ);
         this.reviewService = new ReviewService(reviewRepo, userService, movieServ, configServ, watchServ);
         this.gson = new Gson();
