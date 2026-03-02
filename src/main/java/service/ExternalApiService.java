@@ -7,11 +7,9 @@ import info.movito.themoviedbapi.tools.appendtoresponse.*;
 import info.movito.themoviedbapi.tools.builders.discover.*;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.movies.Credits;
-import info.movito.themoviedbapi.model.people.credits.*;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.core.ProductionCountry;
 import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,33 +19,25 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.time.format.DateTimeParseException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
-import controller.MovieController;
 
 import entity.Movie;
 import entity.Genre;
+import entity.Person;
 
 import info.movito.themoviedbapi.TmdbPeople;
 import info.movito.themoviedbapi.model.people.PersonDb;
-
-import java.util.Date;
-
-import java.time.ZoneId;
-import entity.Person;
+import exception.ErrorFactory;
 
 public class ExternalApiService {
     
     private TmdbApi tmdbApi;
     
     public TmdbApi getTmdbApi() {
-		return tmdbApi;
-	}
+        return tmdbApi;
+    }
     
     public ExternalApiService(String apiKey) {
         this.tmdbApi = new TmdbApi(apiKey);
@@ -57,7 +47,6 @@ public class ExternalApiService {
         return tmdbApi.getGenre().getMovieList("es");
     }
     
- 
     public Genre convertToLocalGenre(info.movito.themoviedbapi.model.core.Genre tmdbGenre) {
         Genre localGenre = new Genre();
         localGenre.setApiId(tmdbGenre.getId());
@@ -65,27 +54,26 @@ public class ExternalApiService {
         return localGenre;
     }
     
-
     public List<Genre> convertToLocalGenres(List<info.movito.themoviedbapi.model.core.Genre> tmdbGenres) {
         return tmdbGenres.stream()
                 .map(this::convertToLocalGenre)
                 .collect(Collectors.toList());
     }
-     
+      
     public List<info.movito.themoviedbapi.model.core.popularperson.PopularPerson> getMoviePersons() throws TmdbException {
-		return tmdbApi.getPeopleLists().getPopular(null, 1).getResults();
-	}
+        return tmdbApi.getPeopleLists().getPopular(null, 1).getResults();
+    }
     
     public List<entity.Person> convertToLocalPersons(List<info.movito.themoviedbapi.model.core.popularperson.PopularPerson> tmdbPersons) {
-		return tmdbPersons.stream()
-				.map(tmdbPerson -> {
-					entity.Person localPerson = new entity.Person();
-					localPerson.setApiId(tmdbPerson.getId());
-					localPerson.setName(tmdbPerson.getName());
-					return localPerson;
-				})
-				.collect(Collectors.toList());
-	}
+        return tmdbPersons.stream()
+                .map(tmdbPerson -> {
+                    entity.Person localPerson = new entity.Person();
+                    localPerson.setApiId(tmdbPerson.getId());
+                    localPerson.setName(tmdbPerson.getName());
+                    return localPerson;
+                })
+                .collect(Collectors.toList());
+    }
 
     public List<info.movito.themoviedbapi.model.core.Movie> getMoviesByGenre(List<Genre> genre) throws TmdbException {
         final int targetResults = 10000;
@@ -162,7 +150,6 @@ public class ExternalApiService {
         }
     }
     
-    
     public List<entity.Country> mapCountries(List<info.movito.themoviedbapi.model.core.ProductionCountry> tmdbCountries) {
         if (tmdbCountries == null) {
             return new ArrayList<>();
@@ -179,38 +166,34 @@ public class ExternalApiService {
     }
     
     public static List<entity.Country> getMovieCountries() throws TmdbException, IOException {
-        System.out.println("📡 Obteniendo países desde TMDB API...");
         try {
-        	URL urlCountries = new URL("https://api.themoviedb.org/3/configuration/countries?api_key=a47ba0b127499b0e1b28ceb0a183ec57");
-        	HttpURLConnection conn = (HttpURLConnection)urlCountries.openConnection();
-        	conn.setRequestMethod("GET");
-        	BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            URL urlCountries = new URL("https://api.themoviedb.org/3/configuration/countries?api_key=a47ba0b127499b0e1b28ceb0a183ec57");
+            HttpURLConnection conn = (HttpURLConnection)urlCountries.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder response = new StringBuilder();
             String line;
             while((line = reader.readLine()) != null) {
-            	response.append(line);
-            	System.out.println("Nro Linea"+ line);
+                response.append(line);
             }
             reader.close();
-			System.out.println("LOCURA" + response.toString());
-			Gson gson = new Gson();
-			entity.Country[] countriesArray = gson.fromJson(response.toString(), entity.Country[].class);
-			List<entity.Country> countriesList = new ArrayList<>();
-			
-			for(entity.Country c : countriesArray) {
-				countriesList.add(c);
-			}
-			System.out.println("✅ Países obtenidos: " + countriesList.size());
-			return countriesList;
-		} catch(IOException e) {
-			System.err.println("❌ Error al obtener países: " + e.getMessage());
-			throw e;
-	    }
+            
+            Gson gson = new Gson();
+            entity.Country[] countriesArray = gson.fromJson(response.toString(), entity.Country[].class);
+            List<entity.Country> countriesList = new ArrayList<>();
+            
+            for(entity.Country c : countriesArray) {
+                countriesList.add(c);
+            }
+            return countriesList;
+        } catch(IOException e) {
+            throw ErrorFactory.internal("Error al obtener la lista de países desde la API externa.");
+        }
     }
     
     public Movie mapAndUpsertFromDiscover(info.movito.themoviedbapi.model.core.Movie tmdbMovie) {
-    	Movie m = new Movie();
-    	m.setApiId(tmdbMovie.getId());
+        Movie m = new Movie();
+        m.setApiId(tmdbMovie.getId());
         m.setTitle(tmdbMovie.getTitle());
         m.setOriginalTitle(tmdbMovie.getOriginalTitle());
         m.setSynopsis(tmdbMovie.getOverview());
@@ -222,11 +205,12 @@ public class ExternalApiService {
         m.setOriginalLanguage(tmdbMovie.getOriginalLanguage());
         if (tmdbMovie.getReleaseDate() != null && !tmdbMovie.getReleaseDate().isBlank()) {
             try {
-            	LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
+                LocalDate release = LocalDate.parse(tmdbMovie.getReleaseDate());
                 int year = release.getYear();
                 m.setReleaseYear(year);
                 m.setReleaseDate(release);
             } catch (DateTimeParseException ex) {
+                // Silencioso
             }
         }
         m.setDuration(null);
@@ -257,7 +241,6 @@ public class ExternalApiService {
     }
 
     public MovieDetailsDTO fetchMovieDetailsWithCredits(int tmdbMovieId, String language) throws TmdbException {
-
         TmdbMovies moviesApi = tmdbApi.getMovies();
         MovieDb movieDb = moviesApi.getDetails(tmdbMovieId, language,
             MovieAppendToResponse.CREDITS,
@@ -265,7 +248,7 @@ public class ExternalApiService {
         );
 
         if (movieDb == null) {
-            throw new IllegalStateException("El resultado de MovieDb es nulo para el id=" + tmdbMovieId);
+            throw ErrorFactory.notFound("El resultado de la API es nulo para el ID: " + tmdbMovieId);
         }
 
         Integer runtime = movieDb.getRuntime();
@@ -281,13 +264,11 @@ public class ExternalApiService {
     }
 
     public class PersonWithCharacter extends entity.Person {
-
         private String characterName;
         
         public String getCharacterName() {
             return characterName;
         }
-
         public void setCharacterName(String characterName) {
             this.characterName = characterName;
         }
@@ -302,16 +283,13 @@ public class ExternalApiService {
                 .limit(20) 
                 .map(tmdbPerson -> {
                     PersonWithCharacter personWithRole = new PersonWithCharacter();
-
                     personWithRole.setApiId(tmdbPerson.getId());
                     personWithRole.setName(tmdbPerson.getName());
                     personWithRole.setCharacterName(tmdbPerson.getCharacter());
-
                     return personWithRole;
                 })
                 .collect(Collectors.toList());
     }
-    
     
     public List<entity.Person> mapCrew(List<info.movito.themoviedbapi.model.movies.Crew> tmdbCrew) {
         if (tmdbCrew == null) {
@@ -330,23 +308,22 @@ public class ExternalApiService {
     }
     
     public PersonDb fetchBasicPersonDetails(int tmdbPersonId, String language) throws TmdbException {
-
         TmdbPeople peopleApi = tmdbApi.getPeople();
         PersonDb personDb = peopleApi.getDetails(tmdbPersonId, language);
 
         if (personDb == null) {
-            throw new IllegalStateException("El resultado de PersonDb es nulo para el id=" + tmdbPersonId);
+            throw ErrorFactory.notFound("Detalles de persona no encontrados para ID: " + tmdbPersonId);
         }
         return personDb;
     }
   
     public Person mapTmdbToPersona(PersonDb tmdbPerson) {
-        if (tmdbPerson == null) {
-            return null;
-        }
+        if (tmdbPerson == null) return null;
+        
         Person personaDB = new Person();
         personaDB.setApiId(tmdbPerson.getId());
         personaDB.setPlaceOfBirth(tmdbPerson.getPlaceOfBirth());
+        
         java.sql.Date sqlBirthDate = null;
         String birthdayString = tmdbPerson.getBirthday();
         
@@ -355,11 +332,12 @@ public class ExternalApiService {
                 LocalDate localDate = LocalDate.parse(birthdayString);
                 sqlBirthDate = java.sql.Date.valueOf(localDate); 
             } catch (DateTimeParseException e) {
-                System.err.println("Error al parsear fecha de nacimiento: " + birthdayString);
+                // Falla silenciosa
             }
         }
         personaDB.setBirthdate(sqlBirthDate);
         personaDB.setProfilePath(tmdbPerson.getProfilePath());
+        
         List<String> alsoKnownAs = tmdbPerson.getAlsoKnownAs();
         if (alsoKnownAs != null && !alsoKnownAs.isEmpty()) {
             String joinedAlias = String.join(", ", alsoKnownAs);
@@ -370,11 +348,7 @@ public class ExternalApiService {
         } else {
             personaDB.setAlsoKnownAs(null);
         }
-        if (tmdbPerson.getId() == 5542969) {
-        	System.out.println("DEBUG Persona TMDB ID 5542969 - Nombre: " + tmdbPerson.getName() + ", Alias: " + personaDB.getAlsoKnownAs()
-        	+ ", BirthDate: " + personaDB.getBirthdate() + ", Place of Birth: " + personaDB.getPlaceOfBirth()
-        	+ ", Profile Path: " + personaDB.getProfilePath());
-        }
+        
         return personaDB;
     }
     
@@ -388,5 +362,4 @@ public class ExternalApiService {
         p.setPlaceOfBirth(pwc.getPlaceOfBirth());
         return p;
     }
-    
 }
