@@ -3,6 +3,7 @@ package util;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.model.people.PersonDb;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,6 +29,9 @@ import repository.MovieRepository;
 import service.MovieService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+
 import controller.GenreController;
 import service.GenreService;
 import repository.GenreRepository;
@@ -39,10 +43,13 @@ import java.util.concurrent.TimeUnit;
 import controller.PersonController;
 import repository.PersonRepository;
 import service.PersonService;
+import service.RecommendationService;
 import entity.Country;
 import entity.Watchlist;
 import repository.WatchlistRepository;
 import java.util.ArrayList;
+
+
 
 public class DiscoverReflectionMain {
 	
@@ -64,10 +71,20 @@ public class DiscoverReflectionMain {
     }
 	
     public static void main(String[] args) throws Exception {
-    	CountryRepository countryRepository = new CountryRepository();
-     	CountryService countryService = new CountryService(countryRepository);
-     	List<Country> countries = ExternalApiService.getMovieCountries();
-     	countryRepository.saveAll(countries);
+    	
+    	//Test recomendaciones 
+    	System.out.println("Exportando ratings a CSV para sistema de recomendación...");
+    	RecommendationService recommendationService = new RecommendationService();
+    	recommendationService.exportRatingCsv();
+    	
+    	
+    	//CARGA DE PAISES
+//    	CountryRepository countryRepository = new CountryRepository();
+//     	CountryService countryService = new CountryService(countryRepository);
+//     	List<Country> countries = ExternalApiService.getMovieCountries();
+//     	countryRepository.saveAll(countries);
+     	
+
     //CARGA DE GENEROS
 		//loadGenres();
 	//CARGA DE PELICULAS
@@ -75,7 +92,7 @@ public class DiscoverReflectionMain {
 	//CARGA DE ACTORES, DIRECTORES Y DURACION
 		//loadActorsDirectorsAndRuntime();
     //loadPersons();
-    	countryPerMovie();
+    	//countryPerMovie();
     }   	
     public static void loadGenres() {
     //CARGA DE GENEROS EN LA BASE DE DATOS	
@@ -180,15 +197,15 @@ public class DiscoverReflectionMain {
                 
                 
                 
-              
-
+             //Reviisar 
+/*
                 for (Country c : paisesPeli) {
                     CountryRepository cr = new CountryRepository();
                     int co =  cr.findOneByISO(c.getIso_3166_1());
                     System.out.println("   -> Guardando país: " + co + " para la película: " + movie.getTitulo());
                     cr.saveCountryMovie(co, movie.getId());
                 }
-                
+  */              
                  
                  
             } catch (Exception e) {
@@ -383,12 +400,12 @@ public class DiscoverReflectionMain {
                 List<actorCharacter> ac = personController.saveActors(personWithCharacter);
 
                 System.out.println("   -> Actores guardados. Actualizando relación actores-película...");
-                movieController.updateMovieActors(movie.getId(), ac);
+      //          movieController.updateMovieActors(movie.getId(), ac);
                 List<entity.Person> director = externalApiService.mapCrew(credits.getCrew());
                 System.out.println("   -> Actualizando directores asociados a personas...");
                 List<entity.Person> d = personController.saveDirectors(director);
                 System.out.println("   -> Directores guardados. Actualizando relación directores-película...");
-                movieController.updateMovieDirectors(movie.getId(), d);
+      //          movieController.updateMovieDirectors(movie.getId(), d);
 				System.out.println("   -> Relación directores-película actualizada.");
 				// Si llegamos aquí, todo fue bien
 				System.out.println("   -> Proceso completado para '" + movie.getTitulo() + "'.\n");
@@ -502,7 +519,12 @@ public static void loadPersons() {
         
         System.out.println("Carga de detalles de personas finalizada.");
     }
-    	
+    
+
+
+//Testeo sistema de recomendación de películas por género
+
+
     	
     	//TESTEO DE OBTENCIÓN DE ACTORES Y DIRECTORES DE UNA PELÍCULA
     	/*
@@ -593,7 +615,14 @@ public static void loadPersons() {
     
    
     
-    
+
+
+
+
+
+
+
+
   
     
 }

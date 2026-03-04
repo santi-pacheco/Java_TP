@@ -415,5 +415,36 @@ public class ReviewRepository {
             }
             return feed;
         }
+        
+        public List<Review> getAllReview() {
+        	
+        	String sql = "SELECT \n"
+        			+ "    r.id_user as idUser,\n"
+        			+ "    r.id_movie as idMovie,\n"
+        			+ "    r.rating as Rating\n"
+        			+ "FROM reviews r;\n";
+        	try {
+        				try (Connection conn = DataSourceProvider.getDataSource().getConnection();
+			            PreparedStatement stmt = conn.prepareStatement(sql);
+			            ResultSet rs = stmt.executeQuery()) {
+			            List<Review> reviews = new ArrayList<>();
+			            while (rs.next()) {
+			                Review review = new Review();
+			                review.setId_user(rs.getInt("idUser"));
+			                review.setId_movie(rs.getInt("idMovie"));
+			                review.setRating(rs.getDouble("Rating"));
+			                reviews.add(review);
+			            }
+			            return reviews;
+			        }
+        		
+        		
+        	} catch (Exception e) {
+				throw ErrorFactory.internal("Error fetching all reviews");
+			}
+        	
+        	
+        	
+        }
     
 }
