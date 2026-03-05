@@ -16,6 +16,8 @@
   </properties>
 
   <dependencies>
+  
+  
   	
   	<dependency>
       <groupId>com.google.guava</groupId>
@@ -97,6 +99,32 @@
     	<version>0.4.20</version>
 	</dependency>
 	
+   <!-- Mahout con soporte de recomendaciones -->
+    <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-core</artifactId>
+        <version>0.9</version>
+    </dependency>
+    <!-- Dependencia para la modificar archivos .csv -->
+    <dependency>
+    	<groupId>com.opencsv</groupId>
+    	<artifactId>opencsv</artifactId>
+    	<version>4.1</version>
+	</dependency>
+    
+    <!-- SLF4J para logs -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.32</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.7.32</version>
+    </dependency>
+	
 	<dependency>
    	  <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
@@ -121,6 +149,8 @@
 		<version>20231013</version>
 	</dependency>
   </dependencies>
+    
+        
     
   <build>
     <plugins>
