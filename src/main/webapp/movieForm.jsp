@@ -20,7 +20,7 @@ body { background: #FAF8F3;
     <div class="form-wrapper">
 
         <% Movie movie = (Movie) request.getAttribute("movie"); %>
-        <h2><%= (movie != null && movie.getId() != 0) ? "Editar" : "Crear" %> Película</h2>
+        <h2><%= (movie != null && movie.getMovieId() != 0) ? "Editar" : "Crear" %> Película</h2>
         
 		<% 
 		    Set<String> errors = (Set<String>) request.getAttribute("errors");
@@ -41,55 +41,55 @@ body { background: #FAF8F3;
         
         <form action="<%= request.getContextPath() %>/movies" method="POST">
 
-            <input type="hidden" name="accion" value="<%= (movie != null && movie.getId() != 0) ? "actualizar" : "crear" %>">
+            <input type="hidden" name="accion" value="<%= (movie != null && movie.getMovieId() != 0) ? "actualizar" : "crear" %>">
 
             <% if (movie != null) { %>
-                <input type="hidden" name="id" value="<%= movie.getId() %>">
+                <input type="hidden" name="id" value="<%= movie.getMovieId() %>">
             <% } %>
             
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>ID API:</label>
-                        <input type="number" name="id_api" class="form-control" value="<%= movie != null ? movie.getId_api() : "" %>" required>
+                        <input type="number" name="id_api" class="form-control" value="<%= movie != null ? movie.getApiId() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Año Estreno:</label>
-                        <input type="number" name="estrenoYear" class="form-control" value="<%= movie != null ? movie.getEstrenoYear() : "" %>" required>
+                        <input type="number" name="estrenoYear" class="form-control" value="<%= movie != null ? movie.getReleaseYear() : "" %>" required>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <label>Título:</label>
-                <input type="text" name="titulo" class="form-control" value="<%= movie != null ? movie.getTitulo() : "" %>" required>
+                <input type="text" name="titulo" class="form-control" value="<%= movie != null ? movie.getTitle() : "" %>" required>
             </div>
             <div class="form-group">
                 <label>Título Original:</label>
-                <input type="text" name="tituloOriginal" class="form-control" value="<%= movie != null ? movie.getTituloOriginal() : "" %>" required>
+                <input type="text" name="tituloOriginal" class="form-control" value="<%= movie != null ? movie.getOriginalTitle() : "" %>" required>
             </div>
             <div class="form-group">
                 <label>Sinopsis:</label>
-                <textarea name="sinopsis" class="form-control" rows="3" required><%= movie != null ? movie.getSinopsis() : "" %></textarea>
+                <textarea name="sinopsis" class="form-control" rows="3" required><%= movie != null ? movie.getSynopsis() : "" %></textarea>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
                         <label>Duración (HH:MM):</label>
-                        <input type="time" name="duracion" class="form-control" value="<%= movie != null && movie.getDuracion() != null ? movie.getDuracion().toString().substring(0,5) : "" %>" required>
+                        <input type="time" name="duracion" class="form-control" value="<%= movie != null && movie.getDuration() != null ? movie.getDuration().toString().substring(0,5) : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                          <label>Puntuación API:</label>
-                        <input type="number" step="0.1" name="puntuacionApi" class="form-control" value="<%= movie != null ? movie.getPuntuacionApi() : "" %>" required>
+                        <input type="number" step="0.1" name="puntuacionApi" class="form-control" value="<%= movie != null ? movie.getApiRating() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                          <label>Popularidad:</label>
-                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularidad() : "" %>" required> 
+                        <input type="number" step="0.1" name="popularidad" class="form-control" value="<%= movie != null ? movie.getPopularity() : "" %>" required> 
                     </div>
                 </div>
             </div>
@@ -97,21 +97,21 @@ body { background: #FAF8F3;
                 <div class="col-md-4">
                      <div class="form-group">
                         <label>Idioma Original:</label>
-                        <input type="text" name="idiomaOriginal" class="form-control" maxlength="2" value="<%= movie != null ? movie.getIdiomaOriginal() : "" %>" required>
+                        <input type="text" name="idiomaOriginal" class="form-control" maxlength="2" value="<%= movie != null ? movie.getOriginalLanguage() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                          <label>Votos API:</label>
-                        <input type="number" name="votosApi" class="form-control" value="<%= movie != null ? movie.getVotosApi() : "" %>" required>
+                        <input type="number" name="votosApi" class="form-control" value="<%= movie != null ? movie.getApiVotes() : "" %>" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                          <label>Adulto:</label>
                         <select name="adulto" class="form-control" required>
-                            <option value="false" <%= movie != null && !movie.getAdulto() ? "selected" : "" %>>No</option>
-                            <option value="true" <%= movie != null && movie.getAdulto() ? "selected" : "" %>>Sí</option>
+                            <option value="false" <%= movie != null && !movie.getIsAdult() ? "selected" : "" %>>No</option>
+                            <option value="true" <%= movie != null && movie.getIsAdult() ? "selected" : "" %>>Sí</option>
                         </select>
                     </div>
                 </div>
@@ -122,7 +122,7 @@ body { background: #FAF8F3;
             </div>
             <div class="form-group">
                 <label>ID IMDB:</label>
-                <input type="text" name="id_imdb" class="form-control" value="<%= movie != null && movie.getId_imdb() != null ? movie.getId_imdb() : "" %>">
+                <input type="text" name="id_imdb" class="form-control" value="<%= movie != null && movie.getImdbId() != null ? movie.getImdbId() : "" %>">
             </div>
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a href="<%= request.getContextPath() %>/movies" class="btn btn-default">Cancelar</a>

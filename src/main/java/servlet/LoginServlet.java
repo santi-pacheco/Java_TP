@@ -38,7 +38,6 @@ public class LoginServlet extends HttpServlet {
  @Override
  protected void doGet(HttpServletRequest request, HttpServletResponse response) 
          throws ServletException, IOException {
-     
      request.getRequestDispatcher("/login.jsp").forward(request, response);
  }
  
@@ -51,16 +50,13 @@ public class LoginServlet extends HttpServlet {
 
      try {
          User usuarioValidado = userController.login(username, password);
-         
          HttpSession session = request.getSession(true); 
          session.setAttribute("usuarioLogueado", usuarioValidado);
-         
          if ("admin".equals(usuarioValidado.getRole())) {
         	 response.sendRedirect(request.getContextPath() + "/home");;
          } else {
              response.sendRedirect(request.getContextPath() + "/home");
          }
-
      } catch (AppException e) {
          if (e.getStatusCode() >= 400 && e.getStatusCode() < 500) {
              request.setAttribute("error", e.getMessage());

@@ -245,7 +245,7 @@
             <div class="reviews-grid" id="reviewsContainer">
                 <%
                     for (Review review : reviews) {
-                        Movie movie = moviesMap.get(review.getId_movie());
+                        Movie movie = moviesMap.get(review.getMovieId());
                         if (movie != null) {
                             String posterUrl = movie.getPosterPath() != null 
                                 ? "https://image.tmdb.org/t/p/w500" + movie.getPosterPath()
@@ -254,24 +254,24 @@
                             String status = (review.getModerationStatus() != null) ? review.getModerationStatus().toString() : "PENDING_MODERATION";
                             
 
-                            long timestamp = review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0;
+                            long timestamp = review.getCreatedAt() != null ? review.getCreatedAt().toEpochDay() : 0;
                 %>
 
                     <div class="review-card" 
 					     data-rating="<%= review.getRating() %>" 
 					     data-timestamp="<%= timestamp %>"
 					     data-status="<%= status %>"
-					     onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'"> 
+					     onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>'"> 
                          
                         <img src="<%= posterUrl %>" 
-                             alt="<%= movie.getTitulo() %>" 
+                             alt="<%= movie.getTitle() %>" 
                              class="movie-poster"
                              onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
                         
                         <div class="review-content">
 
                             <span class="movie-title">
-						    	<%= movie.getTitulo() %>
+						    	<%= movie.getTitle() %>
 							</span>
                             
                             <div class="rating-date">
@@ -279,7 +279,7 @@
                                     🍿 <%= String.format("%.1f", review.getRating()) %>/5.0 Kcals
                                 </div>
                                 <div class="date">
-                                    <%= review.getCreated_at() != null ? review.getCreated_at().toString() : "" %>
+                                    <%= review.getCreatedAt() != null ? review.getCreatedAt().toString() : "" %>
                                 </div>
                                 
                                 <%
@@ -296,7 +296,7 @@
                             </div>
                             
                             <div class="review-text">
-                                <%= review.getReview_text() %>
+                                <%= review.getReviewText() %>
                             </div>
                         </div>
                     </div>

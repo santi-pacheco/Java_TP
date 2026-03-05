@@ -16,7 +16,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= ((Movie)request.getAttribute("movie")).getTitulo() %> - Fat Movies</title>
+    <title><%= ((Movie)request.getAttribute("movie")).getTitle() %> - Fat Movies</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -70,24 +70,39 @@
         .reviews-list { display: flex; flex-direction: column; gap: 20px; }
         .review-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
 
-       /* --- RESEÑA NIVEL 4: CHEDDAR CHORREANDO POR ARRIBA --- */
         .cheddar-review-card {
             position: relative;
             border: 3px solid #FFB800 !important;
             border-radius: 15px !important;
             background: #FFFdf5 !important;
-            margin-top: 30px !important; /* Espacio para el badge de arriba */
-            margin-bottom: 20px !important;
+            margin-top: 30px !important;
+            margin-bottom: 40px !important;
             padding: 25px !important; 
-            padding-top: 40px !important; /* Espacio para que el queso no tape la foto */
             overflow: visible !important; 
         }
 
-        /* El badge de Crítico Supremo (ESTO FALTABA) */
+        .cheddar-review-card::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            height: 40px;
+            background-image: url('${pageContext.request.contextPath}/utils/cheddar.png');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+            background-position: top left;
+
+            z-index: 10;
+            pointer-events: none; 
+            border-top-left-radius: 15px; 
+            border-top-right-radius: 15px; 
+        }
+
         .cheddar-review-card::before {
             content: '👑 Crítico Michelin';
             position: absolute;
-            top: -16px;
+            top: -15px;
             right: 20px;
             background: #222;
             color: #FFB800;
@@ -99,24 +114,6 @@
             z-index: 11;
             border: 2px solid #FFB800;
         }
-        
-        /* Queso derretido cayendo desde el borde SUPERIOR (Más orgánico y asimétrico) */
-        .cheddar-review-card::after {
-            content: '';
-            position: absolute;
-            top: -3px; 
-            left: -3px; 
-            right: -3px; 
-            height: 35px; /* Un poco más alto para darle lugar a las gotas largas */
-            /* SVG de queso asimétrico, con gotas de distintos tamaños y curvas orgánicas */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 50' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1000,0 L1000,10 C960,10 950,45 920,45 C890,45 880,15 840,15 C810,15 800,35 770,35 C740,35 730,5 690,5 C660,5 650,50 620,50 C590,50 580,20 540,20 C510,20 500,40 470,40 C440,40 430,10 390,10 C360,10 350,35 320,35 C290,35 280,15 240,15 C210,15 200,45 170,45 C140,45 130,20 90,20 C60,20 50,35 20,35 C10,35 5,15 0,15 Z' fill='%23FFB800'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-size: 100% 100%; /* Estira el diseño a lo ancho en vez de repetirlo como baldosas */
-            z-index: 10;
-            pointer-events: none; 
-            border-top-left-radius: 15px; 
-            border-top-right-radius: 15px; 
-        }
 
         .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
         .review-text { color: #444; line-height: 1.6; margin-bottom: 10px; }
@@ -127,11 +124,9 @@
         .author-avatar-wrapper { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .author-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; background-color: #f5f5f5; }
 
-        /* --- AVATAR NIVEL 3/4: LA HAMBURGUESA INFALIBLE (SIN EMOJI) --- */
         .burger-avatar-border {
             border-radius: 50% !important;
             padding: 4px;
-            /* Degradados que forman pan, lechuga, carne y pan */
             background: linear-gradient(180deg, 
                 #F5B041 0%, #F5B041 30%,   
                 #58D68D 30%, #58D68D 40%,   
@@ -212,10 +207,11 @@
         .comment-author-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
         .comment-text { color: #555; line-height: 1.4; word-wrap: break-word; }
         
-        .comment-actions { display: flex; gap: 5px; margin-left: auto; }
-        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.5; transition: all 0.2s; padding: 0 4px; }
-        .btn-icon:hover { opacity: 1; transform: scale(1.15); }
-        .btn-icon.delete:hover { filter: hue-rotate(320deg) saturate(300%); }
+        .comment-actions { display: flex; gap: 8px; margin-left: auto; }
+        .btn-action { background: transparent; border: 1px solid #333; color: #333; font-family: inherit; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-action:hover { background: #333; color: #fff; }
+        .btn-action.delete { border-color: #d32f2f; color: #d32f2f; }
+        .btn-action.delete:hover { background: #d32f2f; color: #fff; }
         
         .comment-form { display: flex; gap: 10px; }
         .comment-input { flex: 1; padding: 10px; border: 2px solid #eee; border-radius: 8px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.3s; }
@@ -236,6 +232,7 @@
         @keyframes slideInToast { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutToast { to { opacity: 0; visibility: hidden; margin-top: -50px; } }
 
+        /* --- TRUCO UX: El overlay se enciende, pero el contenido espera 400ms --- */
         #aiLoadingOverlay {
             position: fixed;
             top: 0;
@@ -249,6 +246,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            opacity: 0; /* Empieza invisible */
+            animation: fadeInOverlay 0.3s ease 0.4s forwards; /* Tarda 400ms en mostrarse */
+        }
+
+        @keyframes fadeInOverlay {
+            to { opacity: 1; }
         }
 
         .spinner-ai {
@@ -304,7 +307,7 @@
 <body>
     <div id="aiLoadingOverlay">
         <div class="spinner-ai"></div>
-        <h3 style="color:#333; margin-top:20px;">Nuestra IA está analizando tu reseña...</h3>
+        <h3 style="color:#333; margin-top:20px;" id="aiLoadingText">Nuestra IA está analizando tu contenido...</h3>
         <p style="color:#666;">Verificando normas de la comunidad y posibles spoilers.</p>
     </div>
 
@@ -313,7 +316,7 @@
             <div id="resultIcon" class="result-icon"></div>
             <div id="resultTitle" class="result-title"></div>
             <div id="resultMessage" class="result-message"></div>
-            <button class="result-btn" onclick="window.location.reload()">Entendido</button>
+            <button class="result-btn" id="resultBtn" onclick="window.location.reload()">Entendido</button>
         </div>
     </div>
 
@@ -328,7 +331,7 @@
         if (likedReviewIds == null) likedReviewIds = new ArrayList<>();
         
         User loggedUser = (User) session.getAttribute("usuarioLogueado");
-        Integer currentUserId = loggedUser != null ? loggedUser.getId() : null;
+        Integer currentUserId = loggedUser != null ? loggedUser.getUserId() : null;
         
         if (movie != null) {
     %>
@@ -336,20 +339,20 @@
     <div class="movie-bg"></div>
     <div class="movie-hero">
         <div class="movie-content">
-            <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" alt="<%= movie.getTitulo() %>" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Imagen'">
+            <img src="https://image.tmdb.org/t/p/w500<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" alt="<%= movie.getTitle() %>" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Imagen'">
             <div class="movie-info">
-                <h1 class="movie-title"><%= movie.getTitulo() %></h1>
-                <% if (movie.getTituloOriginal() != null && !movie.getTituloOriginal().equals(movie.getTitulo())) { %>
-                    <div class="movie-original-title"><%= movie.getTituloOriginal() %></div>
+                <h1 class="movie-title"><%= movie.getTitle() %></h1>
+                <% if (movie.getOriginalTitle() != null && !movie.getOriginalTitle().equals(movie.getTitle())) { %>
+                    <div class="movie-original-title"><%= movie.getOriginalTitle() %></div>
                 <% } %>
                 
                 <div class="movie-meta">
-                    <div class="meta-item"><span class="meta-label">Año</span><span class="meta-value"><%= movie.getEstrenoYear() %></span></div>
-                    <% if (movie.getDuracion() != null) { %>
-                        <div class="meta-item"><span class="meta-label">Duración</span><span class="meta-value"><%= movie.getDuracion() %></span></div>
+                    <div class="meta-item"><span class="meta-label">Año</span><span class="meta-value"><%= movie.getReleaseYear() %></span></div>
+                    <% if (movie.getDuration() != null) { %>
+                        <div class="meta-item"><span class="meta-label">Duración</span><span class="meta-value"><%= movie.getDuration() %></span></div>
                     <% } %>
-                    <% if (movie.getIdiomaOriginal() != null) { %>
-                        <div class="meta-item"><span class="meta-label">Idioma</span><span class="meta-value"><%= movie.getIdiomaOriginal().toUpperCase() %></span></div>
+                    <% if (movie.getOriginalLanguage() != null) { %>
+                        <div class="meta-item"><span class="meta-label">Idioma</span><span class="meta-value"><%= movie.getOriginalLanguage().toUpperCase() %></span></div>
                     <% } %>
                     <% 
                         @SuppressWarnings("unchecked")
@@ -360,23 +363,23 @@
                         <span class="meta-label">Países</span>
                         <span class="meta-value">
                             <% for (int i = 0; i < countries.size(); i++) {
-                                out.print((i > 0 ? ", " : "") + countries.get(i).getIso_3166_1());
+                                out.print((i > 0 ? ", " : "") + countries.get(i).getIsoCode());
                             } %>
                         </span>
                     </div>
                     <% } %>
                 </div>
                 
-                <% if (movie.getSinopsis() != null && !movie.getSinopsis().trim().isEmpty()) { %>
-                    <div class="movie-synopsis"><%= movie.getSinopsis() %></div>
+                <% if (movie.getSynopsis() != null && !movie.getSynopsis().trim().isEmpty()) { %>
+                    <div class="movie-synopsis"><%= movie.getSynopsis() %></div>
                 <% } %>
                 
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                        <div class="rating-badge">⭐ TMDB: <%= String.format("%.1f", movie.getPuntuacionApi()) %>/10</div>
+                    <% if (movie.getApiRating() != null && movie.getApiRating() > 0) { %>
+                        <div class="rating-badge">⭐ TMDB: <%= String.format("%.1f", movie.getApiRating()) %>/10</div>
                     <% } %>
-                    <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
-                        <div class="rating-badge" style="background: #8B7355;">🍿 FatMovies: <%= String.format("%.1f", movie.getPromedioResenasLocal()) %>/5.0 (<%= movie.getCantidadResenasLocal() %> reseñas)</div>
+                    <% if (movie.getLocalRatingAvg() != null && movie.getLocalRatingAvg() > 0) { %>
+                        <div class="rating-badge" style="background: #8B7355;">🍿 FatMovies: <%= String.format("%.1f", movie.getLocalRatingAvg()) %>/5.0 (<%= movie.getLocalReviewsCount() %> reseñas)</div>
                     <% } %>
                 </div>
                 
@@ -393,7 +396,7 @@
                     <% } else { %>
                         <form method="post" action="${pageContext.request.contextPath}/watchlist" style="display:inline;">
                             <input type="hidden" name="action" value="add">
-                            <input type="hidden" name="movieId" value="<%= movie.getId() %>">
+                            <input type="hidden" name="movieId" value="<%= movie.getMovieId() %>">
                             <button type="submit" class="btn-watchlist">+ Agregar a Watchlist</button>
                         </form>
                     <%      }
@@ -416,16 +419,16 @@
             <h3 style="margin-bottom: 20px;"><%= userReview != null ? "Editar tu reseña" : "Escribe tu reseña" %></h3>
             
             <form id="ajaxReviewForm">
-                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getId() %>">
+                <input type="hidden" name="movieId" id="movieIdInput" value="<%= movie.getMovieId() %>">
                 <% 
                     String savedReviewText = "", savedRating = "0", savedWatchedOn = "";
                     if (userReview != null) {
-                        savedReviewText = userReview.getReview_text();
+                        savedReviewText = userReview.getReviewText();
                         savedRating = String.valueOf(userReview.getRating());
-                        savedWatchedOn = userReview.getWatched_on().toString();
+                        savedWatchedOn = userReview.getWatchedOn().toString();
                     }
                 %>
-                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required><%= savedReviewText %></textarea>
+                <textarea name="reviewText" id="reviewTextInput" placeholder="Escribe tu reseña aquí..." required autocomplete="off"><%= savedReviewText %></textarea>
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label>Rating:</label>
@@ -441,15 +444,15 @@
                         <label>Visto el:</label>
                         <% 
                             String minDate = "";
-                            if (movie.getFechaEstreno() != null) {
-                                minDate = movie.getFechaEstreno().toString(); 
-                            } else if (movie.getEstrenoYear() > 0) {
-                                minDate = movie.getEstrenoYear() + "-01-01";
+                            if (movie.getReleaseDate() != null) {
+                                minDate = movie.getReleaseDate().toString(); 
+                            } else if (movie.getReleaseYear() > 0) {
+                                minDate = movie.getReleaseYear() + "-01-01";
                             }
                         %>
                         <input type="date" id="watchedOnInput" name="watchedOn" value="<%= savedWatchedOn %>" min="<%= minDate %>" max="<%= java.time.LocalDate.now() %>" required>
                     </div>
-                    <button type="submit"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
+                    <button type="submit" id="submitReviewBtn"><%= userReview != null ? "Actualizar Reseña" : "Publicar Reseña" %></button>
                 </div>
             </form>
         </div>
@@ -467,7 +470,7 @@
             <% for (ActorWithCharacter awc : actors) {
                 Person actor = awc.getActor();
                 if (actor != null) {
-                    String path = actor.getProfile_path();
+                    String path = actor.getProfilePath();
                     String photoUrl = (path != null && !path.trim().isEmpty() && !path.equals("null")) ? "https://image.tmdb.org/t/p/w185" + path : request.getContextPath() + "/utils/default_profile.png";
             %>
             <div class="person-card">
@@ -491,7 +494,7 @@
         <div class="persons-grid">
             <% if (directors != null && !directors.isEmpty()) {
                 for (Person director : directors) {
-                    String path = director.getProfile_path();
+                    String path = director.getProfilePath();
                     String photoUrl = (path != null && !path.trim().isEmpty() && !path.equals("null")) ? "https://image.tmdb.org/t/p/w185" + path : request.getContextPath() + "/utils/default_profile.png";
             %>
             <div class="person-card">
@@ -534,10 +537,9 @@
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     for (Review review : reviews) {
                         boolean isSpoiler = review.getModerationStatus() != null && ModerationStatus.SPOILER.equals(review.getModerationStatus());
-                        boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getId_user(), false);
+                        boolean isFollowing = followedUsersMap != null && followedUsersMap.getOrDefault(review.getUserId(), false);
                         
-                        // LÓGICA DE NIVELES
-                        int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getId_user())) ? userLevelsMap.get(review.getId_user()) : 1;
+                        int authorLevel = (userLevelsMap != null && userLevelsMap.containsKey(review.getUserId())) ? userLevelsMap.get(review.getUserId()) : 1;
                         String reviewCardClass = authorLevel == 4 ? "review-card cheddar-review-card" : "review-card";
                         String avatarWrapperClass = authorLevel >= 3 ? "author-avatar-wrapper burger-avatar-border" : "author-avatar-wrapper";
 
@@ -546,8 +548,8 @@
                             userAvatarPath = request.getContextPath() + "/uploads/" + review.getProfileImage();
                         }
             %>
-            <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreated_at() != null ? review.getCreated_at().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
-                <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getId() %>"><% } %>
+            <div class="<%= reviewCardClass %>" data-timestamp="<%= review.getCreatedAt() != null ? review.getCreatedAt().toEpochDay() : 0 %>" data-rating="<%= review.getRating() %>">
+                <% if (isSpoiler) { %><input type="checkbox" class="spoiler-checkbox" id="spoiler-<%= review.getReviewId() %>"><% } %>
                 <div class="review-content">
                     <div class="review-header">
                         <div class="author-container">
@@ -557,19 +559,19 @@
                             <div class="author-details">
                                 <div class="author-name-row">
                                     <strong>
-                                        <a href="${pageContext.request.contextPath}/profile?id=<%= review.getId_user() %>" class="user-profile-link">
-                                            <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getId_user() %>
+                                        <a href="${pageContext.request.contextPath}/profile?id=<%= review.getUserId() %>" class="user-profile-link">
+                                            <%= review.getUsername() != null ? review.getUsername() : "Usuario #" + review.getUserId() %>
                                         </a>
                                     </strong>
                                     <% if (isSpoiler) { %><span class="spoiler-badge">SPOILER</span><% } %>
                                     
-                                    <% if (currentUserId != null && currentUserId != review.getId_user()) { %>
-                                        <button class="follow-btn <%= isFollowing ? "following" : "" %>" data-user-id="<%= review.getId_user() %>" onclick="toggleFollow(<%= review.getId_user() %>, this)">
+                                    <% if (currentUserId != null && currentUserId != review.getUserId()) { %>
+                                        <button class="follow-btn <%= isFollowing ? "following" : "" %>" data-user-id="<%= review.getUserId() %>" onclick="toggleFollow(<%= review.getUserId() %>, this)">
                                             <%= isFollowing ? "Siguiendo" : "Seguir" %>
                                         </button>
                                     <% } %>
                                 </div>
-                                <span style="color: #888; font-size: 0.8rem;">Visto el <%= review.getWatched_on().format(formatter) %></span>
+                                <span style="color: #888; font-size: 0.8rem;">Visto el <%= review.getWatchedOn().format(formatter) %></span>
                             </div>
                         </div>
 
@@ -587,16 +589,16 @@
                         </div>
                      </div>
                      
-                    <div class="<%= isSpoiler ? "review-text review-spoiler-text" : "review-text" %>"><%= review.getReview_text() %></div>
+                    <div class="<%= isSpoiler ? "review-text review-spoiler-text" : "review-text" %>"><%= review.getReviewText() %></div>
                     
                     <div class="review-meta">
-                        <span>Publicado el <%= review.getCreated_at() != null ? review.getCreated_at().format(formatter) : "N/A" %></span>
+                        <span>Publicado el <%= review.getCreatedAt() != null ? review.getCreatedAt().format(formatter) : "N/A" %></span>
                         <div class="like-section">
                             <% 
-                                boolean isLiked = userLikesMap != null && userLikesMap.getOrDefault(review.getId(), false);
-                                int likesCount = likesCountMap != null ? likesCountMap.getOrDefault(review.getId(), 0) : 0;
+                                boolean isLiked = userLikesMap != null && userLikesMap.getOrDefault(review.getReviewId(), false);
+                                int likesCount = likesCountMap != null ? likesCountMap.getOrDefault(review.getReviewId(), 0) : 0;
                             %>
-                            <button class="like-btn <%= isLiked ? "liked" : "" %>" onclick="toggleLike(<%= review.getId() %>, this)" title="<%= isLiked ? "Quitar voto" : "Votar esta reseña" %>">
+                            <button class="like-btn <%= isLiked ? "liked" : "" %>" onclick="toggleLike(<%= review.getReviewId() %>, this)" title="<%= isLiked ? "Quitar voto" : "Votar esta reseña" %>">
                                 <svg class="soda-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                                     <path class="liquid-fill" d="M20 20 L24 56 H40 L44 20 Z" />
                                     <path class="soda-stroke" d="M38 4 L38 12 M38 4 L46 4" />
@@ -609,15 +611,15 @@
                     </div>
 
                     <div class="comments-section">
-                        <button class="comments-toggle" onclick="toggleComments(<%= review.getId() %>)">
+                        <button class="comments-toggle" onclick="toggleComments(<%= review.getReviewId() %>)">
                             💬 Ver Comentarios (<%= review.getCommentsCount() %>)
                         </button>
-                        <div class="comments-container" id="comments-panel-<%= review.getId() %>">
-                            <div class="comment-list" id="comment-list-<%= review.getId() %>"></div>
+                        <div class="comments-container" id="comments-panel-<%= review.getReviewId() %>">
+                            <div class="comment-list" id="comment-list-<%= review.getReviewId() %>"></div>
                             <% if (loggedUser != null) { %>
                                 <div class="comment-form">
-                                    <input type="text" class="comment-input" id="comment-input-<%= review.getId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500">
-                                    <button class="btn-submit-comment" onclick="submitComment(<%= review.getId() %>)">Enviar</button>
+                                    <input type="text" class="comment-input" id="comment-input-<%= review.getReviewId() %>" placeholder="Escribe un comentario respetuoso..." maxlength="500" autocomplete="off">
+                                    <button class="btn-submit-comment" onclick="submitComment(<%= review.getReviewId() %>)">Enviar</button>
                                 </div>
                             <% } else { %>
                                 <div style="font-size: 0.85rem; color: #888; text-align: center; margin-top: 10px;">Iniciá sesión para comentar.</div>
@@ -626,7 +628,7 @@
                     </div>
                 </div> 
                 <% if (isSpoiler) { %>
-                    <label for="spoiler-<%= review.getId() %>" class="spoiler-overlay">
+                    <label for="spoiler-<%= review.getReviewId() %>" class="spoiler-overlay">
                         <div class="spoiler-text">Mostrar reseña</div>
                     </label>
                 <% } %>
@@ -661,8 +663,14 @@
     if (ajaxForm) {
         ajaxForm.addEventListener('submit', function(e) {
             e.preventDefault(); 
-
+            
+            document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu reseña...';
             document.getElementById('aiLoadingOverlay').style.display = 'flex';
+            
+            const submitBtn = document.getElementById('submitReviewBtn');
+            const origText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
 
             const payload = {
                 id_movie: parseInt(document.getElementById('movieIdInput').value),
@@ -689,10 +697,12 @@
             })
             .catch(err => {
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = origText;
                 if(err.error) {
-                    showModerationResult('🚫', 'Acción Denegada', err.error);
+                    showModerationResult('🚫', 'Acción Denegada', err.error, true);
                 } else {
-                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.');
+                    showModerationResult('❌', 'Error', 'Ocurrió un error inesperado al procesar tu reseña.', false);
                 }
             });
         });
@@ -712,36 +722,44 @@
                     document.getElementById('aiLoadingOverlay').style.display = 'none';
                     
                     if (review.moderationStatus === 'APPROVED') {
-                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.');
+                        showModerationResult('✅', '¡Reseña Aprobada!', 'Tu reseña cumple con todas las normas y ya ha sido publicada.', true);
                     } else if (review.moderationStatus === 'SPOILER') {
-                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.');
+                        showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu reseña revela detalles clave de la trama. Se ha publicado, pero la hemos protegido para que otros usuarios no se arruinen la película accidentalmente.', true);
                     } else if (review.moderationStatus === 'REJECTED') {
-                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'));
+                        showModerationResult('🚫', 'Reseña Rechazada', 'Tu reseña incumple nuestras normas de comunidad por contener lenguaje ofensivo o inapropiado. Tu cuenta ha sido baneada temporalmente.<br><br><strong>Motivo de la IA:</strong> ' + (review.moderationReason || 'Contenido tóxico.'), true);
                     }
                 }
             })
             .catch(err => {
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
-                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.');
+                showModerationResult('⚠️', 'Proceso Finalizado', 'La IA ha terminado de evaluar, la página se recargará para ver los cambios.', true);
             });
 
             if(attempts >= 20) {
                 clearInterval(pollInterval);
                 document.getElementById('aiLoadingOverlay').style.display = 'none';
-                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.');
+                showModerationResult('⏱️', 'Demasiado tiempo', 'Nuestra IA está demorada, pero no te preocupes, tu reseña se está procesando en segundo plano.', true);
             }
 
         }, 1500); 
     }
 
-    function showModerationResult(icon, title, message) {
+    function showModerationResult(icon, title, message, reloadOnClose = false) {
         document.getElementById('resultIcon').textContent = icon;
         document.getElementById('resultTitle').textContent = title;
         document.getElementById('resultMessage').innerHTML = message;
         document.getElementById('resultOverlay').style.display = 'flex';
-    }
 
+        const btn = document.getElementById('resultBtn');
+        if (reloadOnClose) {
+            btn.onclick = () => window.location.reload();
+        } else {
+            btn.onclick = () => {
+                document.getElementById('resultOverlay').style.display = 'none';
+            };
+        }
+    }
 
     function toggleFollow(targetUserId, btnElement) {
         if (currentUserId === null) {
@@ -753,13 +771,15 @@
 
         fetch(contextPath + '/follow', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
             body: 'idUsuario=' + targetUserId + '&ajax=true'
         })
         .then(async res => {
-            const text = await res.text();
-            try { return JSON.parse(text); } 
-            catch(e) { throw new Error("Respuesta inválida del servidor"); }
+			const data = await res.json();
+            if (!res.ok || data.success === false) {
+                throw new Error(data.message || data.error || "Error al procesar la acción");
+            }
+            return data;
         })
         .then(data => {
             if (data && data.success) {
@@ -899,17 +919,28 @@
         listContainer.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">Cargando...</div>';
         
         fetch('<%= request.getContextPath() %>/review-comments?reviewId=' + reviewId + '&t=' + new Date().getTime())
-            .then(response => response.text())
-            .then(text => {
+            .then(async response => {
+                const text = await response.text();
                 let data;
-                try { data = JSON.parse(text); } catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor.</div>'; return; }
+                try { data = JSON.parse(text); } 
+                catch (e) { listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de servidor al leer comentarios.</div>'; return null; }
+                if (!response.ok || data.success === false) { 
+                    listContainer.innerHTML = '<div style="color:red; text-align:center;">' + (data.message || 'Error al cargar comentarios') + '</div>'; 
+                    return null; 
+                }
+                return data;
+            })
+            .then(data => {
+                if (!data) return;
                 listContainer.innerHTML = ''; 
-                if (data.error) { listContainer.innerHTML = '<div style="color:red; text-align:center;">' + data.error + '</div>'; return; }
                 if (!Array.isArray(data) || data.length === 0) { listContainer.innerHTML = '<div style="text-align:center; color:#888; padding: 10px;">Sin comentarios.</div>'; return; }
                 
                 data.forEach(comment => {
-                    appendCommentToDOM(reviewId, comment.idComment, comment.idUsuario, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
+                    appendCommentToDOM(reviewId, comment.commentId, comment.userId, comment.username, comment.createdAt, comment.commentText, comment.status, comment.isFollowing, comment.profilePicture);
                 });
+            })
+            .catch(err => {
+                listContainer.innerHTML = '<div style="color:red; text-align:center;">Error de conexión.</div>';
             });
     }
 
@@ -919,21 +950,48 @@
         const submitBtn = inputField.nextElementSibling;
         
         if (!commentText) return;
-        inputField.disabled = true; submitBtn.disabled = true;
-        const origText = submitBtn.textContent; submitBtn.textContent = 'Enviando...';
+        
+        document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu comentario...';
+        document.getElementById('aiLoadingOverlay').style.display = 'flex';
+        
+        inputField.disabled = true;
+        submitBtn.disabled = true;
+        const origText = submitBtn.textContent; 
+        submitBtn.textContent = 'Enviando...';
         
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=create&reviewId=' + reviewId + '&commentText=' + encodeURIComponent(commentText)
-        }).then(res => res.json()).then(data => {
-            inputField.disabled = false; submitBtn.disabled = false; submitBtn.textContent = origText;
-            if (data.success) {
+        })
+        .then(async res => {
+            const data = await res.json();
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            inputField.disabled = false; 
+            submitBtn.disabled = false; 
+            submitBtn.textContent = origText;
+            if (!res.ok || data.success === false) {
+                if (data.bannedUntil) {
+                    showModerationResult('🚫', 'Acción Denegada', 'No puedes comentar. Has sido baneado hasta: ' + data.bannedUntil, true);
+                } else { 
+                    showModerationResult('❌', 'Error', data.message || data.error || 'Ocurrió un error inesperado al procesar tu comentario.', false);
+                }
+                return;
+            }
+            if (data.status === 'REJECTED') {
+                showModerationResult('🚫', 'Comentario Rechazado', 'Tu comentario incumple nuestras normas. Tu cuenta ha sido baneada.', true);
+            } else if (data.status === 'SPOILER') {
                 inputField.value = '';
-                showToast('Comentario publicado');
-                loadComments(reviewId); 
-            } else if (data.bannedUntil) {
-                showToast('Baneado hasta: ' + data.bannedUntil, 'error');
-            } else { showToast('Error: ' + data.error, 'error'); }
+                loadComments(reviewId);
+                showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Hemos detectado que tu comentario revela detalles clave de la trama. Se ha publicado, pero oculto.', false);
+            } else {
+                inputField.value = '';
+                loadComments(reviewId);
+                showModerationResult('✅', '¡Comentario Aprobado!', 'Tu comentario cumple con todas las normas y ya ha sido publicado.', false);
+            }
+        }).catch(err => {
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            inputField.disabled = false; submitBtn.disabled = false; submitBtn.textContent = origText;
+            showModerationResult('❌', 'Error de conexión', 'No se pudo conectar con el servidor.', false);
         });
     }
 
@@ -942,7 +1000,7 @@
         const currentText = commentItem.getAttribute('data-text'); 
         const safeText = currentText.replace(/"/g, '&quot;');
         const textContainer = commentItem.querySelector('.comment-text-container');
-        textContainer.innerHTML = '<input type="text" class="comment-input edit-input" value="' + safeText + '" style="width: 100%; margin-top: 5px;">' +
+        textContainer.innerHTML = '<input type="text" class="comment-input edit-input" value="' + safeText + '" style="width: 100%; margin-top: 5px;" autocomplete="off">' +
                             '<div style="margin-top: 5px; text-align: right;">' +
                                 '<button onclick="saveEditComment(' + commentId + ', this)" class="btn-submit-comment" style="padding: 4px 10px; font-size: 0.8rem;">Guardar</button>' +
                                 '<button onclick="cancelEditComment(this)" class="btn-submit-comment" style="background: #999; padding: 4px 10px; font-size: 0.8rem; margin-left: 5px;">Cancelar</button>' +
@@ -959,35 +1017,64 @@
         const commentItem = btnElement.closest('.comment-item');
         const newText = commentItem.querySelector('.edit-input').value.trim();
         const reviewId = btnElement.closest('.comments-container').id.split('-')[2];
-        if (!newText) { showToast('Comentario vacío', 'error'); return; }
+        if (!newText) { showToast('El comentario no puede estar vacío', 'error'); return; }
+        
+        document.getElementById('aiLoadingText').textContent = 'Nuestra IA está analizando tu edición...';
+        document.getElementById('aiLoadingOverlay').style.display = 'flex';
+        
         const btn = btnElement; btn.textContent = '...'; btn.disabled = true;
 
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=edit&commentId=' + commentId + '&commentText=' + encodeURIComponent(newText)
-        }).then(r => r.json()).then(data => {
-            if (data.success) {
-                showToast('Comentario editado');
-                loadComments(reviewId); 
-            } else if (data.bannedUntil) {
-                showToast('Baneado hasta: ' + data.bannedUntil, 'error');
+        })
+        .then(async res => {
+            const data = await res.json();
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            
+            if (!res.ok || data.success === false) {
+                if (data.bannedUntil) {
+                    showModerationResult('🚫', 'Acción Denegada', 'No puedes editar. Has sido baneado hasta: ' + data.bannedUntil, true);
+                } else {
+                    showModerationResult('❌', 'Error', data.message || data.error || 'No se pudo editar el comentario.', false);
+                }
+                btn.textContent = 'Guardar'; btn.disabled = false;
+                loadComments(reviewId);
+                return;
+            }
+            if (data.status === 'REJECTED') {
+                showModerationResult('🚫', 'Edición Rechazada', 'Tu edición incumple las normas. Tu cuenta ha sido baneada.', true);
+            } else if (data.status === 'SPOILER') {
+                showModerationResult('⚠️', 'Atención: Contiene Spoilers', 'Se ha actualizado, pero oculto por defecto.', false);
                 loadComments(reviewId);
             } else {
-                showToast('Error: ' + data.error, 'error');
-                btn.textContent = 'Guardar'; btn.disabled = false;
+                showModerationResult('✅', '¡Edición Aprobada!', 'Tu comentario editado ya es visible.', false);
+                loadComments(reviewId);
             }
+        }).catch(err => {
+            document.getElementById('aiLoadingOverlay').style.display = 'none';
+            showModerationResult('❌', 'Error de conexión', 'No se pudo conectar con el servidor.', false);
+            loadComments(reviewId);
         });
     }
 
     function deleteComment(commentId, reviewId) {
         if (!confirm("¿Eliminar comentario permanentemente?")) return;
+        
         fetch('<%= request.getContextPath() %>/review-comments', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'action=delete&commentId=' + commentId
-        }).then(r => r.json()).then(data => {
-            if (data.success) { showToast('Eliminado'); loadComments(reviewId); } 
-            else { showToast('Error al eliminar', 'error'); }
-        });
+        })
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok || data.success === false) {
+                showToast(data.message || 'Error al eliminar', 'error'); 
+            } else {
+                showToast('Comentario eliminado'); 
+                loadComments(reviewId);
+            }
+        })
+        .catch(err => showToast('Error de red al intentar eliminar', 'error'));
     }
 
     function appendCommentToDOM(reviewId, commentId, commentUserId, username, date, text, status, isFollowing, profilePicture) {
@@ -1002,8 +1089,8 @@
         let actionsHtml = '';
         if (currentUserId !== null && currentUserId === commentUserId) {
             actionsHtml = '<div class="comment-actions">' +
-                            '<button class="btn-icon edit" onclick="startEditComment(' + commentId + ', this)" title="Editar">✏️</button>' +
-                            '<button class="btn-icon delete" onclick="deleteComment(' + commentId + ', ' + reviewId + ')" title="Eliminar">🗑️</button>' +
+                            '<button class="btn-action" onclick="startEditComment(' + commentId + ', this)">Editar</button>' +
+                            '<button class="btn-action delete" onclick="deleteComment(' + commentId + ', ' + reviewId + ')">Eliminar</button>' +
                           '</div>';
         }
 
@@ -1015,7 +1102,7 @@
             contentHtml = '<input type="checkbox" class="comment-spoiler-checkbox" id="spoiler-comment-' + commentId + '">' +
                           '<div class="comment-text comment-spoiler-text">' + text + '</div>' +
                           '<label for="spoiler-comment-' + commentId + '" class="comment-spoiler-overlay">' +
-                              '<span style="font-size: 0.75rem; font-weight: 600;">Mostrar reseña</span>' +
+                              '<span style="font-size: 0.75rem; font-weight: 600;">Mostrar comentario</span>' +
                           '</label>';
         } else {
             contentHtml = '<div class="comment-text">' + text + '</div>';

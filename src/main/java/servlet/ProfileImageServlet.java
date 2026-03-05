@@ -108,7 +108,7 @@ public class ProfileImageServlet extends HttpServlet {
 	                if (!ALLOWED_EXTENSIONS.contains(extension)) {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
-	                String uniqueFileName = "avatar_" + user.getId() + "_" + UUID.randomUUID().toString() + extension;
+	                String uniqueFileName = "avatar_" + user.getUserId() + "_" + UUID.randomUUID().toString() + extension;
 	                String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
 	                File archivoFisico = new File(uploadPath, safeFileName);
 
@@ -170,7 +170,7 @@ public class ProfileImageServlet extends HttpServlet {
                         throw ErrorFactory.internal("No pudimos verificar la seguridad de tu foto en este momento. Inténtalo más tarde.");
                     }
 
-	                userController.updateProfileImage(user.getId(), uniqueFileName, uploadPath);
+	                userController.updateProfileImage(user.getUserId(), uniqueFileName, uploadPath);
 	                user.setProfileImage(uniqueFileName);
 	                System.out.println(uploadPath);
 	                request.getSession().setAttribute("flashMessage", "¡Foto actualizada con éxito!");
@@ -178,7 +178,7 @@ public class ProfileImageServlet extends HttpServlet {
 	                break;
 
                 case "eliminar":
-                    userController.removeProfileImage(user.getId(), uploadPath);
+                    userController.removeProfileImage(user.getUserId(), uploadPath);
                     user.setProfileImage(null);
                     request.getSession().setAttribute("flashMessage", "Foto de perfil eliminada.");
                     request.getSession().setAttribute("flashType", "info");
@@ -188,22 +188,18 @@ public class ProfileImageServlet extends HttpServlet {
                     throw ErrorFactory.badRequest("Acción no reconocida: " + accion);
             }
             request.getSession().setAttribute("usuarioLogueado", user);
-            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getId());
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());
 
         } catch (AppException e) {
-            e.printStackTrace();
             request.getSession().setAttribute("flashMessage", e.getMessage());
             request.getSession().setAttribute("flashType", "danger");
-            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-            String msg = "Ocurrió un error inesperado.";
-            if (e instanceof IllegalStateException) {
-                msg = "El archivo es demasiado grande (Máx 10MB).";
-            }
-            request.getSession().setAttribute("flashMessage", msg);
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId());   
+        } catch (IllegalStateException e) {
+            request.getSession().setAttribute("flashMessage", "El archivo es demasiado grande (Máx 10MB).");
             request.getSession().setAttribute("flashType", "danger");
-            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getId());
+            response.sendRedirect(request.getContextPath() + "/profile?id=" + user.getUserId()); 
+        } catch (Exception e) {
+            throw new ServletException("Error crítico procesando la imagen de perfil", e);
         }
     }
     

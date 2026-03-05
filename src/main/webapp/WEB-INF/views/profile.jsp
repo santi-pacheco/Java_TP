@@ -222,7 +222,7 @@
             <c:when test="${!isMyProfile}">
                 <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; justify-content: center; gap: 10px;">
                     <form action="<%= request.getContextPath() %>/follow" method="POST" style="margin: 0;">
-                        <input type="hidden" name="idUsuario" value="${user.id}">
+                        <input type="hidden" name="idUsuario" value="${user.userId}">
                         <c:choose>
                             <c:when test="${isFollowing}">
                                 <button type="submit" class="btn btn-danger">
@@ -236,15 +236,19 @@
                             </c:otherwise>
                         </c:choose>
                     </form>
-                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.id}, true)" style="color: #d9534f; border-color: #d4cfc7;">
+                    <button type="button" class="btn btn-default" onclick="toggleBlock(${user.userId}, true)" style="color: #d9534f; border-color: #d4cfc7;">
                         <i class="glyphicon glyphicon-ban-circle"></i> Bloquear
                     </button>
                 </div>
             </c:when>
             <c:otherwise>
-                <div style="margin-top: 15px;">
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                     <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#blockedUsersModal" style="color: #666;">
                         <i class="glyphicon glyphicon-ban-circle"></i> Usuarios Bloqueados
+                    </button>
+                    
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href='${pageContext.request.contextPath}/logout'">
+                        <i class="glyphicon glyphicon-log-out"></i> Cerrar Sesión
                     </button>
                 </div>
             </c:otherwise>
@@ -286,10 +290,10 @@
             <c:choose>
                 <c:when test="${not empty platoPrincipalMovie}">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <a href="${pageContext.request.contextPath}/movie/${platoPrincipalMovie.id}">
-                            <img src="https://image.tmdb.org/t/p/w300${platoPrincipalMovie.posterPath}" alt="${platoPrincipalMovie.titulo}" style="width: 150px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
+                        <a href="${pageContext.request.contextPath}/movie/${platoPrincipalMovie.movieId}">
+                            <img src="https://image.tmdb.org/t/p/w300${platoPrincipalMovie.posterPath}" alt="${platoPrincipalMovie.title}" style="width: 150px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.src='${pageContext.request.contextPath}/utils/no-poster.png'">
                         </a>
-                        <h4 style="margin: 0; font-weight: 600; color: #333;">${platoPrincipalMovie.titulo}</h4>
+                        <h4 style="margin: 0; font-weight: 600; color: #333;">${platoPrincipalMovie.title}</h4>
                         
                         <c:if test="${isMyProfile}">
                             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
@@ -369,13 +373,13 @@
                     <div class="review-item">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <a href="<%= request.getContextPath() %>/movie/${review.id_movie}" style="text-decoration: none; color: #8B7355; font-weight: 600; font-size: 16px;">
+                                <a href="<%= request.getContextPath() %>/movie/${review.movieId}" style="text-decoration: none; color: #8B7355; font-weight: 600; font-size: 16px;">
                                     <c:choose>
                                         <c:when test="${not empty review.movieTitle}">
                                             ${review.movieTitle}
                                         </c:when>
                                         <c:otherwise>
-                                            Película ID: ${review.id_movie}
+                                            Película ID: ${review.movieId}
                                         </c:otherwise>
                                     </c:choose>
                                 </a>
@@ -387,21 +391,21 @@
                                     </c:if>
                                 </div>
                             </div>
-                            <small style="color: #999;">${review.created_at}</small>
+                            <small style="color: #999;">${review.createdAt}</small>
                         </div>
                         
                         <c:choose>
                             <c:when test="${review.moderationStatus == 'SPOILER'}">
-                                <input type="checkbox" id="spoiler-check-${review.id}" class="spoiler-trigger">
-                                <label for="spoiler-check-${review.id}" class="spoiler-wrapper" style="display: block; margin: 10px 0 0 0;">
+                                <input type="checkbox" id="spoiler-check-${review.reviewId}" class="spoiler-trigger">
+                                <label for="spoiler-check-${review.reviewId}" class="spoiler-wrapper" style="display: block; margin: 10px 0 0 0;">
                                     <div class="spoiler-overlay-label">Mostrar reseña</div>
                                     <p class="spoiler-content" style="margin: 0; color: #666;">
-                                        ${review.review_text}
+                                        ${review.reviewText}
                                     </p>
                                 </label>
                             </c:when>
                             <c:otherwise>
-                                <p style="margin: 10px 0 0 0; color: #666;">${review.review_text}</p>
+                                <p style="margin: 10px 0 0 0; color: #666;">${review.reviewText}</p>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -421,7 +425,7 @@
                     <ul class="list-group">
                         <c:forEach var="f" items="${followers}">
                             <li class="list-group-item">
-                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
+                                <a href="<%= request.getContextPath() %>/profile?id=${f.userId}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
                                     <i class="glyphicon glyphicon-user"></i> ${f.username}
                                 </a>
                             </li>
@@ -447,7 +451,7 @@
                         <c:forEach var="b" items="${blockedUsers}">
                             <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center;">
                                 <span><i class="glyphicon glyphicon-user" style="color: #999;"></i> ${b.username}</span>
-                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.id}, false)">Desbloquear</button>
+                                <button class="btn btn-xs btn-default" onclick="toggleBlock(${b.userId}, false)">Desbloquear</button>
                             </li>
                         </c:forEach>
                         <c:if test="${empty blockedUsers}">
@@ -470,7 +474,7 @@
                     <ul class="list-group">
                         <c:forEach var="f" items="${following}">
                             <li class="list-group-item">
-                                <a href="<%= request.getContextPath() %>/profile?id=${f.id}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
+                                <a href="<%= request.getContextPath() %>/profile?id=${f.userId}" style="color: #333; font-weight: 600; text-decoration: none; display: block;">
                                     <i class="glyphicon glyphicon-user"></i> ${f.username}
                                 </a>
                             </li>
@@ -579,10 +583,10 @@
                             movies.forEach(m => {
                                 const poster = m.posterPath ? 'https://image.tmdb.org/t/p/w92' + m.posterPath : '${pageContext.request.contextPath}/utils/no-poster.png';
                                 const year = m.estrenoYear ? m.estrenoYear : '';
-                                html += '<a href="javascript:void(0)" class="list-group-item" onclick="selectPlatoPrincipal(' + m.id + ')" style="display:flex; align-items:center; gap:15px;">' +
+                                html += '<a href="javascript:void(0)" class="list-group-item" onclick="selectPlatoPrincipal(' + m.movieId + ')" style="display:flex; align-items:center; gap:15px;">' +
                                             '<img src="' + poster + '" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">' +
                                             '<div>' +
-                                                '<h5 style="margin:0; font-weight:600;">' + m.titulo + '</h5>' +
+                                                '<h5 style="margin:0; font-weight:600;">' + m.title + '</h5>' +
                                                 '<small class="text-muted">' + year + '</small>' +
                                             '</div>' +
                                         '</a>';
@@ -636,8 +640,12 @@
                         }
                     }
                 },
-                error: function() {
-                    alert('Hubo un error al procesar la solicitud.');
+                error: function(xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        alert(xhr.responseJSON.message);
+                    } else {
+                        alert('Hubo un error al procesar la solicitud.');
+                    }
                 }
             });
         }

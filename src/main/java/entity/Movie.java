@@ -8,198 +8,182 @@ import java.util.List;
 
 public class Movie {
 
-    private int id;
-    private int id_api; //
-    
+    private int movieId;
+    private Integer apiId;
+
     @NotNull(message = "El año de estreno es obligatorio")
     @Min(value = 1888, message = "El año de estreno debe ser 1888 o posterior")
     @Max(value = 2030, message = "El año de estreno no puede ser tan a futuro")
-    private int estrenoYear; //
-    
-    private LocalDate FechaEstreno; 
-    
+    private int releaseYear;
+
+    private LocalDate releaseDate;
+
     @NotNull(message = "La duración no puede ser nula")
-    private Time duracion;
-    
+    private Time duration;
+
     @NotNull(message = "Debe especificar si la película es para adultos")
-    private Boolean adulto; //
-    
+    private Boolean isAdult;
+
     @NotBlank(message = "El título no puede estar vacío")
     @Size(max = 255, message = "El título no debe exceder los 255 caracteres")
-    private String titulo; //
-    
+    private String title;
+
     @NotNull(message = "La popularidad no puede ser nula")
     @PositiveOrZero(message = "La popularidad debe ser 0 o un número positivo")
-    private Double popularidad; //
-    
-    private String id_imdb; //
-    
-    //@Column(name = "votos_api")
+    private Double popularity;
+
+    private String imdbId;
+
     @NotNull(message = "El conteo de votos no puede ser nulo")
     @PositiveOrZero(message = "El número de votos debe ser 0 o más")
-    private int votosApi; //
-    
-    //@Column(name = "titulo_original")
+    private int apiVotes;
+
     @NotBlank(message = "El título original no puede estar vacío")
     @Size(max = 255, message = "El título original no debe exceder los 255 caracteres")
-    private String tituloOriginal; //
-    
-    //@Column(columnDefinition = "TEXT")
+    private String originalTitle;
+
     @NotBlank(message = "La sinopsis no puede estar vacía")
-    private String sinopsis; //
-    
-    //@Column(name = "puntuacion_api")
+    private String synopsis;
+
     @NotNull(message = "La puntuación no puede ser nula")
     @DecimalMin(value = "0.0", message = "La puntuación debe ser como mínimo 0.0")
     @DecimalMax(value = "10.0", message = "La puntuación debe ser como máximo 10.0")
-    private Double puntuacionApi; //
-    
-    //@Column(name = "idioma_original")
+    private Double apiRating;
+
     @NotBlank(message = "El idioma original no puede estar vacío")
     @Size(min = 2, max = 2, message = "El idioma original debe ser un código ISO de 2 letras")
-    private String idiomaOriginal; //
-    
-    //@Column(name = "poster_path")
+    private String originalLanguage;
+
     @NotBlank(message = "La ruta del póster (poster_path) es obligatoria")
-    private String posterPath; //
-    
-    
+    private String posterPath;
+
     private Float rating;
-    
-    private Double promedioResenasLocal = 0.0;
-    private Integer cantidadResenasLocal = 0;
-    
-    //Lista temporal para generar la relación muchos a muchos con géneros
-    private List<Integer> generosTemporales;
-    
-	public void setRating(Float rating) {
-		this.rating = rating;
-	}
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public int getId_api() {
-		return id_api;
-	}
-	public void setId_api(int id_api) {
-		this.id_api = id_api;
-	} 
-	public int getEstrenoYear() {
-		return estrenoYear;
-	}
-	public void setEstrenoYear(int estrenoYear) {
-		this.estrenoYear = estrenoYear;
-	}
-	public Time getDuracion() {
-		return duracion;
-	}
-	public void setDuracion(Time duracion) {
-		this.duracion = duracion;
-	}
-	public Boolean getAdulto() {
-		return adulto;
-	}
-	public void setAdulto(Boolean adulto) {
-		this.adulto = adulto;
-	}
-	public Double getPopularidad() {
-		return popularidad;
-	}
-	public void setPopularidad(Double popularidad) {
-		this.popularidad = popularidad;
-	}
-	public int getVotosApi() {
-		return votosApi;
-	}
-	public void setVotosApi(int votosApi) {
-		this.votosApi = votosApi;
-	}
-	public String getTituloOriginal() {
-		return tituloOriginal;
-	}
-	public void setTituloOriginal(String tituloOriginal) {
-		this.tituloOriginal = tituloOriginal;
-	}
-	public String getSinopsis() {
-		return sinopsis;
-	}
-	public void setSinopsis(String sinopsis) {
-		this.sinopsis = sinopsis;
-	}
-	public Double getPuntuacionApi() {
-		return puntuacionApi;
-	}
-	public void setPuntuacionApi(Double puntuacionApi) {
-		this.puntuacionApi = puntuacionApi;
-	}
-	public String getIdiomaOriginal() {
-		return idiomaOriginal;
-	}
-	public void setIdiomaOriginal(String idiomaOriginal) {
-		this.idiomaOriginal = idiomaOriginal;
-	}
-	public String getPosterPath() {
-		return posterPath;
-	}
-	public void setPosterPath(String posterPath) {
-		this.posterPath = posterPath;
-	}
-	public String getTitulo() {
-		return titulo;
-	}
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
-	public String getId_imdb() {
-		return id_imdb;
-	}
-	public void setId_imdb(String id_imdb) {
-		this.id_imdb = id_imdb;
-	}
-	
-	public float getRating() {
-		return rating;
-	}
-	
-	public Double getPromedioResenasLocal() {
-		return promedioResenasLocal;
-	}
-	
-	public void setPromedioResenasLocal(Double promedioResenasLocal) {
-		this.promedioResenasLocal = promedioResenasLocal;
-	}
-	
-	public Integer getCantidadResenasLocal() {
-		return cantidadResenasLocal;
-	}
-	
-	public void setCantidadResenasLocal(Integer cantidadResenasLocal) {
-		this.cantidadResenasLocal = cantidadResenasLocal;
-	}
-	
-	public List<Integer> getGenerosTemporales() {
-		return generosTemporales;
-	}
-	public void setGenerosTemporales(List<Integer> generosTemporales) {
-		this.generosTemporales = generosTemporales;
-	}
-	
-	public LocalDate getFechaEstreno() {
-		return FechaEstreno;
-	}
-	
-	public void setFechaEstreno(LocalDate fechaEstreno) {
-		FechaEstreno = fechaEstreno;
-	}
-	
-	@Override
-	public String toString() {
-		return "Movie [id=" + id + ", id_api=" + id_api + ", estrenoYear=" + estrenoYear + ", duracion=" + duracion
-				+ ", adulto=" + adulto + ", titulo=" + titulo + ", popularidad=" + popularidad + ", votosApi="
-				+ votosApi + ", tituloOriginal=" + tituloOriginal + ", sinopsis=" + sinopsis + ", puntuacionApi="
-				+ puntuacionApi + ", idiomaOriginal=" + idiomaOriginal + ", posterPath=" + posterPath + "]";
-	}
+
+    private Double localRatingAvg = 0.0;
+    private Integer localReviewsCount = 0;
+
+    private List<Integer> temporaryGenres;
+
+    public int getMovieId() {
+        return movieId;
+    }
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+    public Integer getApiId() {
+        return apiId;
+    }
+    public void setApiId(Integer apiId) {
+        this.apiId = apiId;
+    }
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+    public void setReleaseYear(int releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+    public void setReleaseDate(LocalDate releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+    public Time getDuration() {
+        return duration;
+    }
+    public void setDuration(Time duration) {
+        this.duration = duration;
+    }
+    public Boolean getIsAdult() {
+        return isAdult;
+    }
+    public void setIsAdult(Boolean isAdult) {
+        this.isAdult = isAdult;
+    }
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    public Double getPopularity() {
+        return popularity;
+    }
+    public void setPopularity(Double popularity) {
+        this.popularity = popularity;
+    }
+    public String getImdbId() {
+        return imdbId;
+    }
+    public void setImdbId(String imdbId) {
+        this.imdbId = imdbId;
+    }
+    public int getApiVotes() {
+        return apiVotes;
+    }
+    public void setApiVotes(int apiVotes) {
+        this.apiVotes = apiVotes;
+    }
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+    public String getSynopsis() {
+        return synopsis;
+    }
+    public void setSynopsis(String synopsis) {
+        this.synopsis = synopsis;
+    }
+    public Double getApiRating() {
+        return apiRating;
+    }
+    public void setApiRating(Double apiRating) {
+        this.apiRating = apiRating;
+    }
+    public String getOriginalLanguage() {
+        return originalLanguage;
+    }
+    public void setOriginalLanguage(String originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
+    public String getPosterPath() {
+        return posterPath;
+    }
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+    public Float getRating() {
+        return rating;
+    }
+    public void setRating(Float rating) {
+        this.rating = rating;
+    }
+    public Double getLocalRatingAvg() {
+        return localRatingAvg;
+    }
+    public void setLocalRatingAvg(Double localRatingAvg) {
+        this.localRatingAvg = localRatingAvg;
+    }
+    public Integer getLocalReviewsCount() {
+        return localReviewsCount;
+    }
+    public void setLocalReviewsCount(Integer localReviewsCount) {
+        this.localReviewsCount = localReviewsCount;
+    }
+    public List<Integer> getTemporaryGenres() {
+        return temporaryGenres;
+    }
+    public void setTemporaryGenres(List<Integer> temporaryGenres) {
+        this.temporaryGenres = temporaryGenres;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie [movieId=" + movieId + ", apiId=" + apiId + ", releaseYear=" + releaseYear + ", duration=" + duration
+                + ", isAdult=" + isAdult + ", title=" + title + ", popularity=" + popularity + ", apiVotes="
+                + apiVotes + ", originalTitle=" + originalTitle + ", synopsis=" + synopsis + ", apiRating="
+                + apiRating + ", originalLanguage=" + originalLanguage + ", posterPath=" + posterPath + "]";
+    }
 }

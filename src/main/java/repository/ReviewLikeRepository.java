@@ -9,23 +9,21 @@ import exception.ErrorFactory;
 
 public class ReviewLikeRepository {
 
-    /**
-     * Toggle like: Returns true if like was ADDED, false if REMOVED
-     */
+
     public boolean toggleLike(int userId, int reviewId) {
         if (existsLike(userId, reviewId)) {
             removeLike(userId, reviewId);
             updateLikesCount(reviewId, -1);
-            return false; // Like removed
+            return false; // Like removido
         } else {
             addLike(userId, reviewId);
             updateLikesCount(reviewId, 1);
-            return true; // Like added
+            return true; // Like agregado
         }
     }
 
     public boolean existsLike(int userId, int reviewId) {
-        String sql = "SELECT 1 FROM reviews_likes WHERE id_usuario = ? AND id_review = ?";
+        String sql = "SELECT 1 FROM review_likes WHERE user_id = ? AND review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -37,12 +35,12 @@ public class ReviewLikeRepository {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error checking like existence");
+            throw ErrorFactory.internal("Error al verificar la existencia del like.");
         }
     }
 
     private void addLike(int userId, int reviewId) {
-        String sql = "INSERT INTO reviews_likes (id_usuario, id_review) VALUES (?, ?)";
+        String sql = "INSERT INTO review_likes (user_id, review_id) VALUES (?, ?)";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -53,15 +51,15 @@ public class ReviewLikeRepository {
             
         } catch (SQLException e) {
             if (e.getErrorCode() == 1062) {
-                // Duplicate entry - ignore, like already exists
+                //lo ignoramos porque el like ya existe
                 return;
             }
-            throw ErrorFactory.internal("Error adding like");
+            throw ErrorFactory.internal("Error al agregar el like en la base de datos.");
         }
     }
 
     private void removeLike(int userId, int reviewId) {
-        String sql = "DELETE FROM reviews_likes WHERE id_usuario = ? AND id_review = ?";
+        String sql = "DELETE FROM review_likes WHERE user_id = ? AND review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -71,12 +69,12 @@ public class ReviewLikeRepository {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error removing like");
+            throw ErrorFactory.internal("Error al remover el like en la base de datos.");
         }
     }
 
     private void updateLikesCount(int reviewId, int delta) {
-        String sql = "UPDATE reviews SET likes_count = likes_count + ? WHERE id_review = ?";
+        String sql = "UPDATE reviews SET likes_count = likes_count + ? WHERE review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -86,12 +84,12 @@ public class ReviewLikeRepository {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error updating likes count");
+            throw ErrorFactory.internal("Error al actualizar el contador de likes de la reseña.");
         }
     }
 
     public int getLikesCount(int reviewId) {
-        String sql = "SELECT likes_count FROM reviews WHERE id_review = ?";
+        String sql = "SELECT likes_count FROM reviews WHERE review_id = ?";
         
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -103,7 +101,7 @@ public class ReviewLikeRepository {
                 }
             }
         } catch (SQLException e) {
-            throw ErrorFactory.internal("Error fetching likes count");
+            throw ErrorFactory.internal("Error al obtener la cantidad total de likes.");
         }
         return 0;
     }

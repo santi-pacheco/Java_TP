@@ -146,20 +146,20 @@
                 <%
                     for (Movie movie : movies) {
                 %>
-                <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getId() %>'">
+                <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>'">
                     <img src="https://image.tmdb.org/t/p/w300<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
-                         alt="<%= movie.getTitulo() %>" 
+                         alt="<%= movie.getTitle() %>" 
                          class="movie-poster"
                          onerror="this.src='https://via.placeholder.com/200x300?text=Sin+Imagen'">
                     <div class="movie-info">
-                        <div class="movie-title"><%= movie.getTitulo() %></div>
-                        <div class="movie-year"><%= movie.getEstrenoYear() %></div>
+                        <div class="movie-title"><%= movie.getTitle() %></div>
+                        <div class="movie-year"><%= movie.getReleaseYear() %></div>
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <% if (movie.getPuntuacionApi() != null && movie.getPuntuacionApi() > 0) { %>
-                                <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getPuntuacionApi()) %></div>
+                            <% if (movie.getApiRating() != null && movie.getApiRating() > 0) { %>
+                                <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getApiRating()) %></div>
                             <% } %>
-                            <% if (movie.getPromedioResenasLocal() != null && movie.getPromedioResenasLocal() > 0) { %>
-                                <div class="movie-rating" style="background: #8B7355;">🍿 <%= String.format("%.1f", movie.getPromedioResenasLocal()) %></div>
+                            <% if (movie.getLocalRatingAvg() != null && movie.getLocalRatingAvg() > 0) { %>
+                                <div class="movie-rating" style="background: #8B7355;">🍿 <%= String.format("%.1f", movie.getLocalRatingAvg()) %></div>
                             <% } %>
                         </div>
                     </div>

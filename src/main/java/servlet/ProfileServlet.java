@@ -9,7 +9,7 @@ import java.util.Map;
 import entity.Review;
 import entity.User;
 import entity.Movie;
-import entity.ConfiguracionReglas;
+import entity.SystemSettings;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,13 +22,13 @@ import service.UserService;
 import service.WatchlistService;
 import service.ReviewService;
 import service.MovieService;
-import service.ConfiguracionReglasService;
+import service.SystemSettingsService;
 import repository.UserRepository;
 import repository.WatchlistRepository;
 import repository.ReviewRepository;
 import repository.MovieRepository;
 import repository.FollowRepository;
-import repository.ConfiguracionReglasRepository;
+import repository.SystemSettingsRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import exception.AppException;
 import exception.ErrorFactory;
@@ -38,7 +38,7 @@ public class ProfileServlet extends HttpServlet {
     
     private UserController userController;
     private ReviewController reviewController;
-    private ConfiguracionReglasService configuracionReglasService;
+    private SystemSettingsService configuracionReglasService;
     private MovieService movieService;
     
     @Override
@@ -50,12 +50,12 @@ public class ProfileServlet extends HttpServlet {
         MovieRepository movieRepository = new MovieRepository();
         FollowRepository followRepository = new FollowRepository();
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        ConfiguracionReglasRepository configuracionReglasRepository = new ConfiguracionReglasRepository();
-        this.configuracionReglasService = new ConfiguracionReglasService(configuracionReglasRepository);
+        SystemSettingsRepository configuracionReglasRepository = new SystemSettingsRepository();
+        this.configuracionReglasService = new SystemSettingsService(configuracionReglasRepository);
         this.movieService = new MovieService(movieRepository);
         BlockRepository blockRepository = new BlockRepository();
         UserService userService = new UserService(userRepository, encoder, followRepository, blockRepository);
-        WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
         WatchlistService watchlistService = new WatchlistService(watchlistRepository, userService, movieService);
         ReviewService reviewService = new ReviewService(reviewRepository, userService, movieService, configuracionReglasService, watchlistService);
         
@@ -66,125 +66,99 @@ public class ProfileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
-        try {
-            HttpSession session = request.getSession(false);
-            User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
-            
-            if (loggedUser == null) {
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
+        HttpSession session = request.getSession(false);
+        User loggedUser = (User) session.getAttribute("usuarioLogueado");
+        String idParam = request.getParameter("id");
+        User profileUser = null;
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            try {
+                int idToView = Integer.parseInt(idParam);
+                profileUser = userController.getUserById(idToView);
+            } catch (NumberFormatException | AppException e) {
+                System.out.println("ID inválido o usuario no encontrado: " + idParam + ". Mostrando perfil propio.");
             }
-
-            String idParam = request.getParameter("id");
-            User profileUser = null;
-
-            if (idParam != null && !idParam.isEmpty()) {
-                try {
-                    int idToView = Integer.parseInt(idParam);
-                    profileUser = userController.getUserById(idToView);
-                } catch (Exception e) {
-                    System.out.println("No se encontró usuario con ID: " + idParam + ". Mostrando perfil propio.");
-                    profileUser = loggedUser; 
-                }
-            }
-            
-            if (profileUser == null) profileUser = loggedUser;
-
-            boolean isMyProfile = (loggedUser.getId() == profileUser.getId());
-            boolean isFollowing = false;
-
-            if (!isMyProfile) {
-                boolean loBloquee = userController.isBlocking(loggedUser.getId(), profileUser.getId());
-                boolean meBloqueo = userController.isBlocking(profileUser.getId(), loggedUser.getId());
-                if (loBloquee || meBloqueo) {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Usuario no encontrado");
-                    return;
-                }
-            }
-            if (!isMyProfile) {
-                isFollowing = userController.checkFollowStatus(loggedUser.getId(), profileUser.getId());
-            }
-
-            List<Review> userReviews = reviewController.getReviewsByUser(profileUser.getId());
-            
-            List<User> followersList = userController.getFollowers(profileUser.getId());
-            List<User> followingList = userController.getFollowing(profileUser.getId());
-            int realFollowersCount = followersList.size();
-            int realFollowingCount = followingList.size();
-            if (loggedUser != null) {
-                followersList.removeIf(u -> 
-                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
-                    userController.isBlocking(u.getId(), loggedUser.getId())
-                );
-                followingList.removeIf(u -> 
-                    userController.isBlocking(loggedUser.getId(), u.getId()) || 
-                    userController.isBlocking(u.getId(), loggedUser.getId())
-                );
-            }
-            request.setAttribute("followers", followersList);
-            request.setAttribute("following", followingList);
-            request.setAttribute("realFollowersCount", realFollowersCount);
-            request.setAttribute("realFollowingCount", realFollowingCount);
-            if (isMyProfile) {
-                List<User> blockedList = userController.getBlockedUsers(loggedUser.getId());
-                request.setAttribute("blockedUsers", blockedList);
-            }
-            Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
-
-            ConfiguracionReglas config = configuracionReglasService.getConfiguracionReglas();
-            int userKcals = profileUser.getTotalKcals();
-            int userLevel = profileUser.getNivelUsuario();
-            int nextLevelMax = config.getUmbralKcalsNivel2();
-            int currentLevelMin = 0;
-
-            if (userLevel == 2) {
-                currentLevelMin = config.getUmbralKcalsNivel2();
-                nextLevelMax = config.getUmbralKcalsNivel3();
-            } else if (userLevel == 3) {
-                currentLevelMin = config.getUmbralKcalsNivel3();
-                nextLevelMax = config.getUmbralKcalsNivel4();
-            } else if (userLevel >= 4) {
-                currentLevelMin = config.getUmbralKcalsNivel4();
-                nextLevelMax = config.getUmbralKcalsNivel4();
-            }
-
-            int progressPercentage = 100;
-            if (userLevel < 4) {
-                progressPercentage = (int) (((float) (userKcals - currentLevelMin) / (nextLevelMax - currentLevelMin)) * 100);
-            }
-            progressPercentage = Math.max(0, Math.min(100, progressPercentage));
-
-            Movie platoPrincipalMovie = null;
-            if (profileUser.getPlatoPrincipalMovieId() != null) {
-                try {
-                    platoPrincipalMovie = movieService.getMovieById(profileUser.getPlatoPrincipalMovieId());
-                } catch (Exception e) {
-                    System.err.println("Error fetching plato principal: " + e.getMessage());
-                }
-            }
-
-            request.setAttribute("userLevel", userLevel);
-            request.setAttribute("userKcals", userKcals);
-            request.setAttribute("nextLevelMax", nextLevelMax);
-            request.setAttribute("progressPercentage", progressPercentage);
-            request.setAttribute("platoPrincipalMovie", platoPrincipalMovie);
-
-            request.setAttribute("user", profileUser);
-            request.setAttribute("loggedUser", loggedUser);
-            request.setAttribute("isMyProfile", isMyProfile);
-            request.setAttribute("isFollowing", isFollowing);
-            request.setAttribute("totalReviews", userReviews.size());
-            request.setAttribute("recentReviews", userReviews.size() > 5 ? userReviews.subList(0, 5) : userReviews);
-            request.setAttribute("ratingDistribution", ratingDistribution);
-            
-            request.getRequestDispatcher("/WEB-INF/views/profile.jsp").forward(request, response);
-
-        } catch (AppException e) {
-            throw e; 
-        } catch (Exception e) {
-            throw ErrorFactory.internal("Error inesperado cargando el perfil: " + e.getMessage());
         }
+        if (profileUser == null) {
+            profileUser = loggedUser;
+        }
+        boolean isMyProfile = (loggedUser.getUserId() == profileUser.getUserId());
+        boolean isFollowing = false;
+
+        if (!isMyProfile) {
+            boolean loBloquee = userController.isBlocking(loggedUser.getUserId(), profileUser.getUserId());
+            boolean meBloqueo = userController.isBlocking(profileUser.getUserId(), loggedUser.getUserId());
+            if (loBloquee || meBloqueo) {
+                throw ErrorFactory.notFound("Usuario no encontrado");
+            }
+            isFollowing = userController.checkFollowStatus(loggedUser.getUserId(), profileUser.getUserId());
+        }
+        List<Review> userReviews = reviewController.getReviewsByUser(profileUser.getUserId());  
+        List<User> followersList = userController.getFollowers(profileUser.getUserId());
+        List<User> followingList = userController.getFollowing(profileUser.getUserId());
+        int realFollowersCount = followersList.size();
+        int realFollowingCount = followingList.size();
+        
+        if (loggedUser != null) {
+            followersList.removeIf(u -> 
+                userController.isBlocking(loggedUser.getUserId(), u.getUserId()) || 
+                userController.isBlocking(u.getUserId(), loggedUser.getUserId())
+            );
+            followingList.removeIf(u -> 
+                userController.isBlocking(loggedUser.getUserId(), u.getUserId()) || 
+                userController.isBlocking(u.getUserId(), loggedUser.getUserId())
+            );
+        }
+        request.setAttribute("followers", followersList);
+        request.setAttribute("following", followingList);
+        request.setAttribute("realFollowersCount", realFollowersCount);
+        request.setAttribute("realFollowingCount", realFollowingCount);
+        if (isMyProfile) {
+            List<User> blockedList = userController.getBlockedUsers(loggedUser.getUserId());
+            request.setAttribute("blockedUsers", blockedList);
+        } 
+        Map<String, Integer> ratingDistribution = calculateRatingDistribution(userReviews);
+        SystemSettings config = configuracionReglasService.getSystemSettings();
+        int userKcals = profileUser.getTotalKcals();
+        int userLevel = profileUser.getUserLevel();
+        int nextLevelMax = config.getKcalsToLevel2();
+        int currentLevelMin = 0;
+        if (userLevel == 2) {
+            currentLevelMin = config.getKcalsToLevel2();
+            nextLevelMax = config.getKcalsToLevel3();
+        } else if (userLevel == 3) {
+            currentLevelMin = config.getKcalsToLevel3();
+            nextLevelMax = config.getKcalsToLevel4();
+        } else if (userLevel >= 4) {
+            currentLevelMin = config.getKcalsToLevel4();
+            nextLevelMax = config.getKcalsToLevel4();
+        }
+        int progressPercentage = 100;
+        if (userLevel < 4) {
+            progressPercentage = (int) (((float) (userKcals - currentLevelMin) / (nextLevelMax - currentLevelMin)) * 100);
+        }
+        progressPercentage = Math.max(0, Math.min(100, progressPercentage));
+
+        Movie platoPrincipalMovie = null;
+        if (profileUser.getMainDishMovieId() != null) {
+            try {
+                platoPrincipalMovie = movieService.getMovieById(profileUser.getMainDishMovieId());
+            } catch (Exception e) {
+                System.err.println("Error fetching plato principal: " + e.getMessage());
+            }
+        }
+        request.setAttribute("userLevel", userLevel);
+        request.setAttribute("userKcals", userKcals);
+        request.setAttribute("nextLevelMax", nextLevelMax);
+        request.setAttribute("progressPercentage", progressPercentage);
+        request.setAttribute("platoPrincipalMovie", platoPrincipalMovie);
+        request.setAttribute("user", profileUser);
+        request.setAttribute("loggedUser", loggedUser);
+        request.setAttribute("isMyProfile", isMyProfile);
+        request.setAttribute("isFollowing", isFollowing);
+        request.setAttribute("totalReviews", userReviews.size());
+        request.setAttribute("recentReviews", userReviews.size() > 5 ? userReviews.subList(0, 5) : userReviews);
+        request.setAttribute("ratingDistribution", ratingDistribution); 
+        request.getRequestDispatcher("/WEB-INF/views/profile.jsp").forward(request, response);
     }
 
     private Map<String, Integer> calculateRatingDistribution(List<Review> reviews) {

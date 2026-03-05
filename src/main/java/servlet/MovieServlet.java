@@ -41,7 +41,6 @@ public class MovieServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String accion = request.getParameter("accion");
 		if (accion == null) accion = "listar";
-		
         String jspForm = "/movieForm.jsp"; 
 
 		switch (accion) {
@@ -51,14 +50,17 @@ public class MovieServlet extends HttpServlet {
 				request.getRequestDispatcher("/movieCrud.jsp").forward(request, response);
 				break;
 			case "mostrarFormEditar":
-				int idEditar = Integer.parseInt(request.getParameter("id"));
+                int idEditar = parseIntParam(request.getParameter("id"), "ID de Película");
 				Movie movie = movieController.getMovieById(idEditar);
-				request.setAttribute("movie", movie);
+                if (movie == null) throw ErrorFactory.notFound("La película solicitada no existe.");
+                request.setAttribute("movie", movie);
 				request.getRequestDispatcher(jspForm).forward(request, response);
 				break;
 			case "mostrarFormCrear":
 				request.getRequestDispatcher(jspForm).forward(request, response);
 				break;
+            default:
+                throw ErrorFactory.badRequest("Acción inválida");
 		}
 	}
 	
@@ -66,92 +68,92 @@ public class MovieServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
         String accion = request.getParameter("accion");
+        if (accion == null) throw ErrorFactory.badRequest("Acción requerida");
+        if ("eliminar".equals(accion)) {
+            int idEliminar = parseIntParam(request.getParameter("id"), "ID");
+            Movie deleteMovie = new Movie();
+            deleteMovie.setMovieId(idEliminar);
+            movieController.removeMovie(deleteMovie);
+            
+            response.sendRedirect(request.getContextPath() + "/movies?accion=listar&exito=true");
+            return;
+        }
         String jspTarget = "/movieForm.jsp";
-        Movie movieFromForm = null;
+        Movie movieFromForm = new Movie();
 
         try {
-            switch (accion) {
-                case "crear":
-                    movieFromForm = new Movie();
-                    populateMovieFromRequest(movieFromForm, request);
-                    Set<ConstraintViolation<Movie>> violationsCreate = validator.validate(movieFromForm);
-                    if (!violationsCreate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsCreate));
-                        request.setAttribute("movie", movieFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-                    movieController.createMovie(movieFromForm);
-                    break;
-                    
-                case "actualizar":
-                    movieFromForm = new Movie();
-                    movieFromForm.setId(parseIntParam(request.getParameter("id"), "ID"));
-                    populateMovieFromRequest(movieFromForm, request);
-                    
-                    Set<ConstraintViolation<Movie>> violationsUpdate = validator.validate(movieFromForm);
-                    if (!violationsUpdate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsUpdate));
-                        request.setAttribute("movie", movieFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-                    movieController.modifyMovie(movieFromForm);
-                    break;
-                    
-                case "eliminar":
-                    int idEliminar = parseIntParam(request.getParameter("id"), "ID");
-                    Movie deleteMovie = new Movie();
-                    deleteMovie.setId(idEliminar);
-                    movieController.removeMovie(deleteMovie);
-                    break;
-            }
-            
-            // Si todo fue bien redirigimos a la lista
-            response.sendRedirect(request.getContextPath() + "/movies?accion=listar&exito=true");
-
-        } catch (AppException e) {
-            if (e.getErrorType().equals("VALIDATION_ERROR")) {
+            if ("crear".equals(accion)) {
+                populateMovieFromRequest(movieFromForm, request);
+                Set<ConstraintViolation<Movie>> violationsCreate = validator.validate(movieFromForm);
+                if (!violationsCreate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsCreate));
+                    request.setAttribute("movie", movieFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }
+                movieController.createMovie(movieFromForm);
                 
-                request.setAttribute("errors", Set.of(e.getMessage())); 
+            } else if ("actualizar".equals(accion)) {
+                movieFromForm.setMovieId(parseIntParam(request.getParameter("id"), "ID"));
+                populateMovieFromRequest(movieFromForm, request);
+                
+                Set<ConstraintViolation<Movie>> violationsUpdate = validator.validate(movieFromForm);
+                if (!violationsUpdate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsUpdate));
+                    request.setAttribute("movie", movieFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }
+                movieController.modifyMovie(movieFromForm);
+                
+            } else {
+                throw ErrorFactory.badRequest("Acción desconocida");
+            }
+            response.sendRedirect(request.getContextPath() + "/movies?accion=listar&exito=true");
+        } catch (AppException e) {
+            if (e.getErrorType().equals("VALIDATION_ERROR") || e.getErrorType().equals("DUPLICATE_ERROR")) {
+                request.setAttribute("appError", e.getMessage()); 
                 request.setAttribute("movie", movieFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
-            
             } else {
                 throw e;
             }
-        } catch (Exception e) {
-            throw e;
         }
 	}
     
     private void populateMovieFromRequest(Movie movie, HttpServletRequest request) {
-        movie.setId_api(parseIntParam(request.getParameter("id_api"), "ID API"));
-        movie.setTitulo(request.getParameter("titulo"));
-        movie.setTituloOriginal(request.getParameter("tituloOriginal"));
-        movie.setSinopsis(request.getParameter("sinopsis"));
-        movie.setEstrenoYear(parseIntParam(request.getParameter("estrenoYear"), "Año de Estreno"));
-        movie.setDuracion(parseTimeParam(request.getParameter("duracion"), "Duración"));
-        movie.setAdulto(Boolean.parseBoolean(request.getParameter("adulto")));
-        movie.setPuntuacionApi(parseDoubleParam(request.getParameter("puntuacionApi"), "Puntuación API"));
-        movie.setIdiomaOriginal(request.getParameter("idiomaOriginal"));
+        movie.setApiId(parseIntParam(request.getParameter("id_api"), "ID API"));
+        movie.setTitle(request.getParameter("titulo"));
+        movie.setOriginalTitle(request.getParameter("tituloOriginal"));
+        movie.setSynopsis(request.getParameter("sinopsis"));
+        movie.setReleaseYear(parseIntParam(request.getParameter("estrenoYear"), "Año de Estreno"));
+        movie.setDuration(parseTimeParam(request.getParameter("duracion"), "Duración"));
+        movie.setIsAdult(Boolean.parseBoolean(request.getParameter("adulto")));
+        movie.setApiRating(parseDoubleParam(request.getParameter("puntuacionApi"), "Puntuación API"));
+        movie.setOriginalLanguage(request.getParameter("idiomaOriginal"));
         movie.setPosterPath(request.getParameter("posterPath"));
-        movie.setPopularidad(parseDoubleParam(request.getParameter("popularidad"), "Popularidad"));
-        movie.setVotosApi(parseIntParam(request.getParameter("votosApi"), "Votos API"));
-        movie.setId_imdb(request.getParameter("id_imdb"));
+        movie.setPopularity(parseDoubleParam(request.getParameter("popularidad"), "Popularidad"));
+        movie.setApiVotes(parseIntParam(request.getParameter("votosApi"), "Votos API"));
+        movie.setImdbId(request.getParameter("id_imdb"));
     }
 
     private int parseIntParam(String param, String fieldName) {
+        if (param == null || param.trim().isEmpty()) {
+            throw ErrorFactory.validation("El campo '" + fieldName + "' no puede estar vacío.");
+        }
         try {
-            return Integer.parseInt(param);
+            return Integer.parseInt(param.trim());
         } catch (NumberFormatException e) {
             throw ErrorFactory.validation("El campo '" + fieldName + "' debe ser un número entero.");
         }
     }
     
     private double parseDoubleParam(String param, String fieldName) {
+        if (param == null || param.trim().isEmpty()) {
+            throw ErrorFactory.validation("El campo '" + fieldName + "' no puede estar vacío.");
+        }
         try {
-            return Double.parseDouble(param);
+            return Double.parseDouble(param.trim());
         } catch (NumberFormatException e) {
             throw ErrorFactory.validation("El campo '" + fieldName + "' debe ser un número decimal.");
         }

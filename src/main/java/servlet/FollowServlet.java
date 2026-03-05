@@ -4,6 +4,7 @@ import java.io.IOException;
 import repository.BlockRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import entity.User;
+import exception.ErrorFactory;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -36,63 +37,36 @@ public class FollowServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // 1. Detectar si la petición viene de nuestro AJAX (fetch)
         boolean isAjax = "true".equals(request.getParameter("ajax"));
-        
         HttpSession session = request.getSession(false);
-        User loggedUser = (session != null) ? (User) session.getAttribute("usuarioLogueado") : null;
-        
-        if (loggedUser == null) {
-            if (isAjax) {
-                response.setContentType("application/json");
-                response.getWriter().write("{\"success\":false, \"error\":\"Debes iniciar sesión\"}");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/login");
-            }
-            return;
-        }
-        
+        User loggedUser = (User) session.getAttribute("usuarioLogueado");
         String targetIdStr = request.getParameter("idUsuario");
-        String redirectUrl = request.getContextPath() + "/home"; 
-        
+        int targetId;
+
         try {
             if (targetIdStr == null || targetIdStr.isEmpty()) {
-                throw exception.ErrorFactory.badRequest("ID de usuario no especificado.");
+                throw ErrorFactory.badRequest("ID de usuario no especificado.");
             }
-            
-            int targetId = Integer.parseInt(targetIdStr);
-            redirectUrl = request.getContextPath() + "/profile?id=" + targetId;
-            
-            userController.handleFollowAction(loggedUser.getId(), targetId);
-
-            // 2. Respuesta dependiendo de quién lo pidió
+            targetId = Integer.parseInt(targetIdStr);
+            userController.handleFollowAction(loggedUser.getUserId(), targetId);
             if (isAjax) {
                 response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
                 response.getWriter().write("{\"success\":true}");
             } else {
-                response.sendRedirect(redirectUrl);
+                response.sendRedirect(request.getContextPath() + "/profile?id=" + targetId);
             }
-
         } catch (AppException e) {
             if (isAjax) {
-                response.setContentType("application/json");
-                response.getWriter().write("{\"success\":false, \"error\":\"" + e.getMessage() + "\"}");
+                throw e;
             } else {
-                if (e.getStatusCode() == 500) {
-                    throw new ServletException("Error crítico procesando follow", e);
-                } else {
-                    session.setAttribute("flashMessage", "⚠️ " + e.getMessage());
-                    session.setAttribute("flashType", "warning");
-                    response.sendRedirect(redirectUrl);
-                }
+                targetId = (targetIdStr != null && !targetIdStr.isEmpty()) ? Integer.parseInt(targetIdStr) : loggedUser.getUserId();
+                session.setAttribute("flashMessage", "⚠️ " + e.getMessage());
+                session.setAttribute("flashType", "warning");
+                response.sendRedirect(request.getContextPath() + "/profile?id=" + targetId);
             }
-        } catch (Exception e) {
-            if (isAjax) {
-                response.setContentType("application/json");
-                response.getWriter().write("{\"success\":false, \"error\":\"Error interno del servidor\"}");
-            } else {
-                throw new ServletException("Error crítico procesando follow", e);
-            }
+        } catch (NumberFormatException e) {
+            throw ErrorFactory.badRequest("El ID de usuario es inválido.");
         }
     }
 }

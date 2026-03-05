@@ -45,7 +45,7 @@ public class MovieDetailServlet extends HttpServlet {
     private PersonService personService;
     private WatchlistController watchlistController;
     private ReviewController reviewController;
-    private controller.ConfiguracionReglasController configController;
+    private controller.SystemSettingsController configController;
     private LikeService likeService;
     private UserService userService; 
     
@@ -66,16 +66,16 @@ public class MovieDetailServlet extends HttpServlet {
             BlockRepository blockRepository = new BlockRepository();
             this.userService = new UserService(userRepository, passwordEncoder, followRepository, blockRepository);
             
-            WatchlistRepository watchlistRepository = new WatchlistRepository(movieRepository);
+            WatchlistRepository watchlistRepository = new WatchlistRepository();
             WatchlistService watchlistService = new WatchlistService(watchlistRepository, this.userService, movieService);
             this.watchlistController = new WatchlistController(watchlistService);
             
             ReviewRepository reviewRepository = new ReviewRepository();
-            repository.ConfiguracionReglasRepository configuracionRepository = new repository.ConfiguracionReglasRepository();
-            service.ConfiguracionReglasService configuracionService = new service.ConfiguracionReglasService(configuracionRepository);
+            repository.SystemSettingsRepository configuracionRepository = new repository.SystemSettingsRepository();
+            service.SystemSettingsService configuracionService = new service.SystemSettingsService(configuracionRepository);
             ReviewService reviewService = new ReviewService(reviewRepository, this.userService, movieService, configuracionService, watchlistService);
             this.reviewController = new ReviewController(reviewService);
-            this.configController = new controller.ConfiguracionReglasController(configuracionService);
+            this.configController = new controller.SystemSettingsController(configuracionService);
             this.likeService = new LikeService();
         } catch (Exception e) {
             throw new ServletException("Failed to initialize MovieDetailServlet", e);
@@ -85,132 +85,110 @@ public class MovieDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         String pathInfo = request.getPathInfo();
         
         if (pathInfo == null || pathInfo.length() <= 1) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
-        
+        int movieId;
         try {
-            int movieId = Integer.parseInt(pathInfo.substring(1));
-            Movie movie = movieController.getMovieById(movieId);
-            
-            List<ActorWithCharacter> actors = new ArrayList<>();
-            List<Person> directors = new ArrayList<>();
-            List<Country> countries = new ArrayList<>();
-            try {
-                actors = personService.getActorsByMovieId(movieId);
-            } catch (Exception e) {
-                System.err.println("Error fetching actors: " + e.getMessage());
-            }
-            
-            try {
-                directors = personService.getDirectorsByMovieId(movieId);
-            } catch (Exception e) {
-                System.err.println("Error fetching directors: " + e.getMessage());
-            }
-            try {
-                countries = movieController.getCountriesByMovieId(movieId);
-            } catch (Exception e) {
-                System.err.println("Error fetching countries: " + e.getMessage());
-            }
-            
-            HttpSession session = request.getSession(false);
-            boolean isInWatchlist = false;
-            boolean canAddToWatchlist = true;
-            Review userReview = null;
-            
-            Set<Integer> followingIds = new HashSet<>();
-            
-            if (session != null && session.getAttribute("usuarioLogueado") != null) {
-                User user = (User) session.getAttribute("usuarioLogueado");
-                User updatedUser = userService.getUserById(user.getId()); 
-                
-                List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getId());
-                isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
-                userReview = reviewController.getReviewByUserAndMovie(user.getId(), movieId);
-                
-                int cantidadPeliculas = watchlistMovies.size();
-                int limite = updatedUser.getNivelUsuario() >= 2 
-                    ? configController.getConfiguracionReglas().getLimiteWatchlistActivo()
-                    : configController.getConfiguracionReglas().getLimiteWatchlistNormal();
-                canAddToWatchlist = cantidadPeliculas < limite;
-                
-                List<User> followingList = userService.getFollowing(user.getId());
-                if (followingList != null) {
-                    for (User u : followingList) {
-                        followingIds.add(u.getId());
-                    }
-                }
-            }
-            
-            int idLector = -1;
-            if (session != null && session.getAttribute("usuarioLogueado") != null) {
-                User user = (User) session.getAttribute("usuarioLogueado");
-                idLector = user.getId();
-            }
-            
-            String sortBy = request.getParameter("sortBy");
-            List<Review> reviews;
-            if ("likes".equals(sortBy)) {
-                reviews = reviewController.getReviewsByMovieSortedByLikes(movieId, idLector);
-            } else {
-                reviews = reviewController.getReviewsByMovie(movieId, idLector);
-            }
-            
-            Map<Integer, Integer> likesCountMap = new HashMap<>();
-            Map<Integer, Boolean> userLikesMap = new HashMap<>();
-            Map<Integer, Boolean> followedUsersMap = new HashMap<>(); 
-            Map<Integer, Integer> userLevelsMap = new HashMap<>();
-            
-            for (Review review : reviews) {
-                int likesCount = likeService.getLikesCount(review.getId());
-                likesCountMap.put(review.getId(), likesCount);
-                
-                if (session != null && session.getAttribute("usuarioLogueado") != null) {
-                    User user = (User) session.getAttribute("usuarioLogueado");
-                    boolean hasLiked = likeService.hasUserLiked(user.getId(), review.getId());
-                    userLikesMap.put(review.getId(), hasLiked);
-                }
-                
-                if (!followedUsersMap.containsKey(review.getId_user())) {
-                    followedUsersMap.put(review.getId_user(), followingIds.contains(review.getId_user()));
-                }
-                
-                if (!userLevelsMap.containsKey(review.getId_user())) {
-                    User reviewAuthor = userService.getUserById(review.getId_user());
-                    if (reviewAuthor != null) {
-                        userLevelsMap.put(review.getId_user(), reviewAuthor.getNivelUsuario());
-                    } else {
-                        userLevelsMap.put(review.getId_user(), 1); 
-                    }
-                }
-            }
-            
-            request.setAttribute("movie", movie);
-            request.setAttribute("likesCountMap", likesCountMap);
-            request.setAttribute("userLikesMap", userLikesMap);
-            request.setAttribute("followedUsersMap", followedUsersMap); 
-            request.setAttribute("userLevelsMap", userLevelsMap);
-            request.setAttribute("currentSort", sortBy != null ? sortBy : "date");
-            request.setAttribute("actors", actors);
-            request.setAttribute("directors", directors);
-            request.setAttribute("countries", countries);
-            request.setAttribute("isInWatchlist", isInWatchlist);
-            request.setAttribute("canAddToWatchlist", canAddToWatchlist);
-            request.setAttribute("reviews", reviews);
-            request.setAttribute("userReview", userReview);
-            request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
-            
+            movieId = Integer.parseInt(pathInfo.substring(1));
         } catch (NumberFormatException e) {
-            System.err.println("Invalid movie ID format: " + pathInfo);
-            response.sendRedirect(request.getContextPath() + "/");
-        } catch (Exception e) {
-            System.err.println("Error in MovieDetailServlet: " + e.getMessage());
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/");
+            throw exception.ErrorFactory.notFound("La película solicitada no existe o la URL es inválida.");
+        }  
+        Movie movie = movieController.getMovieById(movieId);
+        if (movie == null) {
+            throw exception.ErrorFactory.notFound("No se encontró ninguna película con el ID especificado.");
         }
+        
+        List<ActorWithCharacter> actors = new ArrayList<>();
+        List<Person> directors = new ArrayList<>();
+        List<Country> countries = new ArrayList<>();
+
+        try { actors = personService.getActorsByMovieId(movieId); } 
+        catch (Exception e) { System.err.println("Error fetching actors: " + e.getMessage()); }
+        try { directors = personService.getDirectorsByMovieId(movieId); } 
+        catch (Exception e) { System.err.println("Error fetching directors: " + e.getMessage()); }
+        try { countries = movieController.getCountriesByMovieId(movieId); } 
+        catch (Exception e) { System.err.println("Error fetching countries: " + e.getMessage()); }
+        
+        HttpSession session = request.getSession(false);
+        boolean isInWatchlist = false;
+        boolean canAddToWatchlist = true;
+        Review userReview = null;
+        Set<Integer> followingIds = new HashSet<>();
+        int idLector = -1;
+        if (session != null && session.getAttribute("usuarioLogueado") != null) {
+            User user = (User) session.getAttribute("usuarioLogueado");
+            idLector = user.getUserId();
+            User updatedUser = userService.getUserById(user.getUserId()); 
+            
+            List<String> watchlistMovies = watchlistController.getMoviesInWatchlist(user.getUserId());
+            isInWatchlist = watchlistMovies.contains(String.valueOf(movieId));
+            userReview = reviewController.getReviewByUserAndMovie(user.getUserId(), movieId);
+            
+            int cantidadPeliculas = watchlistMovies.size();
+            int limite = updatedUser.getUserLevel() >= 2 
+                ? configController.getSystemSettings().getActiveWatchlistLimit()
+                : configController.getSystemSettings().getNormalWatchlistLimit();
+            canAddToWatchlist = cantidadPeliculas < limite;
+            
+            List<User> followingList = userService.getFollowing(user.getUserId());
+            if (followingList != null) {
+                for (User u : followingList) {
+                    followingIds.add(u.getUserId());
+                }
+            }
+        }
+        
+        String sortBy = request.getParameter("sortBy");
+        List<Review> reviews;
+        if ("likes".equals(sortBy)) {
+            reviews = reviewController.getReviewsByMovieSortedByLikes(movieId, idLector);
+        } else {
+            reviews = reviewController.getReviewsByMovie(movieId, idLector);
+        }
+        
+        Map<Integer, Integer> likesCountMap = new HashMap<>();
+        Map<Integer, Boolean> userLikesMap = new HashMap<>();
+        Map<Integer, Boolean> followedUsersMap = new HashMap<>(); 
+        Map<Integer, Integer> userLevelsMap = new HashMap<>();
+        
+        for (Review review : reviews) {
+            int likesCount = likeService.getLikesCount(review.getReviewId());
+            likesCountMap.put(review.getReviewId(), likesCount);
+            if (idLector != -1) {
+                boolean hasLiked = likeService.hasUserLiked(idLector, review.getReviewId());
+                userLikesMap.put(review.getReviewId(), hasLiked);
+            } 
+            if (!followedUsersMap.containsKey(review.getUserId())) {
+                followedUsersMap.put(review.getUserId(), followingIds.contains(review.getUserId()));
+            }  
+            if (!userLevelsMap.containsKey(review.getUserId())) {
+                User reviewAuthor = userService.getUserById(review.getUserId());
+                if (reviewAuthor != null) {
+                    userLevelsMap.put(review.getUserId(), reviewAuthor.getUserLevel());
+                } else {
+                    userLevelsMap.put(review.getUserId(), 1); 
+                }
+            }
+        }
+        
+        request.setAttribute("movie", movie);
+        request.setAttribute("likesCountMap", likesCountMap);
+        request.setAttribute("userLikesMap", userLikesMap);
+        request.setAttribute("followedUsersMap", followedUsersMap); 
+        request.setAttribute("userLevelsMap", userLevelsMap);
+        request.setAttribute("currentSort", sortBy != null ? sortBy : "date");
+        request.setAttribute("actors", actors);
+        request.setAttribute("directors", directors);
+        request.setAttribute("countries", countries);
+        request.setAttribute("isInWatchlist", isInWatchlist);
+        request.setAttribute("canAddToWatchlist", canAddToWatchlist);
+        request.setAttribute("reviews", reviews);
+        request.setAttribute("userReview", userReview);
+        
+        request.getRequestDispatcher("/WEB-INF/movie-detail.jsp").forward(request, response);
     }
 }

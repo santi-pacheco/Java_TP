@@ -19,7 +19,6 @@ import jakarta.validation.ConstraintViolation;
 import exception.AppException;
 import exception.ErrorFactory;
 
-
 @WebServlet("/countries")
 public class CountryServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -41,101 +40,91 @@ public class CountryServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String accion = request.getParameter("accion");
 		if (accion == null) accion = "listar";
-		
-		try {
-			switch (accion) {
-				case "listar":
-					List<Country> countries = countryController.getCountries();
-					request.setAttribute("countries", countries);
-					request.getRequestDispatcher("/countryCrud.jsp").forward(request, response);
-					break;
-				case "mostrarFormEditar":
-					int idEditar = parseIntParam(request.getParameter("id"), "ID"); // NUEVO
-					Country country = countryController.getCountryById(idEditar);
-					request.setAttribute("country", country);
-					request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
-					break;
-				case "mostrarFormCrear":
-					request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
-					break;
-			}
-		} catch (Exception e) {
-			throw e;
+		switch (accion) {
+			case "listar":
+				List<Country> countries = countryController.getCountries();
+				request.setAttribute("countries", countries);
+				request.getRequestDispatcher("/countryCrud.jsp").forward(request, response);
+				break;
+			case "mostrarFormEditar":
+				int idEditar = parseIntParam(request.getParameter("id"), "ID");
+				Country country = countryController.getCountryById(idEditar);
+				request.setAttribute("country", country);
+				request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
+				break;
+			case "mostrarFormCrear":
+				request.getRequestDispatcher("/countryForm.jsp").forward(request, response);
+				break;
+            default:
+                throw ErrorFactory.badRequest("Acción inválida");
 		}
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String accion = request.getParameter("accion");
-		
+        if (accion == null) throw ErrorFactory.badRequest("Acción requerida");
+
+        if ("eliminar".equals(accion)) {
+            int idEliminar = parseIntParam(request.getParameter("id"), "ID");
+            Country deleteCountry = new Country();
+            deleteCountry.setCountryId(idEliminar);
+            countryController.removeCountry(deleteCountry); 
+            
+            response.sendRedirect(request.getContextPath() + "/countries?accion=listar&exito=true");
+            return;
+        }
+
 		String jspTarget = "/countryForm.jsp";
-        Country countryFromForm = null;
+        Country countryFromForm = new Country();
+
         try {
-			switch (accion) {
-				case "crear":
-					countryFromForm = new Country();
-					populateCountryFromRequest(countryFromForm, request);
+			if ("crear".equals(accion)) {
+				populateCountryFromRequest(countryFromForm, request);
 
-                    Set<ConstraintViolation<Country>> violationsCreate = validator.validate(countryFromForm);
-                    if (!violationsCreate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsCreate));
-                        request.setAttribute("country", countryFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-					countryController.createCountry(countryFromForm);
-					break;
+                Set<ConstraintViolation<Country>> violationsCreate = validator.validate(countryFromForm);
+                if (!violationsCreate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsCreate));
+                    request.setAttribute("country", countryFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }
+				countryController.createCountry(countryFromForm);
 
-				case "actualizar":
-					countryFromForm = new Country();
-					countryFromForm.setId(parseIntParam(request.getParameter("id"), "ID"));
-					populateCountryFromRequest(countryFromForm, request);
-					
-                    Set<ConstraintViolation<Country>> violationsUpdate = validator.validate(countryFromForm);
-                    if (!violationsUpdate.isEmpty()) {
-                        request.setAttribute("errors", getErrorMessages(violationsUpdate));
-                        request.setAttribute("country", countryFromForm);
-                        request.getRequestDispatcher(jspTarget).forward(request, response);
-                        return;
-                    }
-
-					countryController.modifyCountry(countryFromForm);
-					break;
-
-				case "eliminar":
-					int idEliminar = parseIntParam(request.getParameter("id"), "ID");
-					Country deleteCountry = new Country();
-					deleteCountry.setId(idEliminar);
-					countryController.removeCountry(deleteCountry);
-					break;
-			}
+			} else if ("actualizar".equals(accion)) {
+				countryFromForm.setCountryId(parseIntParam(request.getParameter("id"), "ID"));
+				populateCountryFromRequest(countryFromForm, request);
+				
+                Set<ConstraintViolation<Country>> violationsUpdate = validator.validate(countryFromForm);
+                if (!violationsUpdate.isEmpty()) {
+                    request.setAttribute("errors", getErrorMessages(violationsUpdate));
+                    request.setAttribute("country", countryFromForm);
+                    request.getRequestDispatcher(jspTarget).forward(request, response);
+                    return;
+                }
+				countryController.modifyCountry(countryFromForm);
+                
+			} else {
+                throw ErrorFactory.badRequest("Acción desconocida");
+            }
 			
 			response.sendRedirect(request.getContextPath() + "/countries?accion=listar&exito=true");
 
         } catch (AppException e) {
-            
-            if (e.getErrorType().equals("DUPLICATE_ERROR")) {
+            if (e.getErrorType().equals("DUPLICATE_ERROR") || e.getErrorType().equals("VALIDATION_ERROR")) {
                 request.setAttribute("appError", e.getMessage());
                 request.setAttribute("country", countryFromForm);
                 request.getRequestDispatcher(jspTarget).forward(request, response);
-            
-            } else if (e.getErrorType().equals("VALIDATION_ERROR")) {
-                request.setAttribute("errors", Set.of(e.getMessage()));
-                request.setAttribute("country", countryFromForm);
-                request.getRequestDispatcher(jspTarget).forward(request, response);
             } else {
-                throw e;
+                throw e; 
             }
-        } catch (Exception e) {
-            throw e;
         }
       }
 	
 	private void populateCountryFromRequest(Country country, HttpServletRequest request) {
-        country.setIso_3166_1(request.getParameter("iso"));
-        country.setEnglish_name(request.getParameter("name"));
+        country.setIsoCode(request.getParameter("iso"));
+        country.setName(request.getParameter("name"));
     }
-	
 	private int parseIntParam(String param, String fieldName) {
         if (param == null || param.isEmpty()) {
              throw ErrorFactory.validation("El campo '" + fieldName + "' no puede estar vacío.");
@@ -146,7 +135,6 @@ public class CountryServlet extends HttpServlet {
             throw ErrorFactory.validation("El campo '" + fieldName + "' debe ser un número entero.");
         }
     }
-	
 	private Set<String> getErrorMessages(Set<ConstraintViolation<Country>> violations) {
         return violations.stream()
                 .map(ConstraintViolation::getMessage)

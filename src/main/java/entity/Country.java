@@ -3,43 +3,38 @@ package entity;
 import jakarta.validation.constraints.*;
 
 public class Country {
-	private int id;
-	
+	private int countryId;
+
 	@NotNull(message = "El código ISO no puede ser nulo")
-    @Size(min = 2, max = 2, message = "El código ISO debe tener exactamente 2 caracteres")
-    @Pattern(regexp = "[A-Z]{2}", message = "El código ISO debe consistir en 2 letras mayúsculas")
-	private String iso_3166_1;
-	
-	
-	@NotBlank(message = "El nombre en inglés no puede estar vacío ni ser nulo")
-    @Size(max = 100, message = "El nombre en inglés no debe exceder los 100 caracteres")
-	private String english_name;
-	
+	@Size(min = 2, max = 2, message = "El código ISO debe tener exactamente 2 caracteres")
+	@Pattern(regexp = "[A-Z]{2}", message = "El código ISO debe consistir en 2 letras mayúsculas")
+	private String isoCode;
 
-	
-	public void setId(int id) {
-		this.id = id;
+	@NotBlank(message = "El nombre no puede estar vacío ni ser nulo")
+	@Size(max = 100, message = "El nombre no debe exceder los 100 caracteres")
+	private String name;
+
+	public int getCountryId() {
+		return countryId;
 	}
 
-	public int getId() {
-		return id;
+	public void setCountryId(int countryId) {
+		this.countryId = countryId;
 	}
 
-
-	public String getIso_3166_1() {
-		return iso_3166_1;
+	public String getIsoCode() {
+		return isoCode;
 	}
 
-	public void setIso_3166_1(String iso_3166_1) {
-		this.iso_3166_1 = iso_3166_1;
+	public void setIsoCode(String isoCode) {
+		this.isoCode = isoCode;
 	}
 
-	public String getEnglish_name() {
-		return english_name;
+	public String getName() {
+		return name;
 	}
 
-	public void setEnglish_name(String english_name) {
-		this.english_name = english_name;
+	public void setName(String name) {
+		this.name = name;
 	}
-
 }

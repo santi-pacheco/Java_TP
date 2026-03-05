@@ -37,10 +37,6 @@ public class PersonController {
 		personService.deletePerson(per);
 	}
 	
-	public List<util.DiscoverReflectionMain.actorCharacter> saveActors(List <service.ExternalApiService.PersonWithCharacter> personWithCharacter){
-		return personService.saveActors(personWithCharacter);
-	}
-	
 	public List<Person> saveDirectors(List<Person> director) {
 		return personService.saveDirectors(director);
 	}

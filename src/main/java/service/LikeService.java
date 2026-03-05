@@ -3,25 +3,29 @@ package service;
 import repository.ReviewLikeRepository;
 import repository.UserRepository;
 import repository.ReviewRepository;
-import repository.ConfiguracionReglasRepository;
+import repository.SystemSettingsRepository;
 import entity.Review;
-import entity.ConfiguracionReglas;
+import entity.SystemSettings;
 import entity.User;
+import exception.ErrorFactory;
 
 public class LikeService {
     private final ReviewLikeRepository likeRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
-    private final ConfiguracionReglasService configuracionService;
+    private final SystemSettingsService configuracionService;
 
     public LikeService() {
         this.likeRepository = new ReviewLikeRepository();
         this.userRepository = new UserRepository();
         this.reviewRepository = new ReviewRepository();
-        this.configuracionService = new ConfiguracionReglasService(new ConfiguracionReglasRepository());
+        this.configuracionService = new SystemSettingsService(new SystemSettingsRepository());
     }
 
     public LikeResponse toggleLike(int userId, int reviewId) {
+        if (userId <= 0 || reviewId <= 0) {
+            throw ErrorFactory.badRequest("IDs de usuario o reseña inválidos.");
+        }
         
         boolean liked = likeRepository.toggleLike(userId, reviewId);
         int currentCount = likeRepository.getLikesCount(reviewId);
@@ -32,10 +36,12 @@ public class LikeService {
     }
 
     public boolean hasUserLiked(int userId, int reviewId) {
+        if (userId <= 0 || reviewId <= 0) return false;
         return likeRepository.existsLike(userId, reviewId);
     }
 
     public int getLikesCount(int reviewId) {
+        if (reviewId <= 0) return 0;
         return likeRepository.getLikesCount(reviewId);
     }
 
@@ -43,8 +49,9 @@ public class LikeService {
         Review review = reviewRepository.findOne(reviewId);
         if (review == null) return;
 
-        int authorId = review.getId_user();
+        int authorId = review.getUserId();
 
+        // El autor no gana/pierde kcals por darse like a sí mismo
         if (actorId != authorId) {
             int kcalsModifier = isAddingLike ? 500 : -500;
             
@@ -54,15 +61,15 @@ public class LikeService {
             int newKcals = author.getTotalKcals() + kcalsModifier;
             if (newKcals < 0) newKcals = 0;
 
-            ConfiguracionReglas config = configuracionService.getConfiguracionReglas();
+            SystemSettings config = configuracionService.getSystemSettings();
             int newLevel = 1;
 
             if (config != null) {
-                if (newKcals >= config.getUmbralKcalsNivel4()) {
+                if (newKcals >= config.getKcalsToLevel4()) {
                     newLevel = 4;
-                } else if (newKcals >= config.getUmbralKcalsNivel3()) {
+                } else if (newKcals >= config.getKcalsToLevel3()) {
                     newLevel = 3;
-                } else if (newKcals >= config.getUmbralKcalsNivel2()) {
+                } else if (newKcals >= config.getKcalsToLevel2()) {
                     newLevel = 2;
                 }
             }
@@ -70,7 +77,7 @@ public class LikeService {
             userRepository.updateUserVolume(authorId, newKcals, newLevel);
         }
     }
-
+    //Clase interna para devolver la respuesta
     public static class LikeResponse {
         private final boolean liked;
         private final int likesCount;

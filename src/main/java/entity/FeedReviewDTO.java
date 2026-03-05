@@ -12,8 +12,10 @@ public class FeedReviewDTO {
     private boolean isFollowing;
     private String movieTitle;
     private String text;
-    private String moderation_status;
+    private String moderationStatus;
+    private int userLevel;
 
+    
     public int getReviewId() {
     	return reviewId;
     }
@@ -97,12 +99,20 @@ public class FeedReviewDTO {
 		this.isFollowing = isFollowing;
 	}
 	
-	public String getModeration_status() {
-		return moderation_status;
+	public String getModerationStatus() {
+		return moderationStatus;
 	}
 	
-	public void setModeration_status(String moderation_status) {
-		this.moderation_status = moderation_status;
+	public void setModerationStatus(String moderationStatus) {
+		this.moderationStatus = moderationStatus;
 	}
+	
+	public int getUserLevel() {
+		return userLevel;
+	}
+	public void setUserLevel(int userLevel) {
+		this.userLevel = userLevel;
+	}
+	
     
 }

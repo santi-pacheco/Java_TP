@@ -4,18 +4,18 @@ import jakarta.validation.constraints.*;
 
 public class Genre {
 	
-	private int id;
+	private int genreId;
 	
 	@NotBlank(message = "El nombre del género no puede estar vacío")
 	private String name;
 	
-	private int id_api;
+	private Integer apiId;
 	
-	public int getId() {
-		return id;
+	public int getGenreId() {
+		return genreId;
 	}
-	public void setId(int id) {
-		this.id = id;
+	public void setGenreId(int genreId) {
+		this.genreId = genreId;
 	}
 	public String getName() {
 		return name;
@@ -23,11 +23,11 @@ public class Genre {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public int getId_api() {
-		return id_api;
+	public Integer getApiId() {
+		return apiId;
 	}
-	public void setId_api(int id_api) {
-		this.id_api = id_api;
+	public void setApiId(Integer apiId) {
+		this.apiId = apiId;
 	}
 		
 }

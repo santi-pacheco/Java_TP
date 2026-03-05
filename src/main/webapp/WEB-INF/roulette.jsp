@@ -191,7 +191,7 @@
                 %>
                 <div style="position: absolute; width: 100%; height: 100%; transform: rotate(<%= angle %>deg);">
                     <img src="https://image.tmdb.org/t/p/w200<%= movie.getPosterPath() %>" 
-                         alt="<%= movie.getTitulo() %>"
+                         alt="<%= movie.getTitle() %>"
                          style="position: absolute; width: 100px; height: 150px; top: 30px; left: 50%; transform: translateX(-50%); object-fit: cover; border-radius: 8px; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.6);"
                          onerror="this.src='https://via.placeholder.com/100x150?text=?'">
                 </div>
@@ -209,11 +209,11 @@
         <div class="popup-overlay">
             <div class="selected-movie">
             <img src="https://image.tmdb.org/t/p/w300<%= selectedMovie.getPosterPath() %>" 
-                 alt="<%= selectedMovie.getTitulo() %>"
+                 alt="<%= selectedMovie.getTitle() %>"
                  onerror="this.src='https://via.placeholder.com/200x300?text=Sin+Imagen'">
-            <h2><%= selectedMovie.getTitulo() %></h2>
-            <p><%= selectedMovie.getEstrenoYear() %></p>
-            <a href="${pageContext.request.contextPath}/movie/<%= selectedMovie.getId() %>" class="btn">Ver Detalles</a>
+            <h2><%= selectedMovie.getTitle() %></h2>
+            <p><%= selectedMovie.getReleaseYear() %></p>
+            <a href="${pageContext.request.contextPath}/movie/<%= selectedMovie.getMovieId() %>" class="btn">Ver Detalles</a>
             <a href="${pageContext.request.contextPath}/roulette" class="btn btn-secondary">Girar de Nuevo</a>
             <a href="${pageContext.request.contextPath}/watchlist" class="btn btn-secondary">Volver a Watchlist</a>
             </div>

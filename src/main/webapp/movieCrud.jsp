@@ -58,8 +58,8 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 8px; vert
                             Movie movie = movies.get(i);
                             String displayStyle = i < 50 ? "" : "style='display:none;'";
                 %>
-                <tr class="movie-row" data-title="<%= movie.getTitulo().toLowerCase() %>" <%= displayStyle %>>
-                    <td><%= movie.getId() %></td>
+                <tr class="movie-row" data-title="<%= movie.getTitle().toLowerCase() %>" <%= displayStyle %>>
+                    <td><%= movie.getMovieId() %></td>
                     <td>
                         <% if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) { %>
                             <img src="https://image.tmdb.org/t/p/w92<%= movie.getPosterPath() %>" class="movie-poster">
@@ -67,14 +67,14 @@ table.table tr th, table.table tr td { border-color: #e9e9e9; padding: 8px; vert
                             <span>-</span>
                         <% } %>
                     </td>
-                    <td><%= movie.getTitulo() %></td>
-                    <td><%= movie.getEstrenoYear() %></td>
-                    <td><%= String.format("%.1f", movie.getPuntuacionApi()) %></td>
+                    <td><%= movie.getTitle() %></td>
+                    <td><%= movie.getReleaseYear() %></td>
+                    <td><%= String.format("%.1f", movie.getApiRating()) %></td>
                     <td>
-                        <a href="<%= request.getContextPath() %>/movies?accion=mostrarFormEditar&id=<%= movie.getId() %>" class="btn btn-warning btn-xs">Editar</a>
+                        <a href="<%= request.getContextPath() %>/movies?accion=mostrarFormEditar&id=<%= movie.getMovieId() %>" class="btn btn-warning btn-xs">Editar</a>
                         <form action="<%= request.getContextPath() %>/movies" method="POST" style="display:inline;">
                             <input type="hidden" name="accion" value="eliminar">
-                            <input type="hidden" name="id" value="<%= movie.getId() %>">
+                            <input type="hidden" name="id" value="<%= movie.getMovieId() %>">
                             <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('¿Eliminar?')">Eliminar</button>
                         </form>
                     </td>

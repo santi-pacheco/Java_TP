@@ -21,7 +21,6 @@ public class GeminiModerationService {
         API_URL = config.getString("gemini.api.url").trim();
     }
 
-
     public static class ModerationResult {
         private final boolean hasSpoilers;
         private final boolean hasOffensiveContent;
@@ -33,17 +32,9 @@ public class GeminiModerationService {
             this.reason = reason;
         }
 
-        public boolean hasSpoilers() {
-            return hasSpoilers;
-        }
-
-        public boolean hasOffensiveContent() {
-            return hasOffensiveContent;
-        }
-
-        public String getReason() {
-            return reason;
-        }
+        public boolean hasSpoilers() { return hasSpoilers; }
+        public boolean hasOffensiveContent() { return hasOffensiveContent; }
+        public String getReason() { return reason; }
     }
 
     public ModerationResult moderateReview(String reviewText, String moviePlot, String movieTitle) {
@@ -52,9 +43,7 @@ public class GeminiModerationService {
             String response = callGeminiAPI(prompt);
             return parseResponse(response);
         } catch (Exception e) {
-            System.err.println("Error al moderar reseña: " + e.getMessage());
-            e.printStackTrace();
-            return new ModerationResult(false, false, "Error en la moderación: " + e.getMessage());
+            return new ModerationResult(false, false, "Error técnico en la moderación por IA.");
         }
     }
 
@@ -76,10 +65,7 @@ public class GeminiModerationService {
             "  \"hasOffensiveContent\": true/false,\n" +
             "  \"reason\": \"Explicación del veredicto\"\n" +
             "}",
-            movieTitle,
-            moviePlot,
-            reviewText,
-            commentText
+            movieTitle, moviePlot, reviewText, commentText
         );
     }
     
@@ -103,9 +89,7 @@ public class GeminiModerationService {
             "  \"hasOffensiveContent\": true/false,\n" +
             "  \"reason\": \"Explicación del veredicto\"\n" +
             "}",
-            movieTitle,
-            moviePlot,
-            reviewText
+            movieTitle, moviePlot, reviewText
         );
     }
 
@@ -142,16 +126,7 @@ public class GeminiModerationService {
 
         int responseCode = conn.getResponseCode();
         if (responseCode != 200) {
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
-                StringBuilder errorResponse = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    errorResponse.append(line);
-                }
-                throw new RuntimeException("Error en API Gemini: HTTP " + responseCode + 
-                                         " - " + errorResponse.toString());
-            }
+            throw new RuntimeException("Error en API Gemini: HTTP " + responseCode);
         }
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
@@ -174,34 +149,29 @@ public class GeminiModerationService {
             String text = parts.getJSONObject(0).getString("text");
 
             if (text == null || text.trim().isEmpty()) {
-                return new ModerationResult(false, false, "Error: Respuesta vacía de la IA");
+                return new ModerationResult(false, false, "Respuesta vacía de la IA");
             }
 
             int startIdx = text.indexOf("{");
             int endIdx = text.lastIndexOf("}");
 
             if (startIdx != -1 && endIdx != -1 && startIdx < endIdx) {
-
                 String jsonText = text.substring(startIdx, endIdx + 1);
                 JSONObject result = new JSONObject(jsonText);
                 
-
                 return new ModerationResult(
                     result.optBoolean("hasSpoilers", false),
                     result.optBoolean("hasOffensiveContent", false),
                     result.optString("reason", "Sin razón proporcionada")
                 );
             } else {
-          
-                return new ModerationResult(false, false, "Error: Formato de respuesta inválido (No JSON)");
+                return new ModerationResult(false, false, "Formato de respuesta inválido");
             }
             
         } catch (Exception e) {
-            System.err.println("Error al parsear respuesta de Gemini: " + e.getMessage());
-            return new ModerationResult(false, false, "Error técnico al procesar la respuesta");
+            return new ModerationResult(false, false, "Error al procesar la respuesta");
         }
     }
-    
     
     public ModerationResult moderateComment(String commentText, String reviewText, String moviePlot, String movieTitle) {
         try {
@@ -209,11 +179,7 @@ public class GeminiModerationService {
             String response = callGeminiAPI(prompt);
             return parseResponse(response);
         } catch (Exception e) {
-            System.err.println("Error al moderar comentario: " + e.getMessage());
-            e.printStackTrace();
-            return new ModerationResult(false, false, "Error en la moderación: " + e.getMessage());
+            return new ModerationResult(false, false, "Error técnico en la moderación del comentario por IA.");
         }
     }
-
-
 }

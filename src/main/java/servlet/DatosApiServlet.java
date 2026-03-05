@@ -11,6 +11,7 @@ import java.io.IOException;
 import controller.DatosApiController;
 import service.DatosApiService;
 import exception.AppException;
+import exception.ErrorFactory;
 
 @WebServlet("/data-load")
 public class DatosApiServlet extends HttpServlet {
@@ -34,17 +35,14 @@ public class DatosApiServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         String accion = request.getParameter("accion");
-        String mensaje = "";
-        String tipoMensaje = "success";
-
-        if (accion == null) {
-            response.sendRedirect(request.getContextPath() + "/data-load?error=AccionNoEspecificada");
-            return;
-        }
 
         try {
+            if (accion == null || accion.trim().isEmpty()) {
+                throw ErrorFactory.badRequest("Acción no especificada.");
+            }
+
+            String mensaje = "";
             switch (accion) {
                 case "loadGenres":
                     System.out.println("Iniciando carga de géneros...");
@@ -67,20 +65,18 @@ public class DatosApiServlet extends HttpServlet {
                     mensaje = "Datos detallados de Personas cargados correctamente.";
                     break;
                 default:
-                    mensaje = "Acción no reconocida.";
-                    tipoMensaje = "danger";
-                    break;
+                    throw ErrorFactory.badRequest("Acción no reconocida: " + accion);
             }
             request.getSession().setAttribute("flashMessage", mensaje);
-            request.getSession().setAttribute("flashType", tipoMensaje);
+            request.getSession().setAttribute("flashType", "success");
             response.sendRedirect(request.getContextPath() + "/data-load");
         } catch (AppException e) {
-        	System.err.println("Error operativo controlado: " + e.getMessage());
+            System.err.println("Error operativo controlado: " + e.getMessage());
             request.getSession().setAttribute("flashMessage", "⚠️ No se pudo completar: " + e.getMessage());
             request.getSession().setAttribute("flashType", "danger");
-            response.sendRedirect(request.getContextPath() + "/data-load");
+            response.sendRedirect(request.getContextPath() + "/data-load");  
         } catch (Exception e) {
-        	throw new ServletException("Error crítico en carga de datos", e);
+            throw new ServletException("Error crítico en carga de datos", e);
         }
     }
 }
