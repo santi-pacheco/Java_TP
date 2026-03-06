@@ -364,6 +364,8 @@
             List<Movie> topRatedMovies = (List<Movie>) request.getAttribute("topRatedMovies");
             @SuppressWarnings("unchecked")
             List<Movie> recentMovies = (List<Movie>) request.getAttribute("recentMovies");
+            @SuppressWarnings("unchecked")
+            List<Movie> recommendedMovies = (List<Movie>) request.getAttribute("recommendedMovies");
         %>
         
         <% if (filteredMovies != null) { %>
@@ -428,7 +430,49 @@
                 <button class="scroll-button scroll-right" onclick="scrollCarousel('popular', 220)">›</button>
             </div>
         </div>
+        <!-- Recomendaciones -->
+
+		<div class="section">
+		    <h2 class="section-title">Recomendaciones</h2>
+		    <div class="carousel-container">
+		        <button class="scroll-button scroll-left" onclick="scrollCarousel('toprated', -220)">‹</button>
+		        <div class="carousel" id="toprated-carousel">
+		            <%
+		                if (recommendedMovies != null && !recommendedMovies.isEmpty()) {
+		                    for (Movie movie : recommendedMovies) {
+		            %>
+		            <div class="movie-card" onclick="window.location.href='${pageContext.request.contextPath}/movie/<%= movie.getMovieId() %>'">
+		                <img src="https://image.tmdb.org/t/p/w300<%= movie.getPosterPath() != null ? movie.getPosterPath() : "" %>" 
+		                     alt="<%= movie.getTitle() %>" 
+		                     class="movie-poster"
+		                     onerror="this.src='https://via.placeholder.com/200x300?text=Sin+Imagen'">
+		                <div class="movie-info">
+		                    <div class="movie-title"><%= movie.getTitle() %></div>
+		                    <div class="movie-year"><%= movie.getReleaseDate() %></div>
+		                    <% if (movie.getLocalRatingAvg() != null && movie.getLocalRatingAvg() > 0) { %>
+		                        <div class="movie-rating">⭐ <%= String.format("%.1f", movie.getLocalRatingAvg()) %></div>
+		                    <% } %>
+		                </div>
+		            </div>
+		            <%
+		                    }
+		                } else {
+		            %>
+		            <div style="padding: 40px; color: #666; font-size: 1rem; text-align: center; width: 100%;">
+		                🎬 No tenemos recomendaciones todavía, sigue dando likes a películas para que podamos ayudarte.
+		            </div>
+		            <%
+		                }
+		            %>
+		        </div>
+		        <button class="scroll-button scroll-right" onclick="scrollCarousel('toprated', 220)">›</button>
+		    </div>
+		</div>
+
         
+        <!--  -->
+        <!-- Mejor Valoradas -->
+
         <div class="section">
             <h2 class="section-title">Mejor Valoradas</h2>
             <div class="carousel-container">
