@@ -203,7 +203,12 @@
                     <button type="button" class="overlay-btn" title="Cambiar foto" data-toggle="modal" data-target="#uploadPhotoModal">
                         <span class="glyphicon glyphicon-camera"></span>
                     </button>
-
+					<button type="button" id="quickUploadBtn" class="overlay-btn" title="Subir foto rápida">
+					    <span class="glyphicon glyphicon-upload"></span>
+					</button>
+					<form id="quickUploadForm" action="<%= request.getContextPath() %>/profile-image?accion=subir" method="post" enctype="multipart/form-data" style="display:none;">
+					    <input type="file" name="photo" id="quickUploadInput" accept="image/*">
+					</form>
                     <% if (hasPhoto) { %>
                         <form action="<%= request.getContextPath() %>/profile-image?accion=eliminar" method="post" style="display:inline;">
                             <button type="submit" class="overlay-btn overlay-btn-danger" title="Eliminar foto" onclick="return confirm('¿Seguro que quieres quitar tu foto?');">

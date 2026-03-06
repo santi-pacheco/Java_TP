@@ -3,6 +3,8 @@ package servlet;
 import java.io.IOException;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,12 +37,35 @@ public class MoviesPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    	System.out.println("=== DEBUG GET REQUEST ===");
         String genre = request.getParameter("genre");
         String sinceStr = request.getParameter("since");
         String untilStr = request.getParameter("until");
         String name = request.getParameter("name");
         
         List<Movie> filteredMovies = null;
+        System.out.println("=== DEBUG RECOMMENDATION SERVICE ===");
+        RecommendationService recommendationService = new RecommendationService();
+        recommendationService.exportRatingCsv();
+        @Nonnull
+		HttpSession session = request.getSession(false);
+        List<Movie> recommendations = null;
+        System.out.println("=== DEBUG SESSION ===");
+        System.out.println("Session es null: " + (session == null));
+
+
+            if (session.getAttribute("usuarioLogueado") != null) {
+                User usuario = (User) session.getAttribute("usuarioLogueado");
+                int userId = usuario.getUserId();
+                System.out.println("Usuario encontrado: " + usuario.getUsername() + " ID: " + userId);
+                
+                //recommendationService.exportRatingCsv();
+                recommendations = recommendationService.getRecommendations(userId, 5);
+            }
+        if (recommendations != null) {
+        	System.out.println("Hay recomendaciones para mostrar: " + recommendations.size());
+        }
+        request.setAttribute("recommendedMovies", recommendations);
         
         boolean hasFilters = (name != null && !name.trim().isEmpty()) || 
                            (genre != null && !genre.trim().isEmpty()) || 
@@ -84,6 +109,7 @@ public class MoviesPageServlet extends HttpServlet {
 
         
         try {
+        	System.out.println("=== DEBUG POST REQUEST ===");
             String genre = request.getParameter("genre");
             String sinceStr = request.getParameter("since");
             String untilStr = request.getParameter("until");
@@ -127,25 +153,7 @@ public class MoviesPageServlet extends HttpServlet {
                 List<Movie> recentMovies = movieController.getRecentMovies(12);
                 
                 //Testeo recomenaciones
-                HttpSession session = request.getSession(false);
-                List<Movie> recommendations = null;
-                System.out.println("=== DEBUG SESSION ===");
-                System.out.println("Session es null: " + (session == null));
 
-
-                    if (session.getAttribute("usuarioLogueado") != null) {
-                        User usuario = (User) session.getAttribute("usuarioLogueado");
-                        int userId = usuario.getUserId();
-                        System.out.println("Usuario encontrado: " + usuario.getUsername() + " ID: " + userId);
-                        
-                        RecommendationService recommendationService = new RecommendationService();
-                        //recommendationService.exportRatingCsv();
-                        recommendations = recommendationService.getRecommendations(userId, 5);
-                    }
-                if (recommendations != null) {
-                	System.out.println("Hay recomendaciones para mostrar: " + recommendations.size());
-                }
-                request.setAttribute("recommendedMovies", recommendations);
 
                 
                 
