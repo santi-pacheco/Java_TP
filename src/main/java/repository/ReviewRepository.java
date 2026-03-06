@@ -380,7 +380,7 @@ public class ReviewRepository {
                      "AND r.moderation_status IN ('APPROVED', 'SPOILER') " +
                      "AND r.user_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?) " +
                      "AND r.user_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?) " +
-                     "ORDER BY r.likes_count DESC, r.created_at DESC " +
+                     "ORDER BY r.created_at DESC, r.likes_count DESC  " +
                      "LIMIT ? OFFSET ?";
                      
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();

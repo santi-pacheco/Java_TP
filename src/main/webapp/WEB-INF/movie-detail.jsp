@@ -673,11 +673,11 @@
             submitBtn.textContent = 'Enviando...';
 
             const payload = {
-                id_movie: parseInt(document.getElementById('movieIdInput').value),
-                review_text: document.getElementById('reviewTextInput').value,
-                rating: parseFloat(document.getElementById('ratingInput').value),
-                watched_on: document.getElementById('watchedOnInput').value
-            };
+            	    movieId: parseInt(document.getElementById('movieIdInput').value),
+            	    reviewText: document.getElementById('reviewTextInput').value,
+            	    rating: parseFloat(document.getElementById('ratingInput').value),
+            	    watchedOn: document.getElementById('watchedOnInput').value
+            	};
 
             fetch(contextPath + '/reviews', {
                 method: 'POST',
@@ -691,8 +691,8 @@
                 return res.json();
             })
             .then(data => {
-                if(data.id) {
-                    pollReviewStatus(data.id);
+                if(data.reviewId) {
+                    pollReviewStatus(data.reviewId);
                 }
             })
             .catch(err => {

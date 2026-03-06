@@ -118,7 +118,7 @@ public class RecommendationService {
 	                int movieId = (int) recommendation.getItemID();
 	                Movie movie = movieController.getMovieById(movieId);
 	                recommendedMovies.add(movie);
-	                System.out.println("- " + movie.getTitulo() + " (Score: " + String.format("%.2f", recommendation.getValue()) + ")");
+	                System.out.println("- " + movie.getTitle() + " (Score: " + String.format("%.2f", recommendation.getValue()) + ")");
 	            }
 	        }
 	    } catch (Exception e) {

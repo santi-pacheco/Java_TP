@@ -459,7 +459,7 @@
 		                } else {
 		            %>
 		            <div style="padding: 40px; color: #666; font-size: 1rem; text-align: center; width: 100%;">
-		                🎬 No tenemos recomendaciones todavía, sigue dando likes a películas para que podamos ayudarte.
+		                No tenemos recomendaciones todavía, sigue dando reviews a películas para que podamos ayudarte.
 		            </div>
 		            <%
 		                }

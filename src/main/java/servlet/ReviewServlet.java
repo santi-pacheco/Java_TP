@@ -178,18 +178,26 @@ public class ReviewServlet extends HttpServlet {
         
         Review newReview = new Review();
         int movieId = 0;
-        
+        System.out.println("Recibiendo POST en /reviews con contentType: " + contentType);
+  
         try {
             if (contentType != null && contentType.contains("application/json")) {
                 String jsonBody = request.getReader().lines().collect(Collectors.joining());
                 newReview = gson.fromJson(jsonBody, Review.class);
+                System.out.println("Recibiendo POST desde JSON: " + jsonBody);
             } else {
                 // Formulario HTML
-                String movieIdStr = request.getParameter("movieId");
-                String reviewText = request.getParameter("reviewText");
-                String ratingStr = request.getParameter("rating");
-                String watchedOnStr = request.getParameter("watchedOn");
+            	System.out.println("Recibiendo POST desde formulario HTML");
+            	String watchedOnStr = request.getParameter("watchedOn");
+            	System.out.println("watchedOnStr: " + watchedOnStr);
+            	String ratingStr = request.getParameter("rating");
+            	System.out.println("ratingStr: " + ratingStr);
+            	String reviewText = request.getParameter("reviewText");
+            	System.out.println("reviewText: " + reviewText);
+            	String movieIdStr = request.getParameter("movieId");
+            	System.out.println("movieIdStr: " + movieIdStr);
                 
+                System.out.println("Recibiendo POST desde formulario HTML" + " - movieId: " + movieIdStr + ", reviewText: " + reviewText + ", rating: " + ratingStr + ", watchedOn: " + watchedOnStr);
                 movieId = Integer.parseInt(movieIdStr);
                 newReview = new Review();
                 newReview.setMovieId(movieId);
