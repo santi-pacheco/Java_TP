@@ -3,12 +3,16 @@ package service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
@@ -36,15 +40,28 @@ public class RecommendationService {
 	
 	public MovieController movieController;
 	public MovieService movieService;
+
+	private static final String CSV_PATH;
+    static {
+        ResourceBundle config = ResourceBundle.getBundle("config");
+
+        CSV_PATH = config.getString("CSV_PATH").trim();
+    }
 	
+	
+	/**
+	 * Obtiene un archivo dentro del proyecto
+	 */
+
 	public void exportRatingCsv() {
+		System.out.println("Exportando ratings a CSV...");
 	    String sql = "SELECT \n"
-	            + "    r.id_user as idUser,\n"
-	            + "    r.id_movie as idMovie,\n"
+	            + "    r.user_id as idUser,\n"
+	            + "    r.movie_id as idMovie,\n"
 	            + "    r.rating as Rating\n"
 	            + "FROM reviews r;\n";
-	    
-	    File file = new File("C:\\Users\\Ale\\Documents\\tpJava3\\Java\\Java_TP\\src\\data\\testRating.csv");
+	    System.out.println("Ruta del file" + CSV_PATH);
+	    File file = new File(CSV_PATH);
 	    
 
 	    file.getParentFile().mkdirs();
@@ -54,6 +71,7 @@ public class RecommendationService {
 	         ResultSet rs = stmt.executeQuery()) {
 	        
 	        int rowCount = 0;
+	        System.out.println("Escribiendo datos al CSV...");
 	        
 	        try (FileWriter outputfile = new FileWriter(file);
 	        		CSVWriter writer = new CSVWriter(outputfile,
@@ -61,8 +79,9 @@ public class RecommendationService {
 	        		        CSVWriter.NO_QUOTE_CHARACTER,     // ✅ Sin comillas
 	        		        CSVWriter.NO_ESCAPE_CHARACTER,
 	        		        CSVWriter.DEFAULT_LINE_END)) {
-
+	        	System.out.println("Escribiendo encabezados..." + rs.getMetaData().getColumnCount());
 	            while(rs.next()) {
+                	System.out.println("Escribiendo fila: userId=" + rs.getInt("idUser") + ", movieId=" + rs.getInt("idMovie") + ", rating=" + rs.getDouble("Rating"));
 	                String[] data = {
 	                    String.valueOf(rs.getInt("idUser")),
 	                    String.valueOf(rs.getInt("idMovie")),
@@ -97,7 +116,8 @@ public class RecommendationService {
 	    List<Movie> recommendedMovies = new ArrayList<>();
 	    
 	    try {
-	        File ratingsFile = new File("C:\\Users\\Ale\\Documents\\tpJava3\\Java\\Java_TP\\src\\data\\testRating.csv");
+	        File ratingsFile = new File(CSV_PATH);
+
 	        DataModel model = new FileDataModel(ratingsFile);
 	        
 	        System.out.println("Modelo cargado: " + model.getNumUsers() + " usuarios, " + model.getNumItems() + " películas");
