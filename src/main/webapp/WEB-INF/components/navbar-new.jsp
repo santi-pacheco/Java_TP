@@ -4,10 +4,11 @@
 <style>
     .navbar {
         background-color: #FAF8F3;
-        padding: 15px 40px;
-        display: flex;
+        padding: 15px 30px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(400px, 450px) minmax(0, 1fr);
         align-items: center;
-        justify-content: space-between;
+        gap: 15px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         position: sticky;
         top: 0;
@@ -17,31 +18,33 @@
     .navbar-left {
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: 20px;
+        justify-content: flex-start;
     }
     
     .navbar-logo {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         cursor: pointer;
         object-fit: cover;
         object-position: center;
-        transform: scale(1.8);
+        transform: scale(1.6);
     }
     
     .navbar-links {
         display: flex;
-        gap: 15px;
+        gap: 10px;
     }
     
     .navbar-links a {
         text-decoration: none;
         color: #333;
         font-weight: 500;
-        font-size: 16px;
-        padding: 8px 16px;
+        font-size: 14px;
+        padding: 6px 12px;
         border-radius: 8px;
         transition: color 0.3s;
+        white-space: nowrap;
     }
     
     .navbar-links a:hover {
@@ -56,11 +59,9 @@
     }
     
     .navbar-center {
-        flex: 1;
         display: flex;
         justify-content: center;
-        max-width: 500px;
-        margin: 0 20px;
+        align-items: center;
     }
     
     .navbar-center form {
@@ -70,11 +71,11 @@
     
     .search-bar {
         width: 100%;
-        padding: 10px 20px;
+        padding: 9px 18px;
         border: 2px solid #E0E0E0;
         border-radius: 25px;
         font-family: 'Poppins', sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         outline: none;
         transition: border-color 0.3s;
     }
@@ -86,21 +87,23 @@
     .navbar-right {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 10px;
+        justify-content: flex-end;
         position: relative;
     }
     
     .btn-login {
-        padding: 10px 24px;
+        padding: 8px 18px;
         background-color: #333;
         color: #FAF8F3;
         border: none;
         border-radius: 20px;
         font-family: 'Poppins', sans-serif;
         font-weight: 400;
-        font-size: 16px;
+        font-size: 14px;
         cursor: pointer;
         transition: background-color 0.3s;
+        white-space: nowrap;
     }
     
     .btn-login:hover {
@@ -116,8 +119,8 @@
     }
 
     .navbar-avatar-img {
-        width: 45px;
-        height: 45px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #E0E0E0;
@@ -126,9 +129,9 @@
         vertical-align: middle;
     }
 
-    .nav-icon-wrapper { position: relative; cursor: pointer; margin-right: 5px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s; }
+    .nav-icon-wrapper { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background 0.2s; }
     .nav-icon-wrapper:hover { background: #EAE5DB; }
-    .nav-icon { width: 24px; height: 24px; color: #333; }
+    .nav-icon { width: 22px; height: 22px; color: #333; }
     .notification-badge { position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; background-color: #ff3b30; border-radius: 50%; border: 2px solid #FAF8F3; display: none; }
     
     .notif-dropdown { position: absolute; top: 60px; right: 0; width: 380px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 1000; border: 1px solid #eee; }
