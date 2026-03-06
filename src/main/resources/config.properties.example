@@ -1,0 +1,27 @@
+# --- CONFIGURACIÓN DE GOOGLE GEMINI (IA) ---
+# Consigue tu llave en: https://aistudio.google.com/
+gemini.api.url=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+gemini.api.key=TU_GEMINI_API_KEY_AQUI
+
+# --- CONFIGURACIÓN DE SIGHTENGINE (MODERACIÓN VISUAL) ---
+# Consigue tus credenciales en: https://sightengine.com/
+sightengine.api.user=TU_USUARIO_ID
+sightengine.api.secret=TU_LLAVE_SECRETA
+
+# --- CONFIGURACIÓN DE CORREO (SMTP) ---
+# Si usas Gmail, recuerda usar una "Contraseña de Aplicación"
+mail.user=tu_correo@gmail.com
+mail.password=tu_contraseña_de_aplicacion_de_16_caracteres
+
+# --- BASE DE DATOS MYSQL ---
+DB_USER=tu_usuario_mysql
+DB_PASS=tu_password_mysql
+DB_URL=mysql://localhost:3306/nombre_tu_base_datos
+
+# --- RUTAS DE ARCHIVOS LOCALES ---
+# Ejemplo: C:/proyectos/Java/src/data/archivo.csv
+CSV_PATH=RUTA_ABSOLUTA_A_TU_ARCHIVO_CSV
+
+# --- THE MOVIE DATABASE (TMDB) ---
+# Consigue tu token en la sección API de tu perfil en: https://www.themoviedb.org/
+tmdb.token=TU_API_READ_ACCESS_TOKEN_AQUI

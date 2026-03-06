@@ -1,17 +1,26 @@
 package entity;
 
 import java.sql.Date;
+import jakarta.validation.constraints.*;
 
 public class Person {
 
-	private int personId;
-	private int apiId;
-	private String name;
-	private String alsoKnownAs;
-	private String placeOfBirth;
-	private Date birthdate;
-	private String profilePath;
-
+private int personId;
+    
+    private int apiId;
+   
+    @NotBlank(message = "El nombre de la persona no puede estar vacío")
+    @Size(max = 255, message = "El nombre no puede exceder los 255 caracteres")
+    private String name;
+    
+    private String alsoKnownAs;
+    
+    private String placeOfBirth;
+    
+    @PastOrPresent(message = "La fecha de nacimiento no puede ser una fecha futura")
+    private Date birthdate;
+    
+    private String profilePath;
 	public int getPersonId() {
 		return personId;
 	}

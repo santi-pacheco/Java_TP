@@ -22,7 +22,22 @@
     .status-approved { background-color: #d4edda; color: #155724; }
     .status-rejected { background-color: #f8d7da; color: #721c24; }
 
-    /* Likes y Comentarios */
+    /* Estilos del vaso de soda idénticos a movie-detail */
+    .like-badge-static { 
+        background: transparent; 
+        border: 2px solid #e0e0e0; 
+        padding: 6px 16px; 
+        border-radius: 50px; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px; 
+        color: #555; 
+    }
+    .soda-svg { width: 22px; height: 22px; display: block; overflow: visible; }
+    .soda-stroke { fill: none; stroke: #333; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .like-count { font-weight: 700; font-size: 0.95rem; }
+    .like-label { font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    
     .actions-bar { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 30px; }
     .like-section { display: flex; align-items: center; gap: 10px; }
     .like-btn { background: none; border: 2px solid #ddd; border-radius: 20px; padding: 8px 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.3s ease; }
@@ -68,15 +83,18 @@
         <!-- Barra de Acciones: Likes y Comentarios -->
         <div class="actions-bar">
             <div class="like-section">
-                <button class="like-btn" id="likeBtn" onclick="toggleLike()">
-                    <img src="<%= request.getContextPath() %>/utils/like_icon.svg" alt="Like">
-                    <span id="likeBtnText">Like</span>
-                </button>
-                <span id="likeCount">0 Likes</span>
+                <div class="like-badge-static">
+                    <svg class="soda-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path class="soda-stroke" d="M38 4 L38 12 M38 4 L46 4" />
+                        <path class="soda-stroke" d="M16 20 Q32 10 48 20 L44 56 H20 L16 20 Z" />
+                    </svg>
+                    <span class="like-label">Likes</span>
+                    <span class="like-count" id="likeCount"><%= review.getLikesCount() %></span>
+                </div>
             </div>
             <a href="#comments-section" class="btn btn-default">Ver Comentarios</a>
         </div>
-
+        
         <!-- Sección de Comentarios -->
         <div id="comments-section" class="comments-section">
             <h4><span class="glyphicon glyphicon-comment"></span> Comentarios</h4>
@@ -155,111 +173,47 @@
 <script>
     const contextPath = '<%= request.getContextPath() %>';
     const reviewId = <%= review != null ? review.getReviewId() : "null" %>;
-    const userId = <%= loggedUser != null ? loggedUser.getUserId() : "null" %>;
 
     document.addEventListener('DOMContentLoaded', function() {
         if (reviewId) {
-            fetchLikes();
-            fetchComments();
+            fetchCommentsReadOnly();
         }
     });
-
-    async function fetchLikes() {
-        try {
-            const response = await fetch(`\${contextPath}/likes?reviewId=\${reviewId}`);
-            const data = await response.json();
-            if (response.ok) {
-                updateLikeState(data.likes, data.userHasLiked);
-            }
-        } catch (error) {
-            console.error('Error fetching likes:', error);
-        }
-    }
-
-    async function fetchComments() {
-        try {
-            const response = await fetch(`\${contextPath}/comments?reviewId=\${reviewId}`);
-            const comments = await response.json();
-            if (response.ok) {
-                const commentsList = document.getElementById('commentsList');
+    // 2. OBTENER COMENTARIOS (Usando la ruta comprobada de movie-detail)
+    function fetchCommentsReadOnly() {
+        const commentsList = document.getElementById('commentsList');
+        commentsList.innerHTML = '<p style="color:#888;">Cargando comentarios...</p>';
+        
+        fetch(`\${contextPath}/review-comments?reviewId=\${reviewId}`)
+            .then(res => res.json())
+            .then(data => {
                 commentsList.innerHTML = '';
-                comments.forEach(comment => {
+                
+                if (!Array.isArray(data) || data.length === 0) {
+                    commentsList.innerHTML = '<p style="color:#888;">No hay comentarios en esta reseña.</p>';
+                    return;
+                }
+                
+                data.forEach(comment => {
+                    // Mapeo exacto de variables como en movie-detail.jsp
+                    const dateStr = comment.createdAt || '';
+                    const username = comment.username || 'Usuario';
+                    const text = comment.commentText || comment.comment_text || '';
+
                     const commentEl = document.createElement('div');
                     commentEl.className = 'comment';
                     commentEl.innerHTML = `
-                        <p class="comment-author">\${comment.username || 'Usuario'}</p>
-                        <p class="comment-text">\${comment.comment_text}</p>
-                        <small class="comment-date">\${new Date(comment.created_at).toLocaleString()}</small>
+                        <p class="comment-author">\${username}</p>
+                        <p class="comment-text">\${text}</p>
+                        <small class="comment-date">\${dateStr}</small>
                     `;
                     commentsList.appendChild(commentEl);
                 });
-            }
-        } catch (error) {
-            console.error('Error fetching comments:', error);
-        }
-    }
-
-    function updateLikeState(likeCount, userHasLiked) {
-        document.getElementById('likeCount').textContent = `\${likeCount} Likes`;
-        const likeBtn = document.getElementById('likeBtn');
-        const likeBtnText = document.getElementById('likeBtnText');
-        if (userHasLiked) {
-            likeBtn.classList.add('liked');
-            likeBtnText.textContent = 'Liked';
-        } else {
-            likeBtn.classList.remove('liked');
-            likeBtnText.textContent = 'Like';
-        }
-    }
-
-    async function toggleLike() {
-        if (!userId) {
-            window.location.href = `\${contextPath}/login`;
-            return;
-        }
-        try {
-            const response = await fetch(`\${contextPath}/likes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reviewId: reviewId, userId: userId })
+            })
+            .catch(error => {
+                console.error('Error fetching comments:', error);
+                commentsList.innerHTML = '<p style="color:red;">Error al cargar comentarios.</p>';
             });
-            const data = await response.json();
-            if (response.ok) {
-                updateLikeState(data.likes, data.userHasLiked);
-            } else {
-                alert('Error al procesar el like: ' + data.message);
-            }
-        } catch (error) {
-            console.error('Error toggling like:', error);
-        }
-    }
-
-    async function postComment() {
-        const commentText = document.getElementById('commentText').value;
-        if (!commentText.trim()) {
-            alert('El comentario no puede estar vacío.');
-            return;
-        }
-        try {
-            const response = await fetch(`\${contextPath}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reviewId: reviewId,
-                    userId: userId,
-                    commentText: commentText
-                })
-            });
-            if (response.ok) {
-                document.getElementById('commentText').value = '';
-                fetchComments();
-            } else {
-                const data = await response.json();
-                alert('Error al publicar comentario: ' + data.message);
-            }
-        } catch (error) {
-            console.error('Error posting comment:', error);
-        }
     }
 </script>
 

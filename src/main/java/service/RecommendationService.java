@@ -57,8 +57,8 @@ public class RecommendationService {
 	        
 	        try (FileWriter outputfile = new FileWriter(file);
 	        		CSVWriter writer = new CSVWriter(outputfile,
-	        		        CSVWriter.DEFAULT_SEPARATOR,      // ,
-	        		        CSVWriter.NO_QUOTE_CHARACTER,     // ✅ Sin comillas
+	        		        CSVWriter.DEFAULT_SEPARATOR,
+	        		        CSVWriter.NO_QUOTE_CHARACTER,
 	        		        CSVWriter.NO_ESCAPE_CHARACTER,
 	        		        CSVWriter.DEFAULT_LINE_END)) {
 
@@ -74,7 +74,7 @@ public class RecommendationService {
 	            
 	            writer.flush();
 	            
-	            System.out.println("✅ Exportados " + rowCount + " registros a: " + file.getAbsolutePath());
+	            System.out.println("Exportados " + rowCount + " registros a: " + file.getAbsolutePath());
 	            
 	        } catch (IOException e) {
 	            e.printStackTrace();
@@ -102,9 +102,6 @@ public class RecommendationService {
 	        
 	        System.out.println("Modelo cargado: " + model.getNumUsers() + " usuarios, " + model.getNumItems() + " películas");
 	        
-	        // ✅ CONFIGURACIÓN OPTIMIZADA PARA DATOS DISPERSOS
-	        
-	        // Probar con UncenteredCosineSimilarity (mejor para datos dispersos)
 	        ItemSimilarity itemSimilarity = new UncenteredCosineSimilarity(model);
 	        Recommender recommender = new GenericItemBasedRecommender(model, itemSimilarity);
 	        

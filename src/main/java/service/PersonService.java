@@ -53,7 +53,8 @@ public class PersonService {
         existingPerson.setAlsoKnownAs(per.getAlsoKnownAs());
         existingPerson.setPlaceOfBirth(per.getPlaceOfBirth());
         existingPerson.setBirthdate(per.getBirthdate());
-        
+        existingPerson.setProfilePath(per.getProfilePath()); 
+        existingPerson.setApiId(per.getApiId());
         return personRepository.update(existingPerson);
     }
     

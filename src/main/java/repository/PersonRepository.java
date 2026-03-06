@@ -16,7 +16,6 @@ import java.util.HashMap;
 
 public class PersonRepository {
 
-    // Select base para no repetir columnas
     private static final String BASE_SELECT = "SELECT person_id, api_id, name, birthdate, also_known_as, place_of_birth, profile_path FROM persons ";
 
     public PersonRepository() {
@@ -272,7 +271,6 @@ public class PersonRepository {
         return map;
     }
 
-    // ÚNICO PUNTO DE MAPEO
     private Person mapResultSetToPerson(ResultSet rs) throws SQLException {
         Person person = new Person();
         person.setPersonId(rs.getInt("person_id"));

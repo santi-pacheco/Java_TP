@@ -7,9 +7,14 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 
+import entity.User;
 import exception.ErrorFactory;
 
 public class EmailService {
@@ -58,4 +63,5 @@ public class EmailService {
             throw ErrorFactory.internal("Error al enviar correo electrónico al usuario.");
         }
     }
+    
 }

@@ -21,30 +21,17 @@
         .container { max-width: 1200px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
         
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-            flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;
         }
         
         .header-left { display: flex; align-items: center; gap: 20px; }
         .page-title { font-size: 1.5rem; font-weight: 700; color: #1a1a1a; }
         
         .btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px 20px; border-radius: 10px; font-weight: 500; font-size: 0.95rem;
+            text-decoration: none; border: none; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px;
         }
         
         .btn-back { background: #666; color: white; }
@@ -53,117 +40,38 @@
         .btn-success:hover { background: #218838; transform: translateY(-2px); }
         
         .alert {
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-weight: 500;
-            flex-shrink: 0;
+            padding: 10px 15px; border-radius: 8px; margin-bottom: 15px;
+            font-weight: 500; flex-shrink: 0;
         }
         
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         
         .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            overflow: hidden;
-            margin-bottom: 15px;
-            flex-shrink: 0;
+            background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden; margin-bottom: 15px; flex-shrink: 0;
         }
         
-        .card-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
+        .card-header { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; }
+        .card-title { font-size: 1.2rem; font-weight: 600; color: #1a1a1a; }
+        .card-body { padding: 20px; max-height: 300px; overflow-y: auto; }
         
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        
-        .card-body {
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .form-group {
-            margin-bottom: 12px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #333;
-            font-size: 0.85rem;
-        }
-        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; font-size: 0.85rem; }
         .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.3s;
+            width: 100%; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.3s;
         }
+        .form-control:focus { border-color: #999; }
         
-        .form-control:focus {
-            border-color: #999;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f8f9fa; }
+        th { padding: 10px 15px; text-align: left; font-weight: 600; color: #333; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px 15px; border-bottom: 1px solid #f0f0f0; color: #555; font-size: 0.85rem; }
+        tbody tr { transition: background 0.2s; }
+        tbody tr:hover { background: #fafafa; }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background: #f8f9fa;
-        }
-        
-        th {
-            padding: 10px 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #555;
-            font-size: 0.85rem;
-        }
-        
-        tbody tr {
-            transition: background 0.2s;
-        }
-        
-        tbody tr:hover {
-            background: #fafafa;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
         
         @media (max-width: 768px) {
             .page-title { font-size: 1.5rem; }
@@ -188,6 +96,7 @@
         </div>
     </c:if>
     
+    <%-- TARJETA 1: FORMULARIO (AHORA CON AUTOCOMPLETADO) --%>
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Nueva Configuración</h2>
@@ -204,37 +113,41 @@
                 </div>
             </c:if>
             
+            <%-- Variable temporal que guarda la configuración más reciente --%>
+            <c:set var="latestConfig" value="${not empty configuraciones ? configuraciones[0] : null}" />
+            
             <form action="<%= request.getContextPath() %>/system-settings" method="POST">
                 <div class="form-group">
                     <label>Kcals para Nivel 2:</label>
                     <input type="number" name="kcalsToLevel2" class="form-control" required min="1"
-                           value="${(configForm != null) ? configForm.kcalsToLevel2 : ''}">
+                           value="${configForm != null ? configForm.kcalsToLevel2 : latestConfig.kcalsToLevel2}">
                 </div>
                 <div class="form-group">
                     <label>Kcals para Nivel 3:</label>
                     <input type="number" name="kcalsToLevel3" class="form-control" required min="1"
-                           value="${(configForm != null) ? configForm.kcalsToLevel3 : ''}">
+                           value="${configForm != null ? configForm.kcalsToLevel3 : latestConfig.kcalsToLevel3}">
                 </div>
                 <div class="form-group">
                     <label>Kcals para Nivel 4:</label>
                     <input type="number" name="kcalsToLevel4" class="form-control" required min="1"
-                           value="${(configForm != null) ? configForm.kcalsToLevel4 : ''}">
+                           value="${configForm != null ? configForm.kcalsToLevel4 : latestConfig.kcalsToLevel4}">
                 </div>
                 <div class="form-group">
                     <label>Límite Watchlist Normal:</label>
                     <input type="number" name="normalWatchlistLimit" class="form-control" required min="1"
-                           value="${(configForm != null) ? configForm.normalWatchlistLimit : ''}">
+                           value="${configForm != null ? configForm.normalWatchlistLimit : latestConfig.normalWatchlistLimit}">
                 </div>
                 <div class="form-group">
                     <label>Límite Watchlist Activo:</label>
                     <input type="number" name="activeWatchlistLimit" class="form-control" required min="1"
-                           value="${(configForm != null) ? configForm.activeWatchlistLimit : ''}">
+                           value="${configForm != null ? configForm.activeWatchlistLimit : latestConfig.activeWatchlistLimit}">
                 </div>
-                <button type="submit" class="btn btn-success">Guardar Configuración</button>
+                <button type="submit" class="btn btn-success" style="margin-top: 10px;">Guardar Configuración</button>
             </form>
         </div>
     </div>
 
+    <%-- TARJETA 2: HISTORIAL (INTACTO) --%>
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Historial de Configuraciones</h2>
