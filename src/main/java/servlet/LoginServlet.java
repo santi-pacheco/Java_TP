@@ -49,6 +49,8 @@ public class LoginServlet extends HttpServlet {
      String password = request.getParameter("password");
 
      try {
+    	 System.out.println("Intentando login con username: " + username);
+    	 System.out.println("Intentando login con password: " + password);
          User usuarioValidado = userController.login(username, password);
          HttpSession session = request.getSession(true); 
          session.setAttribute("usuarioLogueado", usuarioValidado);
