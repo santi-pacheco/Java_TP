@@ -353,7 +353,7 @@ public class ReviewRepository {
     }
 
     public int countFriendsReviews(int idUsuarioLogueado) {
-        String sql = "SELECT COUNT(*) FROM reviews r INNER JOIN followers s ON r.user_id = s.followed_id WHERE s.follower_id = ?";
+        String sql = "SELECT COUNT(*) FROM reviews r INNER JOIN followers s ON r.user_id = s.followed_id WHERE s.follower_id = ? AND r.moderation_status IN ('APPROVED', 'SPOILER')";
         try (Connection conn = DataSourceProvider.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
              

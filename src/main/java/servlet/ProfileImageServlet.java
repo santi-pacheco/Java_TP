@@ -109,7 +109,7 @@ public class ProfileImageServlet extends HttpServlet {
 	                    throw ErrorFactory.validation("La extensión " + extension + " no está permitida.");
 	                }
 	                String uniqueFileName = "avatar_" + user.getUserId() + "_" + UUID.randomUUID().toString() + extension;
-	                String safeFileName = java.nio.file.Paths.get(uniqueFileName).getFileName().toString();
+	                String safeFileName = Paths.get(uniqueFileName).getFileName().toString();
 	                File archivoFisico = new File(uploadPath, safeFileName);
 
 	                try (InputStream input = filePart.getInputStream()) {

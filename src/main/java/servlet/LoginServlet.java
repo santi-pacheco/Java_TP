@@ -54,11 +54,7 @@ public class LoginServlet extends HttpServlet {
          User usuarioValidado = userController.login(username, password);
          HttpSession session = request.getSession(true); 
          session.setAttribute("usuarioLogueado", usuarioValidado);
-         if ("admin".equals(usuarioValidado.getRole())) {
-        	 response.sendRedirect(request.getContextPath() + "/home");;
-         } else {
-             response.sendRedirect(request.getContextPath() + "/home");
-         }
+         response.sendRedirect(request.getContextPath() + "/home");
      } catch (AppException e) {
          if (e.getStatusCode() >= 400 && e.getStatusCode() < 500) {
              request.setAttribute("error", e.getMessage());

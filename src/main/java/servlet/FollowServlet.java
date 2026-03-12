@@ -61,7 +61,7 @@ public class FollowServlet extends HttpServlet {
                 throw e;
             } else {
                 targetId = (targetIdStr != null && !targetIdStr.isEmpty()) ? Integer.parseInt(targetIdStr) : loggedUser.getUserId();
-                session.setAttribute("flashMessage", "⚠️ " + e.getMessage());
+                session.setAttribute("flashMessage", e.getMessage());
                 session.setAttribute("flashType", "warning");
                 response.sendRedirect(request.getContextPath() + "/profile?id=" + targetId);
             }

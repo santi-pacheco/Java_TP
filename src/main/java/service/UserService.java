@@ -115,7 +115,7 @@ public class UserService {
         if (user != null && user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { 
             File oldFile = new File(uploadDir + File.separator + user.getProfileImage());
             if (oldFile.exists()) {
-                oldFile.delete(); // Borrado silencioso sin ensuciar la consola
+                oldFile.delete();
             }
         }
         userRepository.updateProfileImage(userId, newFileName);

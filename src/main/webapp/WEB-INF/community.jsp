@@ -394,7 +394,7 @@
         </div>
         
         <div id="no-more-data" class="no-more-data">
-            Has llegado al final. ¡No hay más reseñas! 🎬
+            Has llegado al final. ¡No hay más reseñas!
         </div>
     </div>
 
@@ -440,7 +440,7 @@
 
     function displayUserResults(users) {
         if (users.length === 0) {
-            userSearchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">No encontramos a nadie con ese nombre 🕵️‍♂️</div>';
+            userSearchResults.innerHTML = '<div style="padding: 15px; text-align: center; color: #999;">No encontramos a nadie con ese nombre</div>';
         } else {
             let html = '';
             users.forEach(user => {
