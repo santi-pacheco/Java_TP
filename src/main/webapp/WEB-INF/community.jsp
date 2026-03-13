@@ -529,12 +529,12 @@
                 if (offset === 0) {
                     feedContainer.innerHTML = `
                         <div style="text-align: center; padding: 40px; color: #d9534f;">
-                            <h4>⚠️ Ocurrió un problema</h4>
+                            <h4>Ocurrió un problema</h4>
                             <p>\${error.message}</p>
                             <button onclick="location.reload()" style="padding: 8px 16px; margin-top: 15px; cursor: pointer;">Reintentar</button>
                         </div>`;
                 } else {
-                    noMoreDataMsg.innerHTML = '⚠️ Error al cargar más reseñas. Intenta recargar la página.';
+                    noMoreDataMsg.innerHTML = 'Error al cargar más reseñas. Intenta recargar la página.';
                     noMoreDataMsg.style.display = 'block';
                     noMoreDataMsg.style.color = '#d9534f';
                 }

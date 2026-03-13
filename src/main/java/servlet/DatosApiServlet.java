@@ -72,7 +72,7 @@ public class DatosApiServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/data-load");
         } catch (AppException e) {
             System.err.println("Error operativo controlado: " + e.getMessage());
-            request.getSession().setAttribute("flashMessage", "⚠️ No se pudo completar: " + e.getMessage());
+            request.getSession().setAttribute("flashMessage", "No se pudo completar: " + e.getMessage());
             request.getSession().setAttribute("flashType", "danger");
             response.sendRedirect(request.getContextPath() + "/data-load");  
         } catch (Exception e) {

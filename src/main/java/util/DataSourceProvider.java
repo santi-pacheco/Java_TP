@@ -24,8 +24,8 @@ public class DataSourceProvider {
                         DB_PASS = configProp.getString("DB_PASS").trim();
                         DB_URL = configProp.getString("DB_URL").trim();
                         
-                        System.out.println("✓ DataSourceProvider: DB_USER=" + DB_USER);
-                        System.out.println("✓ DataSourceProvider: DB_PASS=" + DB_PASS);
+                        System.out.println("DataSourceProvider: DB_USER=" + DB_USER);
+                        System.out.println("DataSourceProvider: DB_PASS=" + DB_PASS);
                         Class.forName("com.mysql.cj.jdbc.Driver");
 
                         HikariConfig config = new HikariConfig();
@@ -49,7 +49,7 @@ public class DataSourceProvider {
                         config.addDataSourceProperty("characterEncoding", "utf8");
 
                         ds = new HikariDataSource(config);
-                        System.out.println("✓ DataSourceProvider initialized successfully.");
+                        System.out.println("DataSourceProvider initialized successfully.");
                     } catch (Exception e) {
                         System.err.println("Database connection failed: " + e.getMessage());
                         e.printStackTrace();
